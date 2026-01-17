@@ -11,6 +11,7 @@ interface ChatAreaProps {
   onToggleFavorite: (id: string) => void;
   isTyping: boolean;
   userName?: string;
+  userId?: string;
 }
 
 export function ChatArea({
@@ -19,6 +20,7 @@ export function ChatArea({
   onToggleFavorite,
   isTyping,
   userName,
+  userId,
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -54,6 +56,7 @@ export function ChatArea({
                 key={message.id}
                 message={message}
                 onToggleFavorite={onToggleFavorite}
+                userId={userId}
               />
             ))}
             <div ref={messagesEndRef} />

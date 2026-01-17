@@ -289,6 +289,7 @@ const Index = () => {
         onToggleFavorite={handleToggleFavorite}
         isTyping={isTyping}
         userName={profile?.display_name || undefined}
+        userId={user?.id}
       />
     </div>
   );
