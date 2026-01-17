@@ -46,7 +46,6 @@ export function ChatArea({
                 我是你的校园AI辅导员，有什么可以帮助你的吗？
               </p>
             </div>
-            <QuickTags onTagClick={onSendMessage} />
           </div>
         ) : (
           <div className="max-w-3xl mx-auto py-8 px-6 space-y-6">
@@ -61,6 +60,13 @@ export function ChatArea({
           </div>
         )}
       </div>
+
+      {/* Quick Tags above input - only show when no messages */}
+      {showWelcome && (
+        <div className="max-w-3xl mx-auto w-full px-4 mb-3">
+          <QuickTags onTagClick={onSendMessage} variant="horizontal" />
+        </div>
+      )}
 
       {/* Input Area */}
       <ChatInput onSendMessage={onSendMessage} isTyping={isTyping} />
