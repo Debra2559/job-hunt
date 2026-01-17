@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Bookmark, FolderOpen, Plus, ChevronDown, MessageSquare, GraduationCap, Home, Heart, FileText } from 'lucide-react';
+import { Search, Bookmark, Plus, ChevronDown, MessageSquare, GraduationCap, Home, Heart, FileText, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { groups } from '@/data/campusData';
@@ -52,27 +52,35 @@ export function Sidebar({
   );
 
   return (
-    <div className="w-64 h-full bg-sidebar flex flex-col border-r border-sidebar-border">
-      {/* Header with New Chat Button */}
-      <div className="p-4 flex items-center gap-2">
+    <div className="w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
+      {/* Header with Logo */}
+      <div className="p-5 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl gradient-primary shadow-glow flex items-center justify-center">
+          <Sparkles className="w-5 h-5 text-white" />
+        </div>
+        <span className="font-bold text-lg text-sidebar-foreground">校园AI辅导员</span>
+      </div>
+
+      {/* New Chat Button */}
+      <div className="px-4 mb-4">
         <button
           onClick={onNewConversation}
-          className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground flex items-center justify-center gap-2 text-sm font-medium hover:bg-primary/90 transition-colors"
+          className="w-full px-4 py-3 rounded-xl gradient-primary text-white flex items-center justify-center gap-2 text-sm font-semibold shadow-glow hover:opacity-90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-4.5 h-4.5" />
           新建聊天
         </button>
       </div>
 
       {/* Search */}
-      <div className="px-3 mb-3">
+      <div className="px-4 mb-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
-            placeholder="搜索校园服务"
+            placeholder="搜索对话..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-sidebar-accent border-0 h-9 text-sm"
+            className="pl-10 bg-sidebar-accent/60 border-0 h-10 text-sm rounded-xl focus-visible:ring-1 focus-visible:ring-primary/40 placeholder:text-muted-foreground/60"
           />
         </div>
       </div>
@@ -81,9 +89,9 @@ export function Sidebar({
       <button
         onClick={onToggleFavorites}
         className={cn(
-          "mx-3 mb-2 px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors",
+          "mx-4 mb-3 px-4 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200",
           showFavorites
-            ? "bg-sidebar-accent text-sidebar-accent-foreground"
+            ? "bg-primary/10 text-primary font-medium"
             : "hover:bg-sidebar-accent text-sidebar-foreground"
         )}
       >
@@ -92,24 +100,24 @@ export function Sidebar({
       </button>
 
       {/* Groups */}
-      <div className="px-3 mb-2">
-        <div className="flex items-center justify-between text-xs text-muted-foreground uppercase tracking-wide mb-2">
+      <div className="px-4 mb-3">
+        <div className="flex items-center justify-between text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
           <span>分组</span>
-          <button className="hover:text-foreground transition-colors">
-            <Plus className="w-4 h-4" />
+          <button className="hover:text-foreground transition-colors p-1 rounded hover:bg-sidebar-accent">
+            <Plus className="w-3.5 h-3.5" />
           </button>
         </div>
         {groups.map((group) => (
           <div key={group.id} className="mb-1">
             <button
               onClick={() => toggleGroup(group.id)}
-              className="w-full px-3 py-2 rounded-lg flex items-center gap-2 text-sm hover:bg-sidebar-accent transition-colors text-sidebar-foreground"
+              className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm hover:bg-sidebar-accent transition-all duration-200 text-sidebar-foreground"
             >
-              {iconMap[group.icon]}
+              <span className="text-muted-foreground">{iconMap[group.icon]}</span>
               <span className="flex-1 text-left">{group.name}</span>
               <ChevronDown
                 className={cn(
-                  "w-4 h-4 transition-transform",
+                  "w-4 h-4 text-muted-foreground transition-transform duration-200",
                   expandedGroups.includes(group.id) ? "rotate-0" : "-rotate-90"
                 )}
               />
@@ -119,9 +127,9 @@ export function Sidebar({
       </div>
 
       {/* Conversations */}
-      <div className="flex-1 overflow-y-auto px-3">
-        <div className="text-xs text-muted-foreground uppercase tracking-wide mb-2">
-          聊天
+      <div className="flex-1 overflow-y-auto px-4">
+        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
+          聊天记录
         </div>
         <div className="space-y-1">
           {filteredConversations.map((conv) => (
@@ -129,10 +137,10 @@ export function Sidebar({
               key={conv.id}
               onClick={() => onSelectConversation(conv.id)}
               className={cn(
-                "w-full px-3 py-2 rounded-lg flex items-center gap-2 text-sm transition-colors text-left",
+                "w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left",
                 activeConversationId === conv.id
-                  ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                  : "hover:bg-sidebar-accent/50 text-sidebar-foreground"
+                  ? "bg-primary/10 text-primary font-medium"
+                  : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
               )}
             >
               <MessageSquare className="w-4 h-4 flex-shrink-0" />

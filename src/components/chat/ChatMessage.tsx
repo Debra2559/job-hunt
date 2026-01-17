@@ -1,4 +1,4 @@
-import { Bookmark, BookmarkCheck } from 'lucide-react';
+import { Bookmark, BookmarkCheck, Sparkles } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
@@ -15,28 +15,28 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
   return (
     <div
       className={cn(
-        "group flex gap-3 animate-fade-in",
+        "group flex gap-4 animate-fade-in",
         isUser ? "justify-start" : "justify-start"
       )}
     >
       {!isUser && (
-        <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-          <span className="text-primary-foreground text-sm font-medium">AI</span>
+        <div className="w-9 h-9 rounded-xl gradient-primary shadow-glow flex items-center justify-center flex-shrink-0">
+          <Sparkles className="w-4.5 h-4.5 text-white" />
         </div>
       )}
       
       <div
         className={cn(
-          "max-w-[70%] rounded-2xl px-4 py-3 relative",
+          "max-w-[75%] rounded-2xl px-5 py-3.5 relative transition-all duration-200",
           isUser
-            ? "bg-chat-user text-foreground"
-            : "bg-chat-ai border border-border text-foreground shadow-sm"
+            ? "bg-gradient-to-br from-accent to-accent/60 text-foreground shadow-sm"
+            : "bg-card border border-border/60 text-foreground shadow-elegant"
         )}
       >
         {isUser ? (
           <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
         ) : (
-          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+          <div className="prose prose-sm max-w-none text-sm leading-relaxed">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {message.content}
             </ReactMarkdown>
@@ -46,11 +46,11 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
         <button
           onClick={() => onToggleFavorite(message.id)}
           className={cn(
-            "absolute -right-8 top-1/2 -translate-y-1/2 p-1 rounded-full transition-all",
-            "opacity-0 group-hover:opacity-100",
+            "absolute -right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all duration-200",
+            "opacity-0 group-hover:opacity-100 hover:scale-110",
             message.isFavorite 
-              ? "text-primary" 
-              : "text-muted-foreground hover:text-primary"
+              ? "text-primary bg-primary/10" 
+              : "text-muted-foreground hover:text-primary hover:bg-primary/10"
           )}
         >
           {message.isFavorite ? (
@@ -62,8 +62,8 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
       </div>
 
       {isUser && (
-        <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center flex-shrink-0">
-          <span className="text-accent-foreground text-sm font-medium">我</span>
+        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-secondary to-muted flex items-center justify-center flex-shrink-0 shadow-sm">
+          <span className="text-foreground text-sm font-semibold">我</span>
         </div>
       )}
     </div>
