@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -138,22 +138,56 @@ export const KnowledgeManagement = () => {
 
         if (uploadError) throw uploadError;
 
+        // Determine initial status based on file type
+        const needsParsing = ['pdf', 'docx', 'pptx'].includes(ext.replace('.', ''));
+        
         // Create record in database
-        const { error: dbError } = await supabase
+        const { data: insertedFile, error: dbError } = await supabase
           .from('knowledge_files')
           .insert({
             file_name: file.name,
             file_type: file.type || ext,
             file_size: file.size,
             file_path: filePath,
-            status: 'ready',
-          });
+            status: needsParsing ? 'processing' : 'ready',
+          })
+          .select()
+          .single();
 
         if (dbError) throw dbError;
 
+        // Trigger document parsing for PDF, DOCX, PPTX
+        if (needsParsing && insertedFile) {
+          console.log('Triggering document parsing for:', file.name);
+          supabase.functions.invoke('parse-document', {
+            body: {
+              fileId: insertedFile.id,
+              filePath: filePath,
+              fileName: file.name,
+            },
+          }).then(({ error: parseError }) => {
+            if (parseError) {
+              console.error('Parse error:', parseError);
+              toast({
+                variant: 'destructive',
+                title: '文档解析失败',
+                description: `${file.name} 解析失败，请稍后重试`,
+              });
+            } else {
+              toast({
+                title: '解析完成',
+                description: `${file.name} 文本内容已提取`,
+              });
+            }
+            fetchFiles();
+          });
+        }
+
         toast({
           title: '上传成功',
-          description: `${file.name} 已添加到知识库`,
+          description: needsParsing 
+            ? `${file.name} 正在解析中...` 
+            : `${file.name} 已添加到知识库`,
         });
       } catch (error: any) {
         console.error('Error uploading file:', error);
@@ -305,6 +339,32 @@ export const KnowledgeManagement = () => {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
+                        {(file.status === 'error' || (file.status === 'ready' && !file.content_text)) && 
+                          ['pdf', 'docx', 'pptx'].includes(file.file_name.split('.').pop()?.toLowerCase() || '') && (
+                          <Button 
+                            variant="ghost" 
+                            size="icon"
+                            title="重新解析"
+                            onClick={async () => {
+                              toast({ title: '正在解析...', description: file.file_name });
+                              const { error } = await supabase.functions.invoke('parse-document', {
+                                body: {
+                                  fileId: file.id,
+                                  filePath: file.file_path,
+                                  fileName: file.file_name,
+                                },
+                              });
+                              if (error) {
+                                toast({ variant: 'destructive', title: '解析失败', description: error.message });
+                              } else {
+                                toast({ title: '解析成功', description: `${file.file_name} 已更新` });
+                              }
+                              fetchFiles();
+                            }}
+                          >
+                            <RotateCw className="w-4 h-4" />
+                          </Button>
+                        )}
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
