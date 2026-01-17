@@ -43,10 +43,12 @@ export function Sidebar({
       {/* New Chat Button */}
       <div className="px-4 mb-4">
         <button
-          onClick={onNewConversation}
-          className="w-full px-4 py-3 rounded-xl gradient-primary text-white flex items-center justify-center gap-2 text-sm font-semibold shadow-glow hover:opacity-90 transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={() => {
+            onNewConversation();
+          }}
+          className="group w-full px-4 py-3 rounded-xl gradient-primary text-white flex items-center justify-center gap-2 text-sm font-semibold shadow-glow hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.95]"
         >
-          <Plus className="w-4.5 h-4.5" />
+          <Plus className="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" />
           新建聊天
         </button>
       </div>

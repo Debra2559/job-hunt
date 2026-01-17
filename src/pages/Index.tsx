@@ -254,6 +254,7 @@ const Index = () => {
         onSendMessage={handleSendMessage}
         onToggleFavorite={handleToggleFavorite}
         isTyping={isTyping}
+        userName={profile?.display_name || undefined}
       />
     </div>
   );

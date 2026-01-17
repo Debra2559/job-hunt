@@ -10,6 +10,7 @@ interface ChatAreaProps {
   onSendMessage: (message: string) => void;
   onToggleFavorite: (id: string) => void;
   isTyping: boolean;
+  userName?: string;
 }
 
 export function ChatArea({
@@ -17,6 +18,7 @@ export function ChatArea({
   onSendMessage,
   onToggleFavorite,
   isTyping,
+  userName,
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -38,7 +40,7 @@ export function ChatArea({
                 <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-3">
-                Hi，同学~
+                Hi，{userName || '同学'}~
               </h1>
               <p className="text-muted-foreground text-lg">
                 我是你的校园AI辅导员，有什么可以帮助你的吗？
