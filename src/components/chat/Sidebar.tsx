@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
-import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
@@ -19,6 +20,7 @@ interface SidebarProps {
   userAvatarUrl?: string;
   onSignOut: () => void;
   isNewConversation?: boolean;
+  isAdmin?: boolean;
 }
 
 export function Sidebar({
@@ -35,7 +37,9 @@ export function Sidebar({
   userAvatarUrl,
   onSignOut,
   isNewConversation,
+  isAdmin,
 }: SidebarProps) {
+  const navigate = useNavigate();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
@@ -96,6 +100,17 @@ export function Sidebar({
           新建聊天
         </button>
       </div>
+
+      {/* Admin Entry */}
+      {isAdmin && (
+        <button
+          onClick={() => navigate('/admin')}
+          className="mx-4 mb-3 px-4 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent text-sidebar-foreground"
+        >
+          <Settings className="w-4 h-4" />
+          <span>后台管理</span>
+        </button>
+      )}
 
       {/* Favorites */}
       <button

@@ -10,6 +10,7 @@ import { streamChat } from '@/lib/chatApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
+import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
@@ -32,6 +33,7 @@ const Index = () => {
     deleteConversation,
     renameConversation,
   } = useConversations(user?.id);
+  const { isAdmin } = useUserRole(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -268,6 +270,7 @@ const Index = () => {
           userCollege={profile?.college || undefined}
           onSignOut={handleSignOut}
           isNewConversation={activeConversationId === null && !showFavorites}
+          isAdmin={isAdmin}
         />
       </div>
 
