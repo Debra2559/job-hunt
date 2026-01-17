@@ -3,6 +3,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
 import { cn } from '@/lib/utils';
+import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 interface ChatMessageProps {
   message: Message;
@@ -20,8 +21,8 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
       )}
     >
       {!isUser && (
-        <div className="w-9 h-9 rounded-xl gradient-primary shadow-glow flex items-center justify-center flex-shrink-0">
-          <Sparkles className="w-4.5 h-4.5 text-white" />
+        <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/20 flex-shrink-0">
+          <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
         </div>
       )}
       
