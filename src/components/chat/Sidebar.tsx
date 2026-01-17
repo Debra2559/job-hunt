@@ -101,16 +101,6 @@ export function Sidebar({
         </button>
       </div>
 
-      {/* Admin Entry */}
-      {isAdmin && (
-        <button
-          onClick={() => navigate('/admin')}
-          className="mx-4 mb-3 px-4 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent text-sidebar-foreground"
-        >
-          <Settings className="w-4 h-4" />
-          <span>后台管理</span>
-        </button>
-      )}
 
       {/* Favorites */}
       <button
@@ -219,6 +209,19 @@ export function Sidebar({
           ))}
         </div>
       </div>
+
+      {/* Admin Entry - Above User Profile */}
+      {isAdmin && (
+        <div className="px-4 mb-2">
+          <button
+            onClick={() => navigate('/admin')}
+            className="w-full px-4 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-primary/10 text-primary border border-primary/20"
+          >
+            <Settings className="w-4 h-4" />
+            <span>后台管理</span>
+          </button>
+        </div>
+      )}
 
       {/* User Profile at Bottom Left */}
       <UserProfile 
