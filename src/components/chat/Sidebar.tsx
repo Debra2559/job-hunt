@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Bookmark, Plus, MessageSquare, Trash2 } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
@@ -11,6 +11,7 @@ interface SidebarProps {
   onSelectConversation: (id: string) => void;
   onNewConversation: () => void;
   onDeleteConversation: (id: string) => void;
+  onRenameConversation: (id: string, newTitle: string) => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
   userName?: string;
@@ -26,6 +27,7 @@ export function Sidebar({
   onSelectConversation,
   onNewConversation,
   onDeleteConversation,
+  onRenameConversation,
   showFavorites,
   onToggleFavorites,
   userName,
@@ -35,6 +37,42 @@ export function Sidebar({
   isNewConversation,
 }: SidebarProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (editingId && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [editingId]);
+
+  const handleStartEdit = (conv: Conversation) => {
+    setEditingId(conv.id);
+    setEditTitle(conv.title);
+  };
+
+  const handleConfirmEdit = () => {
+    if (editingId && editTitle.trim()) {
+      onRenameConversation(editingId, editTitle.trim());
+    }
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleConfirmEdit();
+    } else if (e.key === 'Escape') {
+      handleCancelEdit();
+    }
+  };
 
   return (
     <div className="w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
@@ -95,33 +133,73 @@ export function Sidebar({
               onMouseEnter={() => setHoveredId(conv.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
-              <button
-                onClick={() => onSelectConversation(conv.id)}
-                className={cn(
-                  "w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-10",
-                  activeConversationId === conv.id
-                    ? "bg-primary/10 text-primary font-medium"
-                    : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
-                )}
-              >
-                <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                <span className="truncate">{conv.title}</span>
-              </button>
-              
-              {/* Delete button */}
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteConversation(conv.id);
-                }}
-                className={cn(
-                  "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all duration-200",
-                  "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
-                  hoveredId === conv.id ? "opacity-100" : "opacity-0"
-                )}
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-              </button>
+              {editingId === conv.id ? (
+                <div className="flex items-center gap-1 px-2 py-1.5">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    onBlur={handleConfirmEdit}
+                    className="flex-1 px-2 py-1.5 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  />
+                  <button
+                    onClick={handleConfirmEdit}
+                    className="p-1.5 rounded-lg text-primary hover:bg-primary/10"
+                  >
+                    <Check className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={handleCancelEdit}
+                    className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={() => onSelectConversation(conv.id)}
+                    className={cn(
+                      "w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-16",
+                      activeConversationId === conv.id
+                        ? "bg-primary/10 text-primary font-medium"
+                        : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+                    )}
+                  >
+                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                    <span className="truncate">{conv.title}</span>
+                  </button>
+                  
+                  {/* Action buttons */}
+                  <div
+                    className={cn(
+                      "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-all duration-200",
+                      hoveredId === conv.id ? "opacity-100" : "opacity-0"
+                    )}
+                  >
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleStartEdit(conv);
+                      }}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteConversation(conv.id);
+                      }}
+                      className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           ))}
         </div>
