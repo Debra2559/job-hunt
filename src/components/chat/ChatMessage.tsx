@@ -13,11 +13,16 @@ interface ChatMessageProps {
 export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
   const isUser = message.role === 'user';
 
+  // Don't render empty messages
+  if (!message.content || message.content.trim() === '') {
+    return null;
+  }
+
   return (
     <div
       className={cn(
         "group flex gap-3 animate-fade-in",
-        isUser ? "flex-row-reverse" : "flex-row"
+        isUser ? "justify-end" : "justify-start"
       )}
     >
       {!isUser && (
@@ -30,7 +35,7 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
         className={cn(
           "max-w-[75%] rounded-2xl px-5 py-3.5 relative transition-all duration-200",
           isUser
-            ? "bg-gradient-to-br from-accent to-accent/60 text-foreground shadow-sm ml-auto"
+            ? "bg-gradient-to-br from-accent to-accent/60 text-foreground shadow-sm"
             : "bg-card border border-border/60 text-foreground shadow-elegant"
         )}
       >
