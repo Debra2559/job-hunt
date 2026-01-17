@@ -82,7 +82,9 @@ export type Database = {
           college: string | null
           created_at: string
           display_name: string | null
+          grade: string | null
           id: string
+          is_verified: boolean
           student_id: string | null
           updated_at: string
           user_id: string
@@ -92,7 +94,9 @@ export type Database = {
           college?: string | null
           created_at?: string
           display_name?: string | null
+          grade?: string | null
           id?: string
+          is_verified?: boolean
           student_id?: string | null
           updated_at?: string
           user_id: string
@@ -102,7 +106,9 @@ export type Database = {
           college?: string | null
           created_at?: string
           display_name?: string | null
+          grade?: string | null
           id?: string
+          is_verified?: boolean
           student_id?: string | null
           updated_at?: string
           user_id?: string
