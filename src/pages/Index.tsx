@@ -3,18 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
 import { Message, Conversation } from '@/types/chat';
-import { Menu, LogOut, User } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { streamChat } from '@/lib/chatApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -170,24 +164,6 @@ const Index = () => {
         <Menu className="w-5 h-5" />
       </button>
 
-      {/* User Menu - Top Right */}
-      <div className="fixed top-4 right-4 z-50">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="flex items-center gap-2 px-3 py-2 rounded-lg bg-card shadow-md border border-border hover:bg-accent transition-colors">
-              <User className="w-4 h-4" />
-              <span className="text-sm hidden sm:inline">{user?.email?.split('@')[0] || '用户'}</span>
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="bg-popover">
-            <DropdownMenuItem onClick={handleSignOut} className="text-destructive">
-              <LogOut className="w-4 h-4 mr-2" />
-              退出登录
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-
       {/* Sidebar */}
       <div
         className={cn(
@@ -202,6 +178,8 @@ const Index = () => {
           onNewConversation={handleNewConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
+          userEmail={user?.email}
+          onSignOut={handleSignOut}
         />
       </div>
 

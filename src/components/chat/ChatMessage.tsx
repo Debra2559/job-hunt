@@ -1,4 +1,6 @@
 import { Bookmark, BookmarkCheck } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
 import { cn } from '@/lib/utils';
 
@@ -14,7 +16,7 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
     <div
       className={cn(
         "group flex gap-3 animate-fade-in",
-        isUser ? "justify-end" : "justify-start"
+        isUser ? "justify-start" : "justify-start"
       )}
     >
       {!isUser && (
@@ -31,7 +33,15 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
             : "bg-chat-ai border border-border text-foreground shadow-sm"
         )}
       >
-        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+        {isUser ? (
+          <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {message.content}
+            </ReactMarkdown>
+          </div>
+        )}
         
         <button
           onClick={() => onToggleFavorite(message.id)}
