@@ -8,14 +8,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 interface UserProfileProps {
-  email?: string;
+  college?: string;
   displayName?: string;
   avatarUrl?: string;
   onSignOut: () => void;
 }
 
-export function UserProfile({ email, displayName, avatarUrl, onSignOut }: UserProfileProps) {
-  const name = displayName || email?.split('@')[0] || '用户';
+export function UserProfile({ college, displayName, avatarUrl, onSignOut }: UserProfileProps) {
+  const name = displayName || '用户';
   
   return (
     <div className="p-4 border-t border-sidebar-border/60">
@@ -32,9 +32,9 @@ export function UserProfile({ email, displayName, avatarUrl, onSignOut }: UserPr
               <div className="text-sm font-medium text-sidebar-foreground truncate">
                 {name}
               </div>
-              {email && (
+              {college && (
                 <div className="text-xs text-muted-foreground truncate">
-                  {email}
+                  {college}
                 </div>
               )}
             </div>
