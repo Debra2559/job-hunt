@@ -12,10 +12,11 @@ interface SidebarProps {
   onNewConversation: () => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
-  userEmail?: string;
   userName?: string;
+  userCollege?: string;
   userAvatarUrl?: string;
   onSignOut: () => void;
+  isNewConversation?: boolean;
 }
 
 export function Sidebar({
@@ -25,10 +26,11 @@ export function Sidebar({
   onNewConversation,
   showFavorites,
   onToggleFavorites,
-  userEmail,
   userName,
+  userCollege,
   userAvatarUrl,
   onSignOut,
+  isNewConversation,
 }: SidebarProps) {
   return (
     <div className="w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
@@ -73,6 +75,15 @@ export function Sidebar({
           聊天记录
         </div>
         <div className="space-y-1">
+          {/* Temporary new conversation placeholder */}
+          {isNewConversation && (
+            <div
+              className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in"
+            >
+              <MessageSquare className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate text-muted-foreground italic">新对话</span>
+            </div>
+          )}
           {conversations.map((conv) => (
             <button
               key={conv.id}
@@ -93,7 +104,7 @@ export function Sidebar({
 
       {/* User Profile at Bottom Left */}
       <UserProfile 
-        email={userEmail}
+        college={userCollege}
         displayName={userName}
         avatarUrl={userAvatarUrl}
         onSignOut={onSignOut}

@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface UserProfile {
   display_name: string | null;
   is_verified: boolean;
+  college: string | null;
 }
 
 const Index = () => {
@@ -57,7 +58,7 @@ const Index = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('display_name, is_verified')
+          .select('display_name, is_verified, college')
           .eq('user_id', user.id)
           .maybeSingle();
 
@@ -179,12 +180,12 @@ const Index = () => {
   };
 
   const handleVerified = () => {
-    setProfile({ display_name: null, is_verified: true });
+    setProfile({ display_name: null, is_verified: true, college: null });
     // Reload profile to get updated data
     if (user) {
       supabase
         .from('profiles')
-        .select('display_name, is_verified')
+        .select('display_name, is_verified, college')
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data }) => {
@@ -234,9 +235,10 @@ const Index = () => {
           onNewConversation={handleNewConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
-          userEmail={user?.email}
           userName={profile?.display_name || undefined}
+          userCollege={profile?.college || undefined}
           onSignOut={handleSignOut}
+          isNewConversation={activeConversationId === null && !showFavorites}
         />
       </div>
 
