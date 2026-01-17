@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -24,6 +25,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import { FilePreviewDialog } from './FilePreviewDialog';
 
 interface KnowledgeFile {
@@ -35,6 +41,7 @@ interface KnowledgeFile {
   created_at: string;
   status: string;
   content_text?: string | null;
+  tags?: string[] | null;
 }
 
 const ALLOWED_TYPES = [
@@ -48,25 +55,50 @@ const ALLOWED_TYPES = [
 
 const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.pptx', '.xlsx', '.md', '.txt'];
 
+// Predefined tag colors
+const TAG_COLORS: Record<string, string> = {
+  '政策法规': 'bg-blue-500',
+  '学业指导': 'bg-green-500',
+  '心理健康': 'bg-purple-500',
+  '就业指导': 'bg-orange-500',
+  '校园生活': 'bg-pink-500',
+  '行政服务': 'bg-cyan-500',
+};
+
 export const KnowledgeManagement = () => {
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [previewFile, setPreviewFile] = useState<KnowledgeFile | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [filterTag, setFilterTag] = useState<string | null>(null);
+  const [allTags, setAllTags] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const fetchFiles = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('knowledge_files')
         .select('*')
         .order('created_at', { ascending: false });
 
+      if (filterTag) {
+        query = query.contains('tags', [filterTag]);
+      }
+
+      const { data, error } = await query;
+
       if (error) throw error;
       setFiles(data || []);
+
+      // Extract all unique tags
+      const tags = new Set<string>();
+      data?.forEach(file => {
+        file.tags?.forEach((tag: string) => tags.add(tag));
+      });
+      setAllTags(Array.from(tags));
     } catch (error) {
       console.error('Error fetching knowledge files:', error);
       toast({
@@ -81,7 +113,7 @@ export const KnowledgeManagement = () => {
 
   useEffect(() => {
     fetchFiles();
-  }, []);
+  }, [filterTag]);
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return bytes + ' B';
@@ -108,6 +140,10 @@ export const KnowledgeManagement = () => {
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
+  };
+
+  const getTagColor = (tag: string) => {
+    return TAG_COLORS[tag] || 'bg-gray-500';
   };
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -150,6 +186,7 @@ export const KnowledgeManagement = () => {
             file_size: file.size,
             file_path: filePath,
             status: needsParsing ? 'processing' : 'ready',
+            tags: [],
           })
           .select()
           .single();
@@ -241,6 +278,52 @@ export const KnowledgeManagement = () => {
     }
   };
 
+  const handleAddTag = async (fileId: string, currentTags: string[], newTag: string) => {
+    if (!newTag.trim() || currentTags.includes(newTag.trim())) return;
+    
+    const updatedTags = [...currentTags, newTag.trim()];
+    try {
+      const { error } = await supabase
+        .from('knowledge_files')
+        .update({ tags: updatedTags })
+        .eq('id', fileId);
+
+      if (error) throw error;
+      
+      // Trigger embedding regeneration
+      supabase.functions.invoke('parse-document', {
+        body: { fileId, regenerateEmbedding: true },
+      });
+
+      fetchFiles();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: '添加标签失败',
+        description: error.message,
+      });
+    }
+  };
+
+  const handleRemoveTag = async (fileId: string, currentTags: string[], tagToRemove: string) => {
+    const updatedTags = currentTags.filter(t => t !== tagToRemove);
+    try {
+      const { error } = await supabase
+        .from('knowledge_files')
+        .update({ tags: updatedTags })
+        .eq('id', fileId);
+
+      if (error) throw error;
+      fetchFiles();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: '删除标签失败',
+        description: error.message,
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -253,6 +336,38 @@ export const KnowledgeManagement = () => {
               </CardDescription>
             </div>
             <div className="flex gap-2">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1">
+                    <Filter className="w-4 h-4" />
+                    {filterTag || '筛选标签'}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-48 p-2">
+                  <div className="space-y-1">
+                    <Button
+                      variant={filterTag === null ? "secondary" : "ghost"}
+                      size="sm"
+                      className="w-full justify-start"
+                      onClick={() => setFilterTag(null)}
+                    >
+                      全部
+                    </Button>
+                    {allTags.map(tag => (
+                      <Button
+                        key={tag}
+                        variant={filterTag === tag ? "secondary" : "ghost"}
+                        size="sm"
+                        className="w-full justify-start"
+                        onClick={() => setFilterTag(tag)}
+                      >
+                        <span className={`w-2 h-2 rounded-full mr-2 ${getTagColor(tag)}`} />
+                        {tag}
+                      </Button>
+                    ))}
+                  </div>
+                </PopoverContent>
+              </Popover>
               <Button
                 variant="outline"
                 size="icon"
@@ -285,6 +400,9 @@ export const KnowledgeManagement = () => {
             <p className="text-sm text-muted-foreground">
               支持的文件格式：PDF、Word文档(.docx)、PPT(.pptx)、Excel(.xlsx)、Markdown(.md)、文本文件(.txt)
             </p>
+            <p className="text-sm text-muted-foreground mt-1">
+              推荐标签：政策法规、学业指导、心理健康、就业指导、校园生活、行政服务
+            </p>
           </div>
 
           {loading ? (
@@ -302,6 +420,7 @@ export const KnowledgeManagement = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>文件名</TableHead>
+                  <TableHead>标签</TableHead>
                   <TableHead>大小</TableHead>
                   <TableHead>状态</TableHead>
                   <TableHead>上传时间</TableHead>
@@ -316,6 +435,15 @@ export const KnowledgeManagement = () => {
                         {getFileIcon(file.file_type)}
                         <span className="truncate max-w-[200px]">{file.file_name}</span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <TagEditor 
+                        fileId={file.id}
+                        tags={file.tags || []}
+                        onAddTag={handleAddTag}
+                        onRemoveTag={handleRemoveTag}
+                        getTagColor={getTagColor}
+                      />
                     </TableCell>
                     <TableCell>{formatFileSize(file.file_size)}</TableCell>
                     <TableCell>{getStatusBadge(file.status)}</TableCell>
@@ -404,6 +532,79 @@ export const KnowledgeManagement = () => {
         onOpenChange={setPreviewOpen}
         file={previewFile}
       />
+    </div>
+  );
+};
+
+// Tag Editor Component
+interface TagEditorProps {
+  fileId: string;
+  tags: string[];
+  onAddTag: (fileId: string, currentTags: string[], newTag: string) => void;
+  onRemoveTag: (fileId: string, currentTags: string[], tagToRemove: string) => void;
+  getTagColor: (tag: string) => string;
+}
+
+const TagEditor = ({ fileId, tags, onAddTag, onRemoveTag, getTagColor }: TagEditorProps) => {
+  const [newTag, setNewTag] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const suggestedTags = ['政策法规', '学业指导', '心理健康', '就业指导', '校园生活', '行政服务'];
+
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      {tags.map(tag => (
+        <Badge 
+          key={tag} 
+          variant="secondary" 
+          className={`${getTagColor(tag)} text-white text-xs flex items-center gap-1`}
+        >
+          {tag}
+          <X 
+            className="w-3 h-3 cursor-pointer hover:opacity-70" 
+            onClick={() => onRemoveTag(fileId, tags, tag)}
+          />
+        </Badge>
+      ))}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            <Plus className="w-3 h-3" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-2" align="start">
+          <div className="space-y-2">
+            <Input
+              placeholder="输入标签..."
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTag.trim()) {
+                  onAddTag(fileId, tags, newTag);
+                  setNewTag('');
+                  setIsOpen(false);
+                }
+              }}
+              className="h-8"
+            />
+            <div className="flex flex-wrap gap-1">
+              {suggestedTags.filter(t => !tags.includes(t)).slice(0, 4).map(tag => (
+                <Badge 
+                  key={tag}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-muted text-xs"
+                  onClick={() => {
+                    onAddTag(fileId, tags, tag);
+                    setIsOpen(false);
+                  }}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
     </div>
   );
 };

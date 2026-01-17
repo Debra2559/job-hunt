@@ -6,6 +6,38 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Generate embedding for document content
+async function generateEmbedding(text: string, apiKey: string): Promise<number[] | null> {
+  try {
+    // Truncate and clean text for embedding
+    const cleanText = text.substring(0, 8000).replace(/\s+/g, ' ').trim();
+    
+    const response = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "text-embedding-3-small",
+        input: cleanText,
+        dimensions: 768,
+      }),
+    });
+
+    if (!response.ok) {
+      console.error("Embedding API error:", response.status, await response.text());
+      return null;
+    }
+
+    const data = await response.json();
+    return data.data?.[0]?.embedding || null;
+  } catch (e) {
+    console.error("Error generating embedding:", e);
+    return null;
+  }
+}
+
 // Extract text from DOCX file
 async function extractTextFromDocx(arrayBuffer: ArrayBuffer): Promise<string> {
   try {
@@ -108,17 +140,61 @@ serve(async (req) => {
   }
 
   try {
-    const { fileId, filePath, fileName } = await req.json();
-    console.log(`Parsing document: ${fileName} (${fileId})`);
+    const { fileId, filePath, fileName, regenerateEmbedding } = await req.json();
+    console.log(`Processing document: ${fileName || fileId} (regenerateEmbedding: ${regenerateEmbedding})`);
 
-    if (!fileId || !filePath || !fileName) {
-      throw new Error("Missing required parameters: fileId, filePath, fileName");
+    if (!fileId) {
+      throw new Error("Missing required parameter: fileId");
     }
 
     // Create Supabase client with service role
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+    
+    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
+
+    // If only regenerating embedding
+    if (regenerateEmbedding) {
+      const { data: file, error: fetchError } = await supabase
+        .from('knowledge_files')
+        .select('content_text, tags, file_name')
+        .eq('id', fileId)
+        .single();
+
+      if (fetchError || !file?.content_text) {
+        throw new Error("File not found or no content");
+      }
+
+      // Generate embedding with tags context
+      const tagsContext = file.tags?.length > 0 ? `[分类: ${file.tags.join(', ')}] ` : '';
+      const textForEmbedding = tagsContext + file.content_text;
+      
+      let embedding = null;
+      if (LOVABLE_API_KEY) {
+        embedding = await generateEmbedding(textForEmbedding, LOVABLE_API_KEY);
+      }
+
+      if (embedding) {
+        const { error: updateError } = await supabase
+          .from('knowledge_files')
+          .update({ embedding })
+          .eq('id', fileId);
+
+        if (updateError) {
+          console.error("Failed to update embedding:", updateError);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Embedding regenerated" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!filePath || !fileName) {
+      throw new Error("Missing required parameters: filePath, fileName");
+    }
 
     // Update status to processing
     await supabase
@@ -170,14 +246,30 @@ serve(async (req) => {
 
     console.log(`Extracted ${extractedText.length} characters from ${fileName}`);
 
-    // Update database with extracted text
+    // Generate embedding for semantic search
+    let embedding = null;
+    if (LOVABLE_API_KEY && extractedText.length > 0) {
+      console.log("Generating embedding...");
+      embedding = await generateEmbedding(extractedText, LOVABLE_API_KEY);
+      if (embedding) {
+        console.log("Embedding generated successfully");
+      }
+    }
+
+    // Update database with extracted text and embedding
+    const updateData: any = { 
+      content_text: extractedText,
+      status: extractedText.length > 0 ? 'ready' : 'error',
+      updated_at: new Date().toISOString()
+    };
+    
+    if (embedding) {
+      updateData.embedding = embedding;
+    }
+
     const { error: updateError } = await supabase
       .from('knowledge_files')
-      .update({ 
-        content_text: extractedText,
-        status: extractedText.length > 0 ? 'ready' : 'error',
-        updated_at: new Date().toISOString()
-      })
+      .update(updateData)
       .eq('id', fileId);
 
     if (updateError) {
@@ -189,7 +281,8 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         message: `Successfully extracted ${extractedText.length} characters`,
-        textLength: extractedText.length
+        textLength: extractedText.length,
+        hasEmbedding: !!embedding
       }),
       { 
         headers: { ...corsHeaders, "Content-Type": "application/json" },

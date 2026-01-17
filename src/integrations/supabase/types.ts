@@ -104,6 +104,7 @@ export type Database = {
         Row: {
           content_text: string | null
           created_at: string
+          embedding: string | null
           file_name: string
           file_path: string
           file_size: number
@@ -111,12 +112,14 @@ export type Database = {
           id: string
           metadata: Json | null
           status: string
+          tags: string[] | null
           updated_at: string
           uploaded_by: string | null
         }
         Insert: {
           content_text?: string | null
           created_at?: string
+          embedding?: string | null
           file_name: string
           file_path: string
           file_size: number
@@ -124,12 +127,14 @@ export type Database = {
           id?: string
           metadata?: Json | null
           status?: string
+          tags?: string[] | null
           updated_at?: string
           uploaded_by?: string | null
         }
         Update: {
           content_text?: string | null
           created_at?: string
+          embedding?: string | null
           file_name?: string
           file_path?: string
           file_size?: number
@@ -137,6 +142,7 @@ export type Database = {
           id?: string
           metadata?: Json | null
           status?: string
+          tags?: string[] | null
           updated_at?: string
           uploaded_by?: string | null
         }
@@ -253,6 +259,20 @@ export type Database = {
         Returns: boolean
       }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
+      match_knowledge_files: {
+        Args: {
+          match_count?: number
+          match_threshold?: number
+          query_embedding: string
+        }
+        Returns: {
+          content_text: string
+          file_name: string
+          id: string
+          similarity: number
+          tags: string[]
+        }[]
+      }
     }
     Enums: {
       app_role: "super_admin" | "admin" | "user"
