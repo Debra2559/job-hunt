@@ -233,6 +233,31 @@ export function useConversations(userId: string | undefined) {
     );
   }, []);
 
+  // Delete a conversation
+  const deleteConversation = useCallback(async (conversationId: string) => {
+    try {
+      // Delete messages first (due to foreign key constraint)
+      await supabase
+        .from('messages')
+        .delete()
+        .eq('conversation_id', conversationId);
+
+      // Then delete the conversation
+      const { error } = await supabase
+        .from('conversations')
+        .delete()
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      setConversations((prev) => prev.filter((conv) => conv.id !== conversationId));
+      return true;
+    } catch (error) {
+      console.error('Error deleting conversation:', error);
+      return false;
+    }
+  }, []);
+
   return {
     conversations,
     loading,
@@ -241,6 +266,7 @@ export function useConversations(userId: string | undefined) {
     updateMessageContent,
     toggleFavorite,
     updateLocalMessage,
+    deleteConversation,
     setConversations,
   };
 }
