@@ -1,14 +1,18 @@
-import { Bookmark, BookmarkCheck } from 'lucide-react';
+import { useState } from 'react';
+import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
 import { cn } from '@/lib/utils';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { format } from 'date-fns';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface ChatMessageProps {
   message: Message;
   onToggleFavorite: (id: string) => void;
+  userId?: string;
 }
 
 function formatTime(date: Date | undefined): string {
@@ -20,13 +24,46 @@ function formatTime(date: Date | undefined): string {
   }
 }
 
-export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
+export function ChatMessage({ message, onToggleFavorite, userId }: ChatMessageProps) {
   const isUser = message.role === 'user';
+  const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   // Don't render empty messages
   if (!message.content || message.content.trim() === '') {
     return null;
   }
+
+  const handleFeedback = async (type: 'positive' | 'negative') => {
+    if (!userId || submitting || message.id.startsWith('temp-')) return;
+    
+    // If clicking the same feedback, remove it
+    if (feedbackType === type) {
+      setFeedbackType(null);
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from('feedbacks')
+        .insert({
+          user_id: userId,
+          message_id: message.id,
+          feedback_type: type,
+        });
+
+      if (error) throw error;
+      
+      setFeedbackType(type);
+      toast.success(type === 'positive' ? '感谢您的好评！' : '感谢您的反馈，我们会继续改进');
+    } catch (error) {
+      console.error('Error submitting feedback:', error);
+      toast.error('反馈提交失败');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div
@@ -59,34 +96,73 @@ export function ChatMessage({ message, onToggleFavorite }: ChatMessageProps) {
               </ReactMarkdown>
             </div>
           )}
-          
-          {!isUser && (
-            <button
-              onClick={() => onToggleFavorite(message.id)}
-              className={cn(
-                "absolute -right-10 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-all duration-200",
-                "opacity-0 group-hover:opacity-100 hover:scale-110",
-                message.isFavorite 
-                  ? "text-primary bg-primary/10" 
-                  : "text-muted-foreground hover:text-primary hover:bg-primary/10"
-              )}
-            >
-              {message.isFavorite ? (
-                <BookmarkCheck className="w-4 h-4" />
-              ) : (
-                <Bookmark className="w-4 h-4" />
-              )}
-            </button>
-          )}
         </div>
         
-        {/* Timestamp */}
-        <span className={cn(
-          "text-[10px] text-muted-foreground/60 px-2",
-          isUser ? "text-right" : "text-left"
-        )}>
-          {formatTime(message.timestamp)}
-        </span>
+        {/* Actions and Timestamp for AI messages */}
+        {!isUser && (
+          <div className="flex items-center gap-2 px-1">
+            <span className="text-[10px] text-muted-foreground/60">
+              {formatTime(message.timestamp)}
+            </span>
+            
+            {/* Feedback buttons */}
+            {!message.id.startsWith('temp-') && (
+              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                  onClick={() => handleFeedback('positive')}
+                  disabled={submitting}
+                  className={cn(
+                    "p-1 rounded-md transition-all duration-200",
+                    feedbackType === 'positive'
+                      ? "text-green-500 bg-green-500/10"
+                      : "text-muted-foreground hover:text-green-500 hover:bg-green-500/10"
+                  )}
+                  title="有帮助"
+                >
+                  <ThumbsUp className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  onClick={() => handleFeedback('negative')}
+                  disabled={submitting}
+                  className={cn(
+                    "p-1 rounded-md transition-all duration-200",
+                    feedbackType === 'negative'
+                      ? "text-red-500 bg-red-500/10"
+                      : "text-muted-foreground hover:text-red-500 hover:bg-red-500/10"
+                  )}
+                  title="需改进"
+                >
+                  <ThumbsDown className="w-3.5 h-3.5" />
+                </button>
+                
+                {/* Favorite button */}
+                <button
+                  onClick={() => onToggleFavorite(message.id)}
+                  className={cn(
+                    "p-1 rounded-md transition-all duration-200",
+                    message.isFavorite 
+                      ? "text-primary bg-primary/10" 
+                      : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  )}
+                  title="收藏"
+                >
+                  {message.isFavorite ? (
+                    <BookmarkCheck className="w-3.5 h-3.5" />
+                  ) : (
+                    <Bookmark className="w-3.5 h-3.5" />
+                  )}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Timestamp for user messages */}
+        {isUser && (
+          <span className="text-[10px] text-muted-foreground/60 px-2 text-right">
+            {formatTime(message.timestamp)}
+          </span>
+        )}
       </div>
 
       {isUser && (
