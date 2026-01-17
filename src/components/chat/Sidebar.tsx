@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { Search, Bookmark, FolderOpen, Plus, ChevronDown, MessageSquare, GraduationCap, Home, Heart, FileText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { groups, initialConversations } from '@/data/campusData';
+import { groups } from '@/data/campusData';
 import { Conversation, Group } from '@/types/chat';
+import { UserProfile } from './UserProfile';
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -12,6 +13,9 @@ interface SidebarProps {
   onNewConversation: () => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
+  userEmail?: string;
+  userAvatarUrl?: string;
+  onSignOut: () => void;
 }
 
 const iconMap: Record<string, React.ReactNode> = {
@@ -28,6 +32,9 @@ export function Sidebar({
   onNewConversation,
   showFavorites,
   onToggleFavorites,
+  userEmail,
+  userAvatarUrl,
+  onSignOut,
 }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedGroups, setExpandedGroups] = useState<string[]>(['academic', 'life', 'mental', 'admin']);
@@ -46,12 +53,15 @@ export function Sidebar({
 
   return (
     <div className="w-64 h-full bg-sidebar flex flex-col border-r border-sidebar-border">
-      {/* Header */}
+      {/* Header with New Chat Button */}
       <div className="p-4 flex items-center gap-2">
-        <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
-          <GraduationCap className="w-5 h-5 text-primary-foreground" />
-        </div>
-        <span className="font-semibold text-sidebar-foreground">校园AI辅导员</span>
+        <button
+          onClick={onNewConversation}
+          className="flex-1 px-3 py-2 rounded-lg bg-primary text-primary-foreground flex items-center justify-center gap-2 text-sm font-medium hover:bg-primary/90 transition-colors"
+        >
+          <Plus className="w-4 h-4" />
+          新建聊天
+        </button>
       </div>
 
       {/* Search */}
@@ -132,16 +142,12 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* New Conversation Button */}
-      <div className="p-3 border-t border-sidebar-border">
-        <button
-          onClick={onNewConversation}
-          className="w-full px-3 py-2 rounded-lg bg-primary text-primary-foreground flex items-center justify-center gap-2 text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          新对话
-        </button>
-      </div>
+      {/* User Profile at Bottom Left */}
+      <UserProfile 
+        email={userEmail}
+        avatarUrl={userAvatarUrl}
+        onSignOut={onSignOut}
+      />
     </div>
   );
 }
