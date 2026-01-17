@@ -199,6 +199,14 @@ export function useConversations(userId: string | undefined) {
       prev.map((conv) => {
         if (conv.id !== conversationId) return conv;
         
+        // If content is empty, remove the temp message
+        if (!content || content.trim() === '') {
+          return {
+            ...conv,
+            messages: conv.messages.filter((m) => m.id !== messageId),
+          };
+        }
+        
         const existingMsg = conv.messages.find((m) => m.id === messageId);
         if (existingMsg) {
           return {

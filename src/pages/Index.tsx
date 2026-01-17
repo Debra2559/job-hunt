@@ -84,41 +84,45 @@ const Index = () => {
 
   const handleSendMessage = useCallback(
     async (content: string) => {
-      if (!user) return;
+      if (!user || isTyping) return;
 
       let targetConvId = activeConversationId;
       let currentConv = conversations.find(c => c.id === targetConvId);
 
-      // If no active conversation, create one
+      // If no active conversation, create one first
       if (!targetConvId) {
+        setIsTyping(true);
         const newConv = await createConversation(
           content.slice(0, 20) + (content.length > 20 ? '...' : '')
         );
         if (!newConv) {
           toast.error('创建对话失败');
+          setIsTyping(false);
           return;
         }
         targetConvId = newConv.id;
         setActiveConversationId(newConv.id);
         currentConv = newConv;
+      } else {
+        setIsTyping(true);
       }
 
       // Add user message
       const userMsg = await addMessage(targetConvId, 'user', content);
       if (!userMsg) {
         toast.error('发送消息失败');
+        setIsTyping(false);
         return;
       }
 
-      setIsTyping(true);
       assistantContentRef.current = "";
 
       // Create placeholder for assistant message
       const tempAssistantId = `temp-ai-${Date.now()}`;
       assistantMessageIdRef.current = tempAssistantId;
 
-      // Get conversation history for context
-      const historyMessages = currentConv?.messages || [];
+      // Get conversation history for context (exclude temp messages)
+      const historyMessages = currentConv?.messages.filter(m => !m.id.startsWith('temp-')) || [];
       const apiMessages = [
         ...historyMessages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
         { role: "user" as const, content }
@@ -131,25 +135,25 @@ const Index = () => {
           updateLocalMessage(targetConvId!, tempAssistantId, assistantContentRef.current);
         },
         onDone: async () => {
+          // Remove temp message first
+          updateLocalMessage(targetConvId!, tempAssistantId, '');
+          
           // Save the final assistant message to database
           if (assistantContentRef.current.trim()) {
-            const savedMsg = await addMessage(targetConvId!, 'assistant', assistantContentRef.current);
-            if (savedMsg) {
-              // Update local state to use the real message ID
-              updateLocalMessage(targetConvId!, tempAssistantId, '');
-            }
+            await addMessage(targetConvId!, 'assistant', assistantContentRef.current);
           }
           setIsTyping(false);
           assistantMessageIdRef.current = null;
         },
         onError: (error) => {
+          updateLocalMessage(targetConvId!, tempAssistantId, '');
           setIsTyping(false);
           toast.error(error);
           assistantMessageIdRef.current = null;
         },
       });
     },
-    [activeConversationId, conversations, user, createConversation, addMessage, updateLocalMessage]
+    [activeConversationId, conversations, user, createConversation, addMessage, updateLocalMessage, isTyping]
   );
 
   const handleToggleFavorite = useCallback(
