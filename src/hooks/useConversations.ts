@@ -258,6 +258,30 @@ export function useConversations(userId: string | undefined) {
     }
   }, []);
 
+  // Rename a conversation
+  const renameConversation = useCallback(async (conversationId: string, newTitle: string) => {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ title: newTitle, updated_at: new Date().toISOString() })
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId
+            ? { ...conv, title: newTitle, updatedAt: new Date() }
+            : conv
+        )
+      );
+      return true;
+    } catch (error) {
+      console.error('Error renaming conversation:', error);
+      return false;
+    }
+  }, []);
+
   return {
     conversations,
     loading,
@@ -267,6 +291,7 @@ export function useConversations(userId: string | undefined) {
     toggleFavorite,
     updateLocalMessage,
     deleteConversation,
+    renameConversation,
     setConversations,
   };
 }

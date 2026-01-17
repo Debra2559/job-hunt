@@ -30,6 +30,7 @@ const Index = () => {
     toggleFavorite,
     updateLocalMessage,
     deleteConversation,
+    renameConversation,
   } = useConversations(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -186,6 +187,15 @@ const Index = () => {
     }
   }, [deleteConversation, activeConversationId]);
 
+  const handleRenameConversation = useCallback(async (id: string, newTitle: string) => {
+    const success = await renameConversation(id, newTitle);
+    if (success) {
+      toast.success('标题已更新');
+    } else {
+      toast.error('重命名失败');
+    }
+  }, [renameConversation]);
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
@@ -251,6 +261,7 @@ const Index = () => {
           onSelectConversation={handleSelectConversation}
           onNewConversation={handleNewConversation}
           onDeleteConversation={handleDeleteConversation}
+          onRenameConversation={handleRenameConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
           userName={profile?.display_name || undefined}
