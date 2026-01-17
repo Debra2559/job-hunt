@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
+import { StudentVerification } from '@/components/auth/StudentVerification';
 import { Message, Conversation } from '@/types/chat';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -9,6 +10,12 @@ import { streamChat } from '@/lib/chatApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
+import { supabase } from '@/integrations/supabase/client';
+
+interface UserProfile {
+  display_name: string | null;
+  is_verified: boolean;
+}
 
 const Index = () => {
   const navigate = useNavigate();
@@ -27,6 +34,8 @@ const Index = () => {
   const [showFavorites, setShowFavorites] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
   const assistantContentRef = useRef<string>("");
   const assistantMessageIdRef = useRef<string | null>(null);
 
@@ -36,6 +45,33 @@ const Index = () => {
       navigate('/auth', { replace: true });
     }
   }, [authLoading, user, navigate]);
+
+  // Load user profile
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user) {
+        setProfileLoading(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('display_name, is_verified')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        if (error) throw error;
+        setProfile(data);
+      } catch (error) {
+        console.error('Error loading profile:', error);
+      } finally {
+        setProfileLoading(false);
+      }
+    };
+
+    loadProfile();
+  }, [user]);
 
   const activeConversation = conversations.find((c) => c.id === activeConversationId);
   const messages = activeConversation?.messages || [];
@@ -142,8 +178,23 @@ const Index = () => {
     }
   };
 
+  const handleVerified = () => {
+    setProfile({ display_name: null, is_verified: true });
+    // Reload profile to get updated data
+    if (user) {
+      supabase
+        .from('profiles')
+        .select('display_name, is_verified')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (data) setProfile(data);
+        });
+    }
+  };
+
   // Show loading while checking auth
-  if (authLoading || convsLoading) {
+  if (authLoading || convsLoading || profileLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -152,6 +203,11 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Show student verification if not verified
+  if (user && (!profile || !profile.is_verified)) {
+    return <StudentVerification userId={user.id} onVerified={handleVerified} />;
   }
 
   return (
@@ -179,6 +235,7 @@ const Index = () => {
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
           userEmail={user?.email}
+          userName={profile?.display_name || undefined}
           onSignOut={handleSignOut}
         />
       </div>

@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { Bookmark, Plus, ChevronDown, MessageSquare, GraduationCap, Home, Heart, FileText, Briefcase, Book, Users, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Conversation, Group } from '@/types/chat';
+import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
-import { GroupManager } from './GroupManager';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 interface SidebarProps {
@@ -14,27 +13,10 @@ interface SidebarProps {
   showFavorites: boolean;
   onToggleFavorites: () => void;
   userEmail?: string;
+  userName?: string;
   userAvatarUrl?: string;
   onSignOut: () => void;
 }
-
-const iconMap: Record<string, React.ReactNode> = {
-  GraduationCap: <GraduationCap className="w-4 h-4" />,
-  Home: <Home className="w-4 h-4" />,
-  Heart: <Heart className="w-4 h-4" />,
-  FileText: <FileText className="w-4 h-4" />,
-  Briefcase: <Briefcase className="w-4 h-4" />,
-  Book: <Book className="w-4 h-4" />,
-  Users: <Users className="w-4 h-4" />,
-  Star: <Star className="w-4 h-4" />,
-};
-
-const defaultGroups: Group[] = [
-  { id: 'academic', name: '学业相关', icon: 'GraduationCap' },
-  { id: 'life', name: '生活服务', icon: 'Home' },
-  { id: 'mental', name: '心理支持', icon: 'Heart' },
-  { id: 'admin', name: '行政流程', icon: 'FileText' },
-];
 
 export function Sidebar({
   conversations,
@@ -44,41 +26,10 @@ export function Sidebar({
   showFavorites,
   onToggleFavorites,
   userEmail,
+  userName,
   userAvatarUrl,
   onSignOut,
 }: SidebarProps) {
-  const [expandedGroups, setExpandedGroups] = useState<string[]>(['academic', 'life', 'mental', 'admin']);
-  const [groups, setGroups] = useState<Group[]>(defaultGroups);
-
-  const toggleGroup = (groupId: string) => {
-    setExpandedGroups((prev) =>
-      prev.includes(groupId)
-        ? prev.filter((id) => id !== groupId)
-        : [...prev, groupId]
-    );
-  };
-
-  const handleAddGroup = (name: string, icon: string) => {
-    const newGroup: Group = {
-      id: `group-${Date.now()}`,
-      name,
-      icon,
-    };
-    setGroups((prev) => [...prev, newGroup]);
-    setExpandedGroups((prev) => [...prev, newGroup.id]);
-  };
-
-  const handleEditGroup = (id: string, name: string, icon: string) => {
-    setGroups((prev) =>
-      prev.map((g) => (g.id === id ? { ...g, name, icon } : g))
-    );
-  };
-
-  const handleDeleteGroup = (id: string) => {
-    setGroups((prev) => prev.filter((g) => g.id !== id));
-    setExpandedGroups((prev) => prev.filter((gId) => gId !== id));
-  };
-
   return (
     <div className="w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
       {/* Header with AI Teacher Avatar */}
@@ -114,36 +65,6 @@ export function Sidebar({
         <span>全部收藏</span>
       </button>
 
-      {/* Groups */}
-      <div className="px-4 mb-3">
-        <div className="flex items-center justify-between text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
-          <span>分组</span>
-          <GroupManager
-            groups={groups}
-            onAddGroup={handleAddGroup}
-            onEditGroup={handleEditGroup}
-            onDeleteGroup={handleDeleteGroup}
-          />
-        </div>
-        {groups.map((group) => (
-          <div key={group.id} className="mb-1">
-            <button
-              onClick={() => toggleGroup(group.id)}
-              className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm hover:bg-sidebar-accent transition-all duration-200 text-sidebar-foreground"
-            >
-              <span className="text-muted-foreground">{iconMap[group.icon] || <GraduationCap className="w-4 h-4" />}</span>
-              <span className="flex-1 text-left">{group.name}</span>
-              <ChevronDown
-                className={cn(
-                  "w-4 h-4 text-muted-foreground transition-transform duration-200",
-                  expandedGroups.includes(group.id) ? "rotate-0" : "-rotate-90"
-                )}
-              />
-            </button>
-          </div>
-        ))}
-      </div>
-
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto px-4">
         <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
@@ -171,6 +92,7 @@ export function Sidebar({
       {/* User Profile at Bottom Left */}
       <UserProfile 
         email={userEmail}
+        displayName={userName}
         avatarUrl={userAvatarUrl}
         onSignOut={onSignOut}
       />
