@@ -29,6 +29,7 @@ const Index = () => {
     updateMessageContent,
     toggleFavorite,
     updateLocalMessage,
+    deleteConversation,
   } = useConversations(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -173,6 +174,18 @@ const Index = () => {
     setShowFavorites(false);
   }, []);
 
+  const handleDeleteConversation = useCallback(async (id: string) => {
+    const success = await deleteConversation(id);
+    if (success) {
+      toast.success('对话已删除');
+      if (activeConversationId === id) {
+        setActiveConversationId(null);
+      }
+    } else {
+      toast.error('删除失败');
+    }
+  }, [deleteConversation, activeConversationId]);
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
@@ -237,6 +250,7 @@ const Index = () => {
           activeConversationId={activeConversationId}
           onSelectConversation={handleSelectConversation}
           onNewConversation={handleNewConversation}
+          onDeleteConversation={handleDeleteConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
           userName={profile?.display_name || undefined}

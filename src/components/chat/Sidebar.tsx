@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, Plus, ChevronDown, MessageSquare, GraduationCap, Home, Heart, FileText, Briefcase, Book, Users, Star } from 'lucide-react';
+import { Bookmark, Plus, MessageSquare, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
@@ -10,6 +10,7 @@ interface SidebarProps {
   activeConversationId: string | null;
   onSelectConversation: (id: string) => void;
   onNewConversation: () => void;
+  onDeleteConversation: (id: string) => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
   userName?: string;
@@ -24,6 +25,7 @@ export function Sidebar({
   activeConversationId,
   onSelectConversation,
   onNewConversation,
+  onDeleteConversation,
   showFavorites,
   onToggleFavorites,
   userName,
@@ -32,6 +34,8 @@ export function Sidebar({
   onSignOut,
   isNewConversation,
 }: SidebarProps) {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
   return (
     <div className="w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
       {/* Header with AI Teacher Avatar */}
@@ -85,19 +89,40 @@ export function Sidebar({
             </div>
           )}
           {conversations.map((conv) => (
-            <button
+            <div
               key={conv.id}
-              onClick={() => onSelectConversation(conv.id)}
-              className={cn(
-                "w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left",
-                activeConversationId === conv.id
-                  ? "bg-primary/10 text-primary font-medium"
-                  : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
-              )}
+              className="relative group"
+              onMouseEnter={() => setHoveredId(conv.id)}
+              onMouseLeave={() => setHoveredId(null)}
             >
-              <MessageSquare className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate">{conv.title}</span>
-            </button>
+              <button
+                onClick={() => onSelectConversation(conv.id)}
+                className={cn(
+                  "w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-10",
+                  activeConversationId === conv.id
+                    ? "bg-primary/10 text-primary font-medium"
+                    : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+                )}
+              >
+                <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{conv.title}</span>
+              </button>
+              
+              {/* Delete button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteConversation(conv.id);
+                }}
+                className={cn(
+                  "absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg transition-all duration-200",
+                  "text-muted-foreground hover:text-destructive hover:bg-destructive/10",
+                  hoveredId === conv.id ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
           ))}
         </div>
       </div>
