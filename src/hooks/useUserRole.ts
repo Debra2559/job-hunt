@@ -31,18 +31,26 @@ export function useUserRole(userId: string | undefined) {
         .eq('user_id', userId)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching user role:', error);
+        throw error;
+      }
 
-      const role = (data?.role as AppRole) || 'user';
+      const role = (data?.role as AppRole) || null;
+      const isSuperAdmin = role === 'super_admin';
+      const isAdmin = role === 'admin' || role === 'super_admin';
+      
+      console.log('User role loaded:', { userId, role, isAdmin, isSuperAdmin });
+      
       setState({
         role,
         loading: false,
-        isAdmin: role === 'admin' || role === 'super_admin',
-        isSuperAdmin: role === 'super_admin',
+        isAdmin,
+        isSuperAdmin,
       });
     } catch (error) {
       console.error('Error loading user role:', error);
-      setState({ role: 'user', loading: false, isAdmin: false, isSuperAdmin: false });
+      setState({ role: null, loading: false, isAdmin: false, isSuperAdmin: false });
     }
   }, [userId]);
 

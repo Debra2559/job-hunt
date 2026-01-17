@@ -33,7 +33,7 @@ const Index = () => {
     deleteConversation,
     renameConversation,
   } = useConversations(user?.id);
-  const { isAdmin } = useUserRole(user?.id);
+  const { isAdmin, isSuperAdmin } = useUserRole(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -270,7 +270,7 @@ const Index = () => {
           userCollege={profile?.college || undefined}
           onSignOut={handleSignOut}
           isNewConversation={activeConversationId === null && !showFavorites}
-          isAdmin={isAdmin}
+          isAdmin={isAdmin || isSuperAdmin}
         />
       </div>
 

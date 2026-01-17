@@ -23,8 +23,15 @@ const Admin = () => {
   }, [authLoading, user, navigate]);
 
   useEffect(() => {
+    // Only redirect if we've finished loading and confirmed user is not admin
     if (!authLoading && !roleLoading && user && !isAdmin) {
-      navigate('/', { replace: true });
+      // Add a small delay to ensure role is properly loaded
+      const timer = setTimeout(() => {
+        if (!isAdmin) {
+          navigate('/', { replace: true });
+        }
+      }, 500);
+      return () => clearTimeout(timer);
     }
   }, [authLoading, roleLoading, user, isAdmin, navigate]);
 
