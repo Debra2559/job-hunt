@@ -7,6 +7,7 @@ import { DataManagement } from '@/components/admin/DataManagement';
 import { FeedbackManagement } from '@/components/admin/FeedbackManagement';
 import { RoleManagement } from '@/components/admin/RoleManagement';
 import { KnowledgeManagement } from '@/components/admin/KnowledgeManagement';
+import { NotificationSettings } from '@/components/admin/NotificationSettings';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
 const Admin = () => {
@@ -59,6 +60,8 @@ const Admin = () => {
         return <FeedbackManagement />;
       case 'knowledge':
         return <KnowledgeManagement />;
+      case 'notifications':
+        return <NotificationSettings />;
       case 'roles':
         return isSuperAdmin ? <RoleManagement /> : null;
       default:

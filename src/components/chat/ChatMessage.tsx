@@ -69,16 +69,56 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
 
     setSubmitting(true);
     try {
-      const { error } = await supabase
+      // Get user display name for notification
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('user_id', userId)
+        .single();
+
+      const { data: feedbackData, error } = await supabase
         .from('feedbacks')
         .insert({
           user_id: userId,
           message_id: message.id,
           feedback_type: type,
           content: content || null,
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      
+      // Send email notification for negative feedback
+      if (type === 'negative' && feedbackData) {
+        try {
+          // Get admin notification emails from settings
+          const { data: settingsData } = await supabase
+            .from('system_settings')
+            .select('value')
+            .eq('key', 'admin_notification_emails')
+            .single();
+
+          const settingsValue = settingsData?.value as { emails?: string[] } | null;
+          const adminEmails = settingsValue?.emails || [];
+          
+          if (adminEmails.length > 0) {
+            await supabase.functions.invoke('send-feedback-notification', {
+              body: {
+                feedback_id: feedbackData.id,
+                feedback_type: type,
+                content: content,
+                user_display_name: profileData?.display_name || '匿名用户',
+                message_content: message.content,
+                admin_emails: adminEmails,
+              },
+            });
+          }
+        } catch (notifyError) {
+          // Don't fail the feedback submission if notification fails
+          console.error('Failed to send notification:', notifyError);
+        }
+      }
       
       setFeedbackType(type);
       setShowFeedbackInput(false);
