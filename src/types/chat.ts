@@ -1,9 +1,16 @@
+export interface KnowledgeSource {
+  fileName: string;
+  similarity: number;
+  tags?: string[];
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
   isFavorite?: boolean;
+  sources?: KnowledgeSource[];
 }
 
 export interface Conversation {

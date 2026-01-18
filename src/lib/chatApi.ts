@@ -1,3 +1,5 @@
+import { KnowledgeSource } from '@/types/chat';
+
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
@@ -7,11 +9,13 @@ export async function streamChat({
   onDelta,
   onDone,
   onError,
+  onSources,
 }: {
   messages: ChatMessage[];
   onDelta: (deltaText: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
+  onSources?: (sources: KnowledgeSource[]) => void;
 }) {
   try {
     const resp = await fetch(CHAT_URL, {
@@ -63,6 +67,13 @@ export async function streamChat({
 
         try {
           const parsed = JSON.parse(jsonStr);
+          
+          // Check for sources data
+          if (parsed.sources && onSources) {
+            onSources(parsed.sources);
+            continue;
+          }
+          
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
           if (content) onDelta(content);
         } catch {
@@ -84,6 +95,13 @@ export async function streamChat({
         if (jsonStr === "[DONE]") continue;
         try {
           const parsed = JSON.parse(jsonStr);
+          
+          // Check for sources data
+          if (parsed.sources && onSources) {
+            onSources(parsed.sources);
+            continue;
+          }
+          
           const content = parsed.choices?.[0]?.delta?.content as string | undefined;
           if (content) onDelta(content);
         } catch {

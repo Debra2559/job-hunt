@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Conversation, Message } from '@/types/chat';
+import { Conversation, Message, KnowledgeSource } from '@/types/chat';
 
 export function useConversations(userId: string | undefined) {
   const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -100,7 +100,8 @@ export function useConversations(userId: string | undefined) {
   const addMessage = useCallback(async (
     conversationId: string,
     role: 'user' | 'assistant',
-    content: string
+    content: string,
+    sources?: KnowledgeSource[]
   ) => {
     try {
       const { data, error } = await supabase
@@ -121,6 +122,7 @@ export function useConversations(userId: string | undefined) {
         content: data.content,
         timestamp: new Date(data.created_at),
         isFavorite: data.is_favorite,
+        sources,
       };
 
       // Update conversation's updated_at
@@ -194,7 +196,12 @@ export function useConversations(userId: string | undefined) {
   }, [conversations]);
 
   // Update local message (for streaming updates before save)
-  const updateLocalMessage = useCallback((conversationId: string, messageId: string, content: string) => {
+  const updateLocalMessage = useCallback((
+    conversationId: string, 
+    messageId: string, 
+    content: string,
+    sources?: KnowledgeSource[]
+  ) => {
     setConversations((prev) =>
       prev.map((conv) => {
         if (conv.id !== conversationId) return conv;
@@ -212,7 +219,7 @@ export function useConversations(userId: string | undefined) {
           return {
             ...conv,
             messages: conv.messages.map((m) =>
-              m.id === messageId ? { ...m, content } : m
+              m.id === messageId ? { ...m, content, sources: sources || m.sources } : m
             ),
           };
         } else {
@@ -225,6 +232,7 @@ export function useConversations(userId: string | undefined) {
                 role: 'assistant' as const,
                 content,
                 timestamp: new Date(),
+                sources,
               },
             ],
           };

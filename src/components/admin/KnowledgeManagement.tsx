@@ -31,6 +31,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { FilePreviewDialog } from './FilePreviewDialog';
+import { KnowledgeSearch } from './KnowledgeSearch';
 
 interface KnowledgeFile {
   id: string;
@@ -634,6 +635,9 @@ export const KnowledgeManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Semantic Search Test */}
+      <KnowledgeSearch />
 
       <FilePreviewDialog
         open={previewOpen}

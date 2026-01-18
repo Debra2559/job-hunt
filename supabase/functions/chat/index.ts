@@ -40,7 +40,7 @@ async function semanticSearch(
   supabase: any, 
   query: string, 
   apiKey: string
-): Promise<Array<{ file_name: string; content_text: string; tags: string[]; similarity: number }>> {
+): Promise<Array<{ id: string; file_name: string; content_text: string; tags: string[]; similarity: number }>> {
   try {
     // Generate embedding for the query
     const queryEmbedding = await generateEmbedding(query, apiKey);
@@ -117,17 +117,23 @@ async function basicSearch(supabase: any, query: string): Promise<string[]> {
   }
 }
 
-// Get knowledge context with semantic search
+// Get knowledge context with semantic search - returns both context string and sources
 async function getKnowledgeContext(
   supabase: any, 
   userQuery: string, 
   apiKey: string
-): Promise<string> {
+): Promise<{ context: string; sources: Array<{ fileName: string; similarity: number; tags: string[] }> }> {
   try {
     // Try semantic search first
     const semanticResults = await semanticSearch(supabase, userQuery, apiKey);
     
     if (semanticResults.length > 0) {
+      const sources = semanticResults.map(r => ({
+        fileName: r.file_name,
+        similarity: r.similarity,
+        tags: r.tags || [],
+      }));
+
       const contents = semanticResults.map(r => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
         const similarity = `[相关度: ${(r.similarity * 100).toFixed(0)}%]`;
@@ -137,7 +143,10 @@ async function getKnowledgeContext(
         return `【${r.file_name}】${tags} ${similarity}\n${truncated}`;
       });
       
-      return `\n\n以下是与问题相关的知识库内容（按相关度排序）：\n\n${contents.join('\n\n---\n\n')}`;
+      return {
+        context: `\n\n以下是与问题相关的知识库内容（按相关度排序）：\n\n${contents.join('\n\n---\n\n')}`,
+        sources,
+      };
     }
 
     // Fallback to basic search
@@ -145,14 +154,17 @@ async function getKnowledgeContext(
     const basicResults = await basicSearch(supabase, userQuery);
     
     if (basicResults.length > 0) {
-      return `\n\n以下是可能相关的知识库内容：\n\n${basicResults.join('\n\n---\n\n')}`;
+      return {
+        context: `\n\n以下是可能相关的知识库内容：\n\n${basicResults.join('\n\n---\n\n')}`,
+        sources: [], // No similarity scores for basic search
+      };
     }
 
     console.log("No relevant knowledge found");
-    return '';
+    return { context: '', sources: [] };
   } catch (e) {
     console.error("Error in getKnowledgeContext:", e);
-    return '';
+    return { context: '', sources: [] };
   }
 }
 
@@ -185,8 +197,8 @@ serve(async (req) => {
     console.log("User query for knowledge search:", latestUserMessage.substring(0, 100));
 
     // Get knowledge base context using semantic search
-    const knowledgeContext = await getKnowledgeContext(supabase, latestUserMessage, LOVABLE_API_KEY);
-    console.log("Knowledge context length:", knowledgeContext.length);
+    const { context: knowledgeContext, sources } = await getKnowledgeContext(supabase, latestUserMessage, LOVABLE_API_KEY);
+    console.log("Knowledge context length:", knowledgeContext.length, "Sources:", sources.length);
 
     const systemPrompt = `你是一位友善、专业的校园AI辅导员。你的职责是帮助学生解决学业、生活、心理和行政方面的问题。
 
@@ -246,6 +258,39 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "AI服务暂时不可用，请稍后重试。" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Create a TransformStream to inject sources at the end
+    const sourcesData = sources.length > 0 ? JSON.stringify(sources) : null;
+    
+    // If we have sources, we need to append them to the stream
+    if (sourcesData && response.body) {
+      const reader = response.body.getReader();
+      const encoder = new TextEncoder();
+      
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read();
+              if (done) {
+                // Append sources as a special event before [DONE]
+                const sourcesEvent = `data: ${JSON.stringify({ sources })}\n\n`;
+                controller.enqueue(encoder.encode(sourcesEvent));
+                break;
+              }
+              controller.enqueue(value);
+            }
+            controller.close();
+          } catch (e) {
+            controller.error(e);
+          }
+        }
+      });
+
+      return new Response(stream, {
+        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }
 
