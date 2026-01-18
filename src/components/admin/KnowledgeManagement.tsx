@@ -181,7 +181,14 @@ export const KnowledgeManagement = () => {
         if (uploadError) throw uploadError;
 
         // Determine initial status based on file type
-        const needsParsing = ['pdf', 'docx', 'pptx'].includes(ext.replace('.', ''));
+        const needsParsing = ['pdf', 'docx', 'pptx'].includes(fileExtension);
+        const isTextFile = ['md', 'txt'].includes(fileExtension);
+        
+        // For text files, read content directly
+        let contentText: string | null = null;
+        if (isTextFile) {
+          contentText = await file.text();
+        }
         
         // Create record in database - store original file name for display
         const { data: insertedFile, error: dbError } = await supabase
@@ -192,6 +199,7 @@ export const KnowledgeManagement = () => {
             file_size: file.size,
             file_path: safeFilePath, // Use safe path for storage
             status: needsParsing ? 'processing' : 'ready',
+            content_text: contentText, // Store content for text files
             tags: [],
           })
           .select()
@@ -221,6 +229,22 @@ export const KnowledgeManagement = () => {
                 title: '解析完成',
                 description: `${file.name} 文本内容已提取`,
               });
+            }
+            fetchFiles();
+          });
+        }
+        
+        // For text files, trigger embedding generation
+        if (isTextFile && insertedFile && contentText) {
+          console.log('Generating embedding for text file:', file.name);
+          supabase.functions.invoke('parse-document', {
+            body: {
+              fileId: insertedFile.id,
+              regenerateEmbedding: true,
+            },
+          }).then(({ error: embedError }) => {
+            if (embedError) {
+              console.error('Embedding error:', embedError);
             }
             fetchFiles();
           });
