@@ -261,6 +261,43 @@ serve(async (req) => {
       });
     }
 
+    // Log knowledge usage for statistics (background task)
+    if (sources.length > 0) {
+      const authHeader = req.headers.get('Authorization');
+      let conversationId: string | null = null;
+      
+      // Try to extract conversation context if available
+      try {
+        const requestBody = await req.clone().json();
+        conversationId = requestBody.conversationId || null;
+      } catch {}
+
+      // Log usage in background (fire and forget)
+      (async () => {
+        for (const source of sources) {
+          try {
+            // Find file id by name
+            const { data: fileData } = await supabase
+              .from('knowledge_files')
+              .select('id')
+              .eq('file_name', source.fileName)
+              .single();
+            
+            if (fileData) {
+              await supabase.from('knowledge_usage').insert({
+                file_id: fileData.id,
+                conversation_id: conversationId,
+                user_query: latestUserMessage.substring(0, 500),
+                similarity: source.similarity,
+              });
+            }
+          } catch (e) {
+            console.error('Error logging knowledge usage:', e);
+          }
+        }
+      })();
+    }
+
     // Create a TransformStream to inject sources at the end
     const sourcesData = sources.length > 0 ? JSON.stringify(sources) : null;
     

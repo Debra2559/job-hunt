@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/popover';
 import { FilePreviewDialog } from './FilePreviewDialog';
 import { KnowledgeSearch } from './KnowledgeSearch';
+import { KnowledgeUsageStats } from './KnowledgeUsageStats';
 import { CategoryManagement, KnowledgeCategory } from './CategoryManagement';
 import {
   Select,
@@ -1328,6 +1329,9 @@ export const KnowledgeManagement = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Knowledge Usage Statistics */}
+      <KnowledgeUsageStats />
 
       {/* Semantic Search Test */}
       <KnowledgeSearch />

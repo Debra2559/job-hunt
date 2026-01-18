@@ -218,6 +218,48 @@ export type Database = {
           },
         ]
       }
+      knowledge_usage: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          file_id: string | null
+          id: string
+          similarity: number | null
+          user_query: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          id?: string
+          similarity?: number | null
+          user_query: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          file_id?: string | null
+          id?: string
+          similarity?: number | null
+          user_query?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_usage_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "knowledge_usage_file_id_fkey"
+            columns: ["file_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_files"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       messages: {
         Row: {
           content: string
