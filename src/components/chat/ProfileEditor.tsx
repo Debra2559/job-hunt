@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { colleges, grades } from '@/data/campusData';
+import { AvatarCropper } from './AvatarCropper';
 
 interface ProfileEditorProps {
   userId: string;
@@ -29,7 +30,7 @@ interface ProfileEditorProps {
 type DuplicateAction = 'replace' | 'keep-both' | 'keep-original' | null;
 
 interface PendingUpload {
-  file: File;
+  blob: Blob;
   fileName: string;
   existingPath: string;
 }
@@ -54,10 +55,12 @@ export function ProfileEditor({
   });
   const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
   const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState('');
+  const [originalFileName, setOriginalFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const checkDuplicateFile = async (fileName: string): Promise<string | null> => {
-    // Check if file exists in user's folder
     const { data, error } = await supabase.storage
       .from('avatars')
       .list(userId, { search: fileName });
@@ -71,10 +74,10 @@ export function ProfileEditor({
     return existing ? `${userId}/${fileName}` : null;
   };
 
-  const uploadFile = async (file: File, filePath: string, upsert: boolean = false) => {
+  const uploadBlob = async (blob: Blob, filePath: string, upsert: boolean = false) => {
     const { error: uploadError } = await supabase.storage
       .from('avatars')
-      .upload(filePath, file, { upsert });
+      .upload(filePath, blob, { upsert, contentType: 'image/jpeg' });
 
     if (uploadError) throw uploadError;
 
@@ -82,52 +85,60 @@ export function ProfileEditor({
       .from('avatars')
       .getPublicUrl(filePath);
 
-    // Add cache busting parameter
     return `${publicUrl}?t=${Date.now()}`;
   };
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Reset input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
 
-    // Validate file type
     if (!file.type.startsWith('image/')) {
       toast.error('请选择图片文件');
       return;
     }
 
-    // Validate file size (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('图片大小不能超过 2MB');
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('图片大小不能超过 5MB');
       return;
     }
 
-    const fileExt = file.name.split('.').pop();
-    const baseFileName = file.name.replace(/\.[^/.]+$/, '');
-    const fileName = `${baseFileName}.${fileExt}`;
+    // Store original filename
+    const baseName = file.name.replace(/\.[^/.]+$/, '');
+    setOriginalFileName(baseName);
+
+    // Create object URL for cropper
+    const imageUrl = URL.createObjectURL(file);
+    setCropImageSrc(imageUrl);
+    setCropperOpen(true);
+  };
+
+  const handleCropComplete = async (croppedBlob: Blob) => {
+    // Clean up the object URL
+    if (cropImageSrc) {
+      URL.revokeObjectURL(cropImageSrc);
+    }
+    setCropImageSrc('');
+
+    const fileName = `${originalFileName}.jpg`;
 
     setUploadingAvatar(true);
 
     try {
-      // Check for duplicate
       const existingPath = await checkDuplicateFile(fileName);
 
       if (existingPath) {
-        // Show duplicate dialog
-        setPendingUpload({ file, fileName, existingPath });
+        setPendingUpload({ blob: croppedBlob, fileName, existingPath });
         setDuplicateDialogOpen(true);
         setUploadingAvatar(false);
         return;
       }
 
-      // No duplicate, upload directly
       const filePath = `${userId}/${fileName}`;
-      const publicUrl = await uploadFile(file, filePath);
+      const publicUrl = await uploadBlob(croppedBlob, filePath);
       setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
       toast.success('头像上传成功');
     } catch (error) {
@@ -149,24 +160,20 @@ export function ProfileEditor({
     setUploadingAvatar(true);
 
     try {
-      const { file, fileName } = pendingUpload;
+      const { blob, fileName } = pendingUpload;
 
       if (action === 'keep-original') {
-        // User wants to keep original, do nothing
         toast.info('已取消上传');
       } else if (action === 'replace') {
-        // Replace existing file
         const filePath = `${userId}/${fileName}`;
-        const publicUrl = await uploadFile(file, filePath, true);
+        const publicUrl = await uploadBlob(blob, filePath, true);
         setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
         toast.success('头像已替换');
       } else if (action === 'keep-both') {
-        // Keep both - add timestamp to new file name
-        const fileExt = fileName.split('.').pop();
         const baseName = fileName.replace(/\.[^/.]+$/, '');
-        const newFileName = `${baseName}_${Date.now()}.${fileExt}`;
+        const newFileName = `${baseName}_${Date.now()}.jpg`;
         const filePath = `${userId}/${newFileName}`;
-        const publicUrl = await uploadFile(file, filePath);
+        const publicUrl = await uploadBlob(blob, filePath);
         setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
         toast.success('头像上传成功（已重命名）');
       }
@@ -264,12 +271,20 @@ export function ProfileEditor({
                 ref={fileInputRef}
                 type="file"
                 accept="image/*"
-                onChange={handleAvatarUpload}
+                onChange={handleFileSelect}
                 className="hidden"
               />
             </div>
-            <p className="text-xs text-muted-foreground">点击头像更换（最大 2MB）</p>
+            <p className="text-xs text-muted-foreground">点击头像更换（支持裁剪，最大 5MB）</p>
           </div>
+
+          {/* Avatar Cropper */}
+          <AvatarCropper
+            open={cropperOpen}
+            onOpenChange={setCropperOpen}
+            imageSrc={cropImageSrc}
+            onCropComplete={handleCropComplete}
+          />
 
           {/* Display Name */}
           <div className="space-y-2">
