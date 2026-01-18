@@ -106,11 +106,16 @@ export function useConversationTags(userId: string | undefined) {
   );
 
   // Update a tag
-  const updateTag = useCallback(async (tagId: string, updates: Partial<{ name: string; color: string }>) => {
+  const updateTag = useCallback(async (tagId: string, updates: Partial<{ name: string; color: string; sortOrder: number }>) => {
     try {
+      const dbUpdates: Record<string, unknown> = { updated_at: new Date().toISOString() };
+      if (updates.name !== undefined) dbUpdates.name = updates.name;
+      if (updates.color !== undefined) dbUpdates.color = updates.color;
+      if (updates.sortOrder !== undefined) dbUpdates.sort_order = updates.sortOrder;
+
       const { error } = await supabase
         .from('conversation_tags')
-        .update({ ...updates, updated_at: new Date().toISOString() })
+        .update(dbUpdates)
         .eq('id', tagId);
 
       if (error) throw error;
@@ -124,6 +129,30 @@ export function useConversationTags(userId: string | undefined) {
       return false;
     }
   }, []);
+
+  // Reorder tags
+  const reorderTags = useCallback(async (reorderedTags: ConversationTag[]) => {
+    // Optimistic update
+    setTags(reorderedTags);
+
+    try {
+      // Update each tag's sort_order in database
+      const updates = reorderedTags.map((tag, index) => 
+        supabase
+          .from('conversation_tags')
+          .update({ sort_order: index, updated_at: new Date().toISOString() })
+          .eq('id', tag.id)
+      );
+
+      await Promise.all(updates);
+      return true;
+    } catch (error) {
+      console.error('Error reordering tags:', error);
+      // Revert on error
+      await loadTags();
+      return false;
+    }
+  }, [loadTags]);
 
   // Delete a tag
   const deleteTag = useCallback(async (tagId: string) => {
@@ -209,6 +238,7 @@ export function useConversationTags(userId: string | undefined) {
     createTag,
     updateTag,
     deleteTag,
+    reorderTags,
     assignTag,
     removeTagAssignment,
     getConversationTags,
