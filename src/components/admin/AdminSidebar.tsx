@@ -22,6 +22,7 @@ const menuItems = [
   { id: 'data', label: '数据管理', icon: BarChart3 },
   { id: 'feedback', label: '反馈管理', icon: MessageSquare },
   { id: 'knowledge', label: '知识库', icon: BookOpen },
+  { id: 'notifications', label: '通知设置', icon: Settings },
 ];
 
 const superAdminItems = [
