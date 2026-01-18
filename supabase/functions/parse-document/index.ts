@@ -107,8 +107,20 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  let requestBody: any;
   try {
-    const { fileId, filePath, fileName, regenerateEmbedding } = await req.json();
+    const rawText = await req.text();
+    requestBody = JSON.parse(rawText);
+  } catch (parseError) {
+    console.error("JSON parse error:", parseError);
+    return new Response(
+      JSON.stringify({ success: false, error: "Invalid JSON in request body" }),
+      { headers: { ...corsHeaders, "Content-Type": "application/json" }, status: 400 }
+    );
+  }
+
+  try {
+    const { fileId, filePath, fileName, regenerateEmbedding } = requestBody;
     console.log(`Processing document: ${fileName || fileId}`);
 
     if (!fileId) {
@@ -221,8 +233,7 @@ serve(async (req) => {
     
     // Try to update status to error if we have fileId
     try {
-      const body = await req.clone().json().catch(() => ({}));
-      if (body.fileId) {
+      if (requestBody?.fileId) {
         const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
         const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
         const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -230,7 +241,7 @@ serve(async (req) => {
         await supabase
           .from('knowledge_files')
           .update({ status: 'error' })
-          .eq('id', body.fileId);
+          .eq('id', requestBody.fileId);
       }
     } catch {}
     
