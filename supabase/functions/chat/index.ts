@@ -118,7 +118,7 @@ async function getFallbackKnowledge(
 async function getKnowledgeContext(
   supabase: any, 
   userQuery: string
-): Promise<{ context: string; sources: Array<{ fileName: string; score: number; tags: string[]; id: string }> }> {
+): Promise<{ context: string; sources: Array<{ fileName: string; similarity: number; tags: string[]; id: string }> }> {
   try {
     // Try keyword search first
     const keywordResults = await keywordSearch(supabase, userQuery);
@@ -127,7 +127,7 @@ async function getKnowledgeContext(
       const sources = keywordResults.map(r => ({
         id: r.id,
         fileName: r.file_name,
-        score: r.score,
+        similarity: Math.min(r.score / 10, 1), // Normalize score to 0-1 range for similarity
         tags: r.tags || [],
       }));
 
@@ -165,7 +165,7 @@ async function getKnowledgeContext(
         sources: fallbackKnowledge.map(r => ({
           id: r.id,
           fileName: r.file_name,
-          score: 0.1,
+          similarity: 0.5, // Default similarity for fallback sources
           tags: r.tags || [],
         })),
       };
@@ -281,7 +281,7 @@ serve(async (req) => {
             await supabase.from('knowledge_usage').insert({
               file_id: source.id,
               user_query: latestUserMessage.substring(0, 500),
-              similarity: source.score / 10, // Normalize score
+              similarity: source.similarity,
             });
           } catch (e) {
             console.error('Error logging knowledge usage:', e);
