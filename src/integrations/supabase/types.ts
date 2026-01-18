@@ -115,8 +115,53 @@ export type Database = {
           },
         ]
       }
+      knowledge_categories: {
+        Row: {
+          color: string | null
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          sort_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          sort_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       knowledge_files: {
         Row: {
+          category_id: string | null
           content_text: string | null
           created_at: string
           embedding: string | null
@@ -132,6 +177,7 @@ export type Database = {
           uploaded_by: string | null
         }
         Insert: {
+          category_id?: string | null
           content_text?: string | null
           created_at?: string
           embedding?: string | null
@@ -147,6 +193,7 @@ export type Database = {
           uploaded_by?: string | null
         }
         Update: {
+          category_id?: string | null
           content_text?: string | null
           created_at?: string
           embedding?: string | null
@@ -161,7 +208,15 @@ export type Database = {
           updated_at?: string
           uploaded_by?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "knowledge_files_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "knowledge_categories"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       messages: {
         Row: {
