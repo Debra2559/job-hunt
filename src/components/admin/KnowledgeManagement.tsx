@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square, Search } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square, Search, FolderInput } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -32,6 +32,14 @@ import {
 } from '@/components/ui/popover';
 import { FilePreviewDialog } from './FilePreviewDialog';
 import { KnowledgeSearch } from './KnowledgeSearch';
+import { CategoryManagement, KnowledgeCategory } from './CategoryManagement';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface KnowledgeFile {
   id: string;
@@ -44,6 +52,7 @@ interface KnowledgeFile {
   content_text?: string | null;
   tags?: string[] | null;
   embedding?: string | null;
+  category_id?: string | null;
 }
 
 const ALLOWED_TYPES = [
@@ -88,12 +97,19 @@ export const KnowledgeManagement = () => {
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categories, setCategories] = useState<KnowledgeCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  // Filter files based on search query
+  // Filter files based on search query and category
   const filteredFiles = files.filter(file => {
+    // Category filter
+    if (selectedCategory === 'uncategorized' && file.category_id) return false;
+    if (selectedCategory && selectedCategory !== 'uncategorized' && file.category_id !== selectedCategory) return false;
+    
+    // Search filter
     if (!searchQuery.trim()) return true;
     const query = searchQuery.toLowerCase();
     const matchesName = file.file_name.toLowerCase().includes(query);
@@ -101,6 +117,28 @@ export const KnowledgeManagement = () => {
     const matchesTags = file.tags?.some(tag => tag.toLowerCase().includes(query));
     return matchesName || matchesContent || matchesTags;
   });
+
+  // Calculate file counts per category
+  const fileCounts: Record<string, number> = {
+    uncategorized: files.filter(f => !f.category_id).length,
+  };
+  categories.forEach(cat => {
+    fileCounts[cat.id] = files.filter(f => f.category_id === cat.id).length;
+  });
+
+  const fetchCategories = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('knowledge_categories')
+        .select('*')
+        .order('sort_order', { ascending: true });
+      
+      if (error) throw error;
+      setCategories(data || []);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
 
   // Selection handlers
   const toggleFileSelection = (fileId: string) => {
@@ -202,6 +240,7 @@ export const KnowledgeManagement = () => {
 
   useEffect(() => {
     fetchFiles();
+    fetchCategories();
   }, [filterTag]);
 
   const formatFileSize = (bytes: number) => {
@@ -522,6 +561,73 @@ export const KnowledgeManagement = () => {
     }
   };
 
+  const handleChangeCategory = async (fileId: string, categoryId: string | null) => {
+    try {
+      const { error } = await supabase
+        .from('knowledge_files')
+        .update({ category_id: categoryId })
+        .eq('id', fileId);
+
+      if (error) throw error;
+      
+      toast({ title: '分类已更新' });
+      fetchFiles();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: '更新分类失败',
+        description: error.message,
+      });
+    }
+  };
+
+  const handleBatchChangeCategory = async (categoryId: string | null) => {
+    if (selectedFiles.size === 0) return;
+    
+    try {
+      const { error } = await supabase
+        .from('knowledge_files')
+        .update({ category_id: categoryId })
+        .in('id', Array.from(selectedFiles));
+
+      if (error) throw error;
+      
+      toast({ title: `已将 ${selectedFiles.size} 个文件移动到分类` });
+      setSelectedFiles(new Set());
+      fetchFiles();
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: '批量更新失败',
+        description: error.message,
+      });
+    }
+  };
+
+  const getCategoryName = (categoryId: string | null) => {
+    if (!categoryId) return '未分类';
+    const category = categories.find(c => c.id === categoryId);
+    return category?.name || '未分类';
+  };
+
+  const getCategoryColor = (categoryId: string | null) => {
+    if (!categoryId) return 'bg-gray-400';
+    const category = categories.find(c => c.id === categoryId);
+    const colorMap: Record<string, string> = {
+      gray: 'bg-gray-500',
+      blue: 'bg-blue-500',
+      green: 'bg-green-500',
+      purple: 'bg-purple-500',
+      orange: 'bg-orange-500',
+      pink: 'bg-pink-500',
+      cyan: 'bg-cyan-500',
+      red: 'bg-red-500',
+      yellow: 'bg-yellow-500',
+    };
+    return category ? (colorMap[category.color] || 'bg-gray-500') : 'bg-gray-400';
+  };
+  };
+
   // Count files without embeddings
   const filesWithoutEmbedding = files.filter(f => f.status === 'ready' && f.content_text && !f.embedding);
   const filesWithEmbedding = files.filter(f => f.embedding);
@@ -671,6 +777,20 @@ export const KnowledgeManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
+          <div className="flex gap-6">
+            {/* Category Sidebar */}
+            <div className="w-56 flex-shrink-0 border-r pr-4">
+              <CategoryManagement
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+                onCategoriesChange={fetchCategories}
+                fileCounts={fileCounts}
+              />
+            </div>
+            
+            {/* Main Content */}
+            <div className="flex-1 min-w-0">
           {/* Drag and Drop Zone */}
           <div
             ref={dropZoneRef}
@@ -801,6 +921,24 @@ export const KnowledgeManagement = () => {
                   已选择 {selectedFiles.size} 个文件
                 </span>
                 <div className="flex items-center gap-2">
+                  {/* Batch Move to Category */}
+                  <Select onValueChange={(value) => handleBatchChangeCategory(value === 'none' ? null : value)}>
+                    <SelectTrigger className="w-[140px] h-8">
+                      <FolderInput className="w-4 h-4 mr-2" />
+                      <SelectValue placeholder="移动到分类" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="none">未分类</SelectItem>
+                      {categories.map(cat => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          <div className="flex items-center gap-2">
+                            <div className={`w-2 h-2 rounded-full ${getCategoryColor(cat.id)}`} />
+                            {cat.name}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <Button
                     variant="outline"
                     size="sm"
@@ -864,6 +1002,7 @@ export const KnowledgeManagement = () => {
                     </Button>
                   </TableHead>
                   <TableHead>文件名</TableHead>
+                  <TableHead>分类</TableHead>
                   <TableHead>标签</TableHead>
                   <TableHead>大小</TableHead>
                   <TableHead>状态</TableHead>
@@ -905,6 +1044,35 @@ export const KnowledgeManagement = () => {
                           {file.file_name}
                         </span>
                       </div>
+                    </TableCell>
+                    <TableCell>
+                      <Select 
+                        value={file.category_id || 'none'} 
+                        onValueChange={(value) => handleChangeCategory(file.id, value === 'none' ? null : value)}
+                      >
+                        <SelectTrigger className="h-7 w-[100px] text-xs">
+                          <div className="flex items-center gap-1.5">
+                            <div className={`w-2 h-2 rounded-full ${getCategoryColor(file.category_id)}`} />
+                            <span className="truncate">{getCategoryName(file.category_id)}</span>
+                          </div>
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 rounded-full bg-gray-400" />
+                              未分类
+                            </div>
+                          </SelectItem>
+                          {categories.map(cat => (
+                            <SelectItem key={cat.id} value={cat.id}>
+                              <div className="flex items-center gap-2">
+                                <div className={`w-2 h-2 rounded-full ${getCategoryColor(cat.id)}`} />
+                                {cat.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </TableCell>
                     <TableCell>
                       <TagEditor 
@@ -1004,6 +1172,8 @@ export const KnowledgeManagement = () => {
             </Table>
             </>
           )}
+            </div>
+          </div>
         </CardContent>
       </Card>
 
