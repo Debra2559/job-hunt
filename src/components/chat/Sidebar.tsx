@@ -1,10 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings } from 'lucide-react';
+import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+
+interface ConversationGroup {
+  label: string;
+  conversations: Conversation[];
+}
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -44,6 +50,57 @@ export function Sidebar({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    today: true,
+    yesterday: true,
+    week: true,
+    older: true,
+  });
+
+  // Group conversations by time
+  const groupedConversations = useMemo((): ConversationGroup[] => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    const groups: Record<string, Conversation[]> = {
+      today: [],
+      yesterday: [],
+      week: [],
+      older: [],
+    };
+
+    conversations.forEach((conv) => {
+      const convDate = new Date(conv.updatedAt);
+      if (convDate >= today) {
+        groups.today.push(conv);
+      } else if (convDate >= yesterday) {
+        groups.yesterday.push(conv);
+      } else if (convDate >= weekAgo) {
+        groups.week.push(conv);
+      } else {
+        groups.older.push(conv);
+      }
+    });
+
+    const result: ConversationGroup[] = [];
+    if (groups.today.length > 0) result.push({ label: '今天', conversations: groups.today });
+    if (groups.yesterday.length > 0) result.push({ label: '昨天', conversations: groups.yesterday });
+    if (groups.week.length > 0) result.push({ label: '过去7天', conversations: groups.week });
+    if (groups.older.length > 0) result.push({ label: '更早', conversations: groups.older });
+
+    return result;
+  }, [conversations]);
+
+  const toggleGroup = (groupKey: string) => {
+    setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  };
+
+  const getGroupKey = (label: string): string => {
+    const map: Record<string, string> = { '今天': 'today', '昨天': 'yesterday', '过去7天': 'week', '更早': 'older' };
+    return map[label] || label;
+  };
 
   useEffect(() => {
     if (editingId && inputRef.current) {
@@ -118,95 +175,119 @@ export function Sidebar({
 
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto px-4">
-        <div className="text-xs text-muted-foreground uppercase tracking-wider mb-2 px-1">
-          聊天记录
-        </div>
-        <div className="space-y-1">
-          {/* Temporary new conversation placeholder */}
-          {isNewConversation && (
-            <div
-              className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in"
-            >
-              <MessageSquare className="w-4 h-4 flex-shrink-0" />
-              <span className="truncate text-muted-foreground italic">新对话</span>
-            </div>
-          )}
-          {conversations.map((conv) => (
-            <div
-              key={conv.id}
-              className="relative group"
-              onMouseEnter={() => setHoveredId(conv.id)}
-              onMouseLeave={() => setHoveredId(null)}
-            >
-              {editingId === conv.id ? (
-                <div className="flex items-center gap-1 px-2 py-1.5">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={editTitle}
-                    onChange={(e) => setEditTitle(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    onBlur={handleConfirmEdit}
-                    className="flex-1 px-2 py-1.5 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+        {/* Temporary new conversation placeholder */}
+        {isNewConversation && (
+          <div
+            className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in mb-2"
+          >
+            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate text-muted-foreground italic">新对话</span>
+          </div>
+        )}
+        
+        {/* Grouped conversations */}
+        <div className="space-y-3">
+          {groupedConversations.map((group) => {
+            const groupKey = getGroupKey(group.label);
+            const isExpanded = expandedGroups[groupKey];
+            
+            return (
+              <Collapsible
+                key={groupKey}
+                open={isExpanded}
+                onOpenChange={() => toggleGroup(groupKey)}
+              >
+                <CollapsibleTrigger className="flex items-center gap-2 w-full px-1 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                  <ChevronDown 
+                    className={cn(
+                      "w-3.5 h-3.5 transition-transform duration-200",
+                      !isExpanded && "-rotate-90"
+                    )} 
                   />
-                  <button
-                    onClick={handleConfirmEdit}
-                    className="p-1.5 rounded-lg text-primary hover:bg-primary/10"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                  </button>
-                  <button
-                    onClick={handleCancelEdit}
-                    className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={() => onSelectConversation(conv.id)}
-                    className={cn(
-                      "w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-16",
-                      activeConversationId === conv.id
-                        ? "bg-primary/10 text-primary font-medium"
-                        : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
-                    )}
-                  >
-                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                    <span className="truncate">{conv.title}</span>
-                  </button>
-                  
-                  {/* Action buttons */}
-                  <div
-                    className={cn(
-                      "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-all duration-200",
-                      hoveredId === conv.id ? "opacity-100" : "opacity-0"
-                    )}
-                  >
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleStartEdit(conv);
-                      }}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  <span className="font-medium">{group.label}</span>
+                  <span className="text-muted-foreground/60">({group.conversations.length})</span>
+                </CollapsibleTrigger>
+                <CollapsibleContent className="space-y-1 mt-1">
+                  {group.conversations.map((conv) => (
+                    <div
+                      key={conv.id}
+                      className="relative group"
+                      onMouseEnter={() => setHoveredId(conv.id)}
+                      onMouseLeave={() => setHoveredId(null)}
                     >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDeleteConversation(conv.id);
-                      }}
-                      className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          ))}
+                      {editingId === conv.id ? (
+                        <div className="flex items-center gap-1 px-2 py-1.5">
+                          <input
+                            ref={inputRef}
+                            type="text"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            onKeyDown={handleKeyDown}
+                            onBlur={handleConfirmEdit}
+                            className="flex-1 px-2 py-1.5 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+                          />
+                          <button
+                            onClick={handleConfirmEdit}
+                            className="p-1.5 rounded-lg text-primary hover:bg-primary/10"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <button
+                            onClick={() => onSelectConversation(conv.id)}
+                            className={cn(
+                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-16",
+                              activeConversationId === conv.id
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+                            )}
+                          >
+                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{conv.title}</span>
+                          </button>
+                          
+                          {/* Action buttons */}
+                          <div
+                            className={cn(
+                              "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-all duration-200",
+                              hoveredId === conv.id ? "opacity-100" : "opacity-0"
+                            )}
+                          >
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStartEdit(conv);
+                              }}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                onDeleteConversation(conv.id);
+                              }}
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  ))}
+                </CollapsibleContent>
+              </Collapsible>
+            );
+          })}
         </div>
       </div>
 
