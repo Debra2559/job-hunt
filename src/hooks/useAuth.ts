@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -7,38 +7,36 @@ export function useAuth() {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const didInitRef = useRef(false);
+
   useEffect(() => {
+    let mounted = true;
+
     // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      // Avoid early redirects/flicker: only mark loading false after initial getSession resolves
+      if (didInitRef.current) {
         setLoading(false);
       }
-    );
+    });
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      // Check if this is a session-only login (should not persist)
-      const isSessionOnly = sessionStorage.getItem('sessionOnly') === 'true';
-      const rememberMe = localStorage.getItem('rememberMe') === 'true';
-      
-      // If session-only was set and we're in a new browser session, sign out
-      if (session && !rememberMe && !isSessionOnly) {
-        // New browser session without remember me - check if we should auto-logout
-        const lastActivity = localStorage.getItem('lastActivity');
-        if (!lastActivity) {
-          // This is a fresh browser session without remember me preference
-          // Keep the session for now, user explicitly chose to not remember
-        }
-      }
-      
+      if (!mounted) return;
+      didInitRef.current = true;
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, displayName?: string) => {
