@@ -4,9 +4,13 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { GraduationCap, Mail, Lock, User } from 'lucide-react';
+import { GraduationCap, Mail, Lock, User, Building, Calendar, IdCard, ArrowLeft, ArrowRight } from 'lucide-react';
 import { z } from 'zod';
+import { supabase } from '@/integrations/supabase/client';
+import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
+import { colleges, grades } from '@/data/campusData';
 
 const emailSchema = z.string().email('请输入有效的邮箱地址');
 const passwordSchema = z.string().min(6, '密码至少需要6个字符');
@@ -35,22 +39,43 @@ const GoogleIcon = () => (
 
 export default function Auth() {
   const [isLogin, setIsLogin] = useState(true);
+  const [step, setStep] = useState<'account' | 'profile'>('account');
+  
+  // Account fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  // Profile fields
   const [displayName, setDisplayName] = useState('');
+  const [studentId, setStudentId] = useState('');
+  const [college, setCollege] = useState('');
+  const [grade, setGrade] = useState('');
+  
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
+  // Redirect if already logged in and verified
   useEffect(() => {
-    if (user) {
-      navigate('/', { replace: true });
-    }
+    const checkUserStatus = async () => {
+      if (user) {
+        // Check if user has verified profile
+        const { data } = await supabase
+          .from('profiles')
+          .select('is_verified')
+          .eq('user_id', user.id)
+          .maybeSingle();
+        
+        if (data?.is_verified) {
+          navigate('/', { replace: true });
+        }
+      }
+    };
+    checkUserStatus();
   }, [user, navigate]);
 
-  const validateInputs = () => {
+  const validateAccountInputs = () => {
     const emailResult = emailSchema.safeParse(email);
     if (!emailResult.success) {
       toast.error(emailResult.error.errors[0].message);
@@ -66,39 +91,113 @@ export default function Auth() {
     return true;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const validateProfileInputs = () => {
+    if (!studentId.trim() || !displayName.trim() || !college || !grade) {
+      toast.error('请填写完整信息');
+      return false;
+    }
+
+    if (!/^\d{8,12}$/.test(studentId.trim())) {
+      toast.error('学号格式不正确，请输入8-12位数字');
+      return false;
+    }
+
+    if (displayName.trim().length < 2 || displayName.trim().length > 20) {
+      toast.error('姓名长度应在2-20个字符之间');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateInputs()) return;
+    if (!validateAccountInputs()) return;
 
     setLoading(true);
 
     try {
-      if (isLogin) {
-        const { error } = await signIn(email, password);
-        if (error) {
-          if (error.message.includes('Invalid login credentials')) {
-            toast.error('邮箱或密码错误');
-          } else {
-            toast.error(error.message);
-          }
+      const { error } = await signIn(email, password);
+      if (error) {
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error('邮箱或密码错误');
         } else {
-          toast.success('登录成功！');
-          navigate('/', { replace: true });
+          toast.error(error.message);
         }
       } else {
-        const { error } = await signUp(email, password, displayName);
-        if (error) {
-          if (error.message.includes('already registered')) {
-            toast.error('该邮箱已被注册');
-          } else {
-            toast.error(error.message);
-          }
-        } else {
-          toast.success('注册成功！请登录');
-          setIsLogin(true);
-        }
+        toast.success('登录成功！');
+        navigate('/', { replace: true });
       }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleNextStep = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateAccountInputs()) return;
+    
+    setStep('profile');
+  };
+
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateProfileInputs()) return;
+
+    setLoading(true);
+
+    try {
+      // Sign up the user
+      const { error: signUpError, data } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+          data: {
+            display_name: displayName.trim(),
+          }
+        }
+      });
+
+      if (signUpError) {
+        if (signUpError.message.includes('already registered')) {
+          toast.error('该邮箱已被注册');
+        } else {
+          toast.error(signUpError.message);
+        }
+        return;
+      }
+
+      // If sign up successful, create the verified profile
+      if (data.user) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .upsert({
+            user_id: data.user.id,
+            student_id: studentId.trim(),
+            display_name: displayName.trim(),
+            college,
+            grade,
+            is_verified: true,
+          }, {
+            onConflict: 'user_id',
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          toast.error('创建用户资料失败');
+          return;
+        }
+
+        toast.success('注册成功！');
+        navigate('/', { replace: true });
+      }
+    } catch (error: any) {
+      console.error('Registration error:', error);
+      toast.error('注册失败，请重试');
     } finally {
       setLoading(false);
     }
@@ -116,122 +215,292 @@ export default function Auth() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 mb-4">
-            <GraduationCap className="w-8 h-8 text-primary" />
-          </div>
-          <h1 className="text-2xl font-bold text-foreground mb-2">校园AI辅导员</h1>
-          <p className="text-muted-foreground">
-            {isLogin ? '登录以同步你的对话记录' : '注册账号开始使用'}
-          </p>
-        </div>
-
-        {/* Form Card */}
-        <div className="bg-card rounded-2xl shadow-lg border border-border p-6">
-          {/* Google Sign In Button */}
-          <Button
-            type="button"
-            variant="outline"
-            className="w-full mb-4 h-11"
-            onClick={handleGoogleSignIn}
-            disabled={googleLoading}
-          >
-            <GoogleIcon />
-            <span className="ml-2">
-              {googleLoading ? '正在跳转...' : '使用 Google 账号登录'}
-            </span>
-          </Button>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border" />
+  // Login form
+  if (isLogin) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
+        <div className="w-full max-w-md">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-primary/20 mx-auto mb-4">
+              <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">或使用邮箱</span>
-            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">皇家种地大学</h1>
+            <p className="text-muted-foreground">登录以同步你的对话记录</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {!isLogin && (
+          {/* Form Card */}
+          <div className="bg-card rounded-2xl shadow-lg border border-border p-6">
+            {/* Google Sign In Button */}
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full mb-4 h-11"
+              onClick={handleGoogleSignIn}
+              disabled={googleLoading}
+            >
+              <GoogleIcon />
+              <span className="ml-2">
+                {googleLoading ? '正在跳转...' : '使用 Google 账号登录'}
+              </span>
+            </Button>
+
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-border" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-card px-2 text-muted-foreground">或使用邮箱</span>
+              </div>
+            </div>
+
+            <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="displayName" className="text-sm font-medium">
-                  昵称
+                <Label htmlFor="email" className="text-sm font-medium">
+                  邮箱
                 </Label>
                 <div className="relative">
-                  <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
-                    id="displayName"
-                    type="text"
-                    placeholder="你的昵称"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value)}
+                    id="email"
+                    type="email"
+                    placeholder="your@email.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
+                    required
                   />
                 </div>
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm font-medium">
-                邮箱
-              </Label>
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium">
+                  密码
+                </Label>
+                <div className="relative">
+                  <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="至少6个字符"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="pl-10"
+                    required
+                  />
+                </div>
+              </div>
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? '登录中...' : '登录'}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsLogin(false);
+                  setStep('account');
+                }}
+                className="text-sm text-primary hover:underline"
+              >
+                没有账号？点击注册
+              </button>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-xs text-muted-foreground mt-6">
+            登录即表示同意我们的服务条款和隐私政策
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Registration flow
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-card rounded-3xl shadow-lg border border-border/60 p-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-primary/20 mx-auto mb-4">
+              <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
+            </div>
+            <h1 className="text-2xl font-bold text-foreground mb-2">皇家种地大学</h1>
+            <p className="text-muted-foreground">
+              {step === 'account' ? '创建账号' : '完善学生信息'}
+            </p>
+            
+            {/* Step indicator */}
+            <div className="flex justify-center gap-2 mt-4">
+              <div className={`w-2 h-2 rounded-full transition-colors ${step === 'account' ? 'bg-primary' : 'bg-muted'}`} />
+              <div className={`w-2 h-2 rounded-full transition-colors ${step === 'profile' ? 'bg-primary' : 'bg-muted'}`} />
+            </div>
+          </div>
+
+          {step === 'account' ? (
+            <form onSubmit={handleNextStep} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="reg-email" className="flex items-center gap-2 text-sm font-medium">
+                  <Mail className="w-4 h-4 text-muted-foreground" />
+                  邮箱
+                </Label>
                 <Input
-                  id="email"
+                  id="reg-email"
                   type="email"
                   placeholder="your@email.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10"
+                  className="h-12 rounded-xl"
                   required
                 />
               </div>
-            </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm font-medium">
-                密码
-              </Label>
-              <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <div className="space-y-2">
+                <Label htmlFor="reg-password" className="flex items-center gap-2 text-sm font-medium">
+                  <Lock className="w-4 h-4 text-muted-foreground" />
+                  密码
+                </Label>
                 <Input
-                  id="password"
+                  id="reg-password"
                   type="password"
                   placeholder="至少6个字符"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10"
+                  className="h-12 rounded-xl"
                   required
                 />
               </div>
-            </div>
 
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? '处理中...' : isLogin ? '登录' : '注册'}
-            </Button>
-          </form>
+              <Button
+                type="submit"
+                className="w-full h-12 rounded-xl"
+              >
+                下一步
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
 
-          <div className="mt-6 text-center">
-            <button
-              type="button"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-primary hover:underline"
-            >
-              {isLogin ? '没有账号？点击注册' : '已有账号？点击登录'}
-            </button>
-          </div>
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsLogin(true)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  已有账号？点击登录
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleRegister} className="space-y-5">
+              <div className="space-y-2">
+                <Label htmlFor="studentId" className="flex items-center gap-2 text-sm font-medium">
+                  <IdCard className="w-4 h-4 text-muted-foreground" />
+                  学号
+                </Label>
+                <Input
+                  id="studentId"
+                  type="text"
+                  placeholder="请输入8-12位学号"
+                  value={studentId}
+                  onChange={(e) => setStudentId(e.target.value)}
+                  className="h-12 rounded-xl"
+                  maxLength={12}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="displayName" className="flex items-center gap-2 text-sm font-medium">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  姓名
+                </Label>
+                <Input
+                  id="displayName"
+                  type="text"
+                  placeholder="请输入真实姓名"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  className="h-12 rounded-xl"
+                  maxLength={20}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="college" className="flex items-center gap-2 text-sm font-medium">
+                  <Building className="w-4 h-4 text-muted-foreground" />
+                  学院
+                </Label>
+                <Select value={college} onValueChange={setCollege}>
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="请选择所在学院" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover">
+                    {colleges.map((c) => (
+                      <SelectItem key={c} value={c}>
+                        {c}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="grade" className="flex items-center gap-2 text-sm font-medium">
+                  <Calendar className="w-4 h-4 text-muted-foreground" />
+                  现年级
+                </Label>
+                <Select value={grade} onValueChange={setGrade}>
+                  <SelectTrigger className="h-12 rounded-xl">
+                    <SelectValue placeholder="请选择当前年级" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover">
+                    {grades.map((g) => (
+                      <SelectItem key={g} value={g}>
+                        {g}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex-1 h-12 rounded-xl"
+                  onClick={() => setStep('account')}
+                >
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  上一步
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 h-12 rounded-xl gradient-primary text-white font-semibold shadow-glow hover:opacity-90 transition-all"
+                >
+                  {loading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      注册中...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <GraduationCap className="w-5 h-5" />
+                      完成注册
+                    </div>
+                  )}
+                </Button>
+              </div>
+            </form>
+          )}
+
+          <p className="text-xs text-muted-foreground text-center mt-6">
+            注册即表示同意我们的服务条款和隐私政策
+          </p>
         </div>
-
-        {/* Footer */}
-        <p className="text-center text-xs text-muted-foreground mt-6">
-          登录即表示同意我们的服务条款和隐私政策
-        </p>
       </div>
     </div>
   );
