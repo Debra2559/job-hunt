@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -42,6 +42,7 @@ interface KnowledgeFile {
   status: string;
   content_text?: string | null;
   tags?: string[] | null;
+  embedding?: string | null;
 }
 
 const ALLOWED_TYPES = [
@@ -73,6 +74,8 @@ export const KnowledgeManagement = () => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [filterTag, setFilterTag] = useState<string | null>(null);
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [batchProcessing, setBatchProcessing] = useState(false);
+  const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
@@ -324,6 +327,63 @@ export const KnowledgeManagement = () => {
     }
   };
 
+  // Count files without embeddings
+  const filesWithoutEmbedding = files.filter(f => f.status === 'ready' && f.content_text && !f.embedding);
+  const filesWithEmbedding = files.filter(f => f.embedding);
+
+  // Batch generate embeddings for all files
+  const handleBatchGenerateEmbeddings = async () => {
+    const filesToProcess = filesWithoutEmbedding;
+    
+    if (filesToProcess.length === 0) {
+      toast({
+        title: '无需处理',
+        description: '所有文件都已生成向量嵌入',
+      });
+      return;
+    }
+
+    setBatchProcessing(true);
+    setBatchProgress({ current: 0, total: filesToProcess.length });
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < filesToProcess.length; i++) {
+      const file = filesToProcess[i];
+      setBatchProgress({ current: i + 1, total: filesToProcess.length });
+
+      try {
+        const { error } = await supabase.functions.invoke('parse-document', {
+          body: { fileId: file.id, regenerateEmbedding: true },
+        });
+
+        if (error) {
+          console.error(`Error generating embedding for ${file.file_name}:`, error);
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      } catch (error) {
+        console.error(`Error processing ${file.file_name}:`, error);
+        errorCount++;
+      }
+
+      // Small delay to avoid overwhelming the server
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
+    setBatchProcessing(false);
+    setBatchProgress({ current: 0, total: 0 });
+
+    toast({
+      title: '批量处理完成',
+      description: `成功: ${successCount} 个文件，失败: ${errorCount} 个文件`,
+    });
+
+    fetchFiles();
+  };
+
   return (
     <div className="space-y-6">
       <Card>
@@ -396,13 +456,51 @@ export const KnowledgeManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="mb-4 p-4 bg-muted/50 rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              支持的文件格式：PDF、Word文档(.docx)、PPT(.pptx)、Excel(.xlsx)、Markdown(.md)、文本文件(.txt)
-            </p>
-            <p className="text-sm text-muted-foreground mt-1">
-              推荐标签：政策法规、学业指导、心理健康、就业指导、校园生活、行政服务
-            </p>
+          <div className="mb-4 p-4 bg-muted/50 rounded-lg space-y-3">
+            <div>
+              <p className="text-sm text-muted-foreground">
+                支持的文件格式：PDF、Word文档(.docx)、PPT(.pptx)、Excel(.xlsx)、Markdown(.md)、文本文件(.txt)
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                推荐标签：政策法规、学业指导、心理健康、就业指导、校园生活、行政服务
+              </p>
+            </div>
+            
+            {/* Embedding Status */}
+            <div className="flex items-center justify-between pt-2 border-t border-border/50">
+              <div className="flex items-center gap-4 text-sm">
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <span className="text-muted-foreground">已嵌入: {filesWithEmbedding.length}</span>
+                </span>
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-4 h-4 text-amber-500" />
+                  <span className="text-muted-foreground">待嵌入: {filesWithoutEmbedding.length}</span>
+                </span>
+              </div>
+              
+              {filesWithoutEmbedding.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleBatchGenerateEmbeddings}
+                  disabled={batchProcessing}
+                  className="gap-2"
+                >
+                  {batchProcessing ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      处理中 ({batchProgress.current}/{batchProgress.total})
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-4 h-4" />
+                      批量生成嵌入
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
           </div>
 
           {loading ? (
@@ -423,6 +521,7 @@ export const KnowledgeManagement = () => {
                   <TableHead>标签</TableHead>
                   <TableHead>大小</TableHead>
                   <TableHead>状态</TableHead>
+                  <TableHead>嵌入</TableHead>
                   <TableHead>上传时间</TableHead>
                   <TableHead className="text-right">操作</TableHead>
                 </TableRow>
@@ -447,6 +546,15 @@ export const KnowledgeManagement = () => {
                     </TableCell>
                     <TableCell>{formatFileSize(file.file_size)}</TableCell>
                     <TableCell>{getStatusBadge(file.status)}</TableCell>
+                    <TableCell>
+                      {file.embedding ? (
+                        <CheckCircle2 className="w-4 h-4 text-green-500" />
+                      ) : file.content_text ? (
+                        <span className="text-amber-500 text-xs">待生成</span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs">-</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {new Date(file.created_at).toLocaleString('zh-CN', {
                         month: 'short',
