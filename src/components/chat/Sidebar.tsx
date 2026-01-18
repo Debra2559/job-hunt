@@ -1,14 +1,19 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown } from 'lucide-react';
+import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Search, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ConversationTag } from '@/hooks/useConversationTags';
+import { TagManager } from './TagManager';
+import { ConversationTagSelector } from './ConversationTagSelector';
+import { Input } from '@/components/ui/input';
 
 interface ConversationGroup {
   label: string;
+  key: string;
   conversations: Conversation[];
 }
 
@@ -27,6 +32,14 @@ interface SidebarProps {
   onSignOut: () => void;
   isNewConversation?: boolean;
   isAdmin?: boolean;
+  // Tag props
+  tags?: ConversationTag[];
+  getConversationTags?: (conversationId: string) => ConversationTag[];
+  onCreateTag?: (name: string, color: string) => Promise<ConversationTag | null>;
+  onUpdateTag?: (tagId: string, updates: Partial<{ name: string; color: string }>) => Promise<boolean>;
+  onDeleteTag?: (tagId: string) => Promise<boolean>;
+  onAssignTag?: (conversationId: string, tagId: string) => Promise<boolean>;
+  onRemoveTag?: (conversationId: string, tagId: string) => Promise<boolean>;
 }
 
 export function Sidebar({
@@ -44,11 +57,20 @@ export function Sidebar({
   onSignOut,
   isNewConversation,
   isAdmin,
+  tags = [],
+  getConversationTags,
+  onCreateTag,
+  onUpdateTag,
+  onDeleteTag,
+  onAssignTag,
+  onRemoveTag,
 }: SidebarProps) {
   const navigate = useNavigate();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTagFilter, setSelectedTagFilter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     today: true,
@@ -56,6 +78,30 @@ export function Sidebar({
     week: true,
     older: true,
   });
+
+  // Filter conversations by search and tags
+  const filteredConversations = useMemo(() => {
+    let filtered = conversations;
+
+    // Search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter((conv) => 
+        conv.title.toLowerCase().includes(query) ||
+        conv.messages.some((m) => m.content.toLowerCase().includes(query))
+      );
+    }
+
+    // Tag filter
+    if (selectedTagFilter && getConversationTags) {
+      filtered = filtered.filter((conv) => {
+        const convTags = getConversationTags(conv.id);
+        return convTags.some((t) => t.id === selectedTagFilter);
+      });
+    }
+
+    return filtered;
+  }, [conversations, searchQuery, selectedTagFilter, getConversationTags]);
 
   // Group conversations by time
   const groupedConversations = useMemo((): ConversationGroup[] => {
@@ -71,7 +117,7 @@ export function Sidebar({
       older: [],
     };
 
-    conversations.forEach((conv) => {
+    filteredConversations.forEach((conv) => {
       const convDate = new Date(conv.updatedAt);
       if (convDate >= today) {
         groups.today.push(conv);
@@ -85,21 +131,16 @@ export function Sidebar({
     });
 
     const result: ConversationGroup[] = [];
-    if (groups.today.length > 0) result.push({ label: '今天', conversations: groups.today });
-    if (groups.yesterday.length > 0) result.push({ label: '昨天', conversations: groups.yesterday });
-    if (groups.week.length > 0) result.push({ label: '过去7天', conversations: groups.week });
-    if (groups.older.length > 0) result.push({ label: '更早', conversations: groups.older });
+    if (groups.today.length > 0) result.push({ label: '今天', key: 'today', conversations: groups.today });
+    if (groups.yesterday.length > 0) result.push({ label: '昨天', key: 'yesterday', conversations: groups.yesterday });
+    if (groups.week.length > 0) result.push({ label: '过去7天', key: 'week', conversations: groups.week });
+    if (groups.older.length > 0) result.push({ label: '更早', key: 'older', conversations: groups.older });
 
     return result;
-  }, [conversations]);
+  }, [filteredConversations]);
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
-  };
-
-  const getGroupKey = (label: string): string => {
-    const map: Record<string, string> = { '今天': 'today', '昨天': 'yesterday', '过去7天': 'week', '更早': 'older' };
-    return map[label] || label;
   };
 
   useEffect(() => {
@@ -158,6 +199,46 @@ export function Sidebar({
         </button>
       </div>
 
+      {/* Search */}
+      <div className="px-4 mb-3">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            placeholder="搜索对话..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9 h-9 bg-sidebar-accent/50 border-sidebar-border text-sm"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Tag Filter */}
+      {tags.length > 0 && (
+        <div className="px-4 mb-3 flex gap-1.5 flex-wrap">
+          {tags.map((tag) => (
+            <button
+              key={tag.id}
+              onClick={() => setSelectedTagFilter(selectedTagFilter === tag.id ? null : tag.id)}
+              className={cn(
+                "px-2 py-1 rounded-full text-xs transition-all",
+                selectedTagFilter === tag.id
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
+              )}
+            >
+              {tag.name}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Favorites */}
       <button
@@ -185,17 +266,23 @@ export function Sidebar({
           </div>
         )}
         
+        {/* No results */}
+        {filteredConversations.length === 0 && conversations.length > 0 && (
+          <div className="text-center py-8 text-sm text-muted-foreground">
+            未找到匹配的对话
+          </div>
+        )}
+        
         {/* Grouped conversations */}
         <div className="space-y-3">
           {groupedConversations.map((group) => {
-            const groupKey = getGroupKey(group.label);
-            const isExpanded = expandedGroups[groupKey];
+            const isExpanded = expandedGroups[group.key];
             
             return (
               <Collapsible
-                key={groupKey}
+                key={group.key}
                 open={isExpanded}
-                onOpenChange={() => toggleGroup(groupKey)}
+                onOpenChange={() => toggleGroup(group.key)}
               >
                 <CollapsibleTrigger className="flex items-center gap-2 w-full px-1 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                   <ChevronDown 
@@ -244,14 +331,36 @@ export function Sidebar({
                           <button
                             onClick={() => onSelectConversation(conv.id)}
                             className={cn(
-                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-16",
+                              "w-full px-3 py-2 rounded-xl flex flex-col gap-1 text-sm transition-all duration-200 text-left pr-20",
                               activeConversationId === conv.id
                                 ? "bg-primary/10 text-primary font-medium"
                                 : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
                             )}
                           >
-                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">{conv.title}</span>
+                            <div className="flex items-center gap-3">
+                              <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                              <span className="truncate">{conv.title}</span>
+                            </div>
+                            {/* Show assigned tags */}
+                            {getConversationTags && (() => {
+                              const convTags = getConversationTags(conv.id);
+                              if (convTags.length === 0) return null;
+                              return (
+                                <div className="flex gap-1 ml-7 flex-wrap">
+                                  {convTags.slice(0, 3).map((tag) => (
+                                    <span
+                                      key={tag.id}
+                                      className="px-1.5 py-0.5 rounded text-[10px] bg-muted/60 text-muted-foreground"
+                                    >
+                                      {tag.name}
+                                    </span>
+                                  ))}
+                                  {convTags.length > 3 && (
+                                    <span className="text-[10px] text-muted-foreground">+{convTags.length - 3}</span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </button>
                           
                           {/* Action buttons */}
@@ -261,6 +370,17 @@ export function Sidebar({
                               hoveredId === conv.id ? "opacity-100" : "opacity-0"
                             )}
                           >
+                            {/* Tag selector */}
+                            {onAssignTag && onRemoveTag && onCreateTag && getConversationTags && (
+                              <ConversationTagSelector
+                                conversationId={conv.id}
+                                allTags={tags}
+                                assignedTags={getConversationTags(conv.id)}
+                                onAssignTag={onAssignTag}
+                                onRemoveTag={onRemoveTag}
+                                onCreateTag={onCreateTag}
+                              />
+                            )}
                             <button
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -290,6 +410,18 @@ export function Sidebar({
           })}
         </div>
       </div>
+
+      {/* Tag Manager */}
+      {onCreateTag && onUpdateTag && onDeleteTag && (
+        <div className="px-4 mb-2">
+          <TagManager
+            tags={tags}
+            onCreateTag={onCreateTag}
+            onUpdateTag={onUpdateTag}
+            onDeleteTag={onDeleteTag}
+          />
+        </div>
+      )}
 
       {/* Admin Entry - Above User Profile */}
       {isAdmin && (

@@ -10,6 +10,7 @@ import { streamChat } from '@/lib/chatApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
+import { useConversationTags } from '@/hooks/useConversationTags';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -33,6 +34,15 @@ const Index = () => {
     deleteConversation,
     renameConversation,
   } = useConversations(user?.id);
+  const {
+    tags,
+    getConversationTags,
+    createTag,
+    updateTag,
+    deleteTag,
+    assignTag,
+    removeTagAssignment,
+  } = useConversationTags(user?.id);
   const { isAdmin, isSuperAdmin } = useUserRole(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -277,6 +287,13 @@ const Index = () => {
           onSignOut={handleSignOut}
           isNewConversation={activeConversationId === null && !showFavorites}
           isAdmin={isAdmin || isSuperAdmin}
+          tags={tags}
+          getConversationTags={getConversationTags}
+          onCreateTag={createTag}
+          onUpdateTag={updateTag}
+          onDeleteTag={deleteTag}
+          onAssignTag={assignTag}
+          onRemoveTag={removeTagAssignment}
         />
       </div>
 
