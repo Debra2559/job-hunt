@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
@@ -8,6 +8,7 @@ import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { Badge } from '@/components/ui/badge';
 
 interface ChatMessageProps {
   message: Message;
@@ -28,6 +29,8 @@ export function ChatMessage({ message, onToggleFavorite, userId }: ChatMessagePr
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showSources, setShowSources] = useState(false);
+  const hasSources = message.sources && message.sources.length > 0;
 
   // Don't render empty messages
   if (!message.content || message.content.trim() === '') {
@@ -97,6 +100,40 @@ export function ChatMessage({ message, onToggleFavorite, userId }: ChatMessagePr
             </div>
           )}
         </div>
+        
+        {/* Knowledge Sources for AI messages */}
+        {!isUser && hasSources && (
+          <div className="mt-2">
+            <button
+              onClick={() => setShowSources(!showSources)}
+              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>参考来源 ({message.sources!.length})</span>
+              {showSources ? (
+                <ChevronUp className="w-3.5 h-3.5" />
+              ) : (
+                <ChevronDown className="w-3.5 h-3.5" />
+              )}
+            </button>
+            
+            {showSources && (
+              <div className="mt-2 p-2.5 bg-muted/50 rounded-lg space-y-1.5">
+                {message.sources!.map((source, index) => (
+                  <div key={index} className="flex items-center justify-between gap-2 text-xs">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                      <span className="truncate font-medium">{source.fileName}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 flex-shrink-0">
+                      {(source.similarity * 100).toFixed(0)}%
+                    </Badge>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         
         {/* Actions and Timestamp for AI messages */}
         {!isUser && (

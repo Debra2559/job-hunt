@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
 import { StudentVerification } from '@/components/auth/StudentVerification';
-import { Message, Conversation } from '@/types/chat';
+import { Message, Conversation, KnowledgeSource } from '@/types/chat';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { streamChat } from '@/lib/chatApi';
@@ -43,6 +43,7 @@ const Index = () => {
   const [profileLoading, setProfileLoading] = useState(true);
   const assistantContentRef = useRef<string>("");
   const assistantMessageIdRef = useRef<string | null>(null);
+  const assistantSourcesRef = useRef<KnowledgeSource[]>([]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -120,6 +121,7 @@ const Index = () => {
       }
 
       assistantContentRef.current = "";
+      assistantSourcesRef.current = [];
 
       // Create placeholder for assistant message
       const tempAssistantId = `temp-ai-${Date.now()}`;
@@ -136,7 +138,11 @@ const Index = () => {
         messages: apiMessages,
         onDelta: (chunk) => {
           assistantContentRef.current += chunk;
-          updateLocalMessage(targetConvId!, tempAssistantId, assistantContentRef.current);
+          updateLocalMessage(targetConvId!, tempAssistantId, assistantContentRef.current, assistantSourcesRef.current);
+        },
+        onSources: (sources) => {
+          assistantSourcesRef.current = sources;
+          updateLocalMessage(targetConvId!, tempAssistantId, assistantContentRef.current, sources);
         },
         onDone: async () => {
           // Remove temp message first
@@ -144,7 +150,7 @@ const Index = () => {
           
           // Save the final assistant message to database
           if (assistantContentRef.current.trim()) {
-            await addMessage(targetConvId!, 'assistant', assistantContentRef.current);
+            await addMessage(targetConvId!, 'assistant', assistantContentRef.current, assistantSourcesRef.current);
           }
           setIsTyping(false);
           assistantMessageIdRef.current = null;
