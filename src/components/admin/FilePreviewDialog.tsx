@@ -8,7 +8,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Download, ExternalLink, FileText, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Download, ExternalLink, FileText, Loader2, FileCode, Eye } from 'lucide-react';
 
 interface FilePreviewDialogProps {
   open: boolean;
@@ -27,10 +28,19 @@ export const FilePreviewDialog = ({ open, onOpenChange, file }: FilePreviewDialo
   const [content, setContent] = useState<string | null>(null);
   const [downloadUrl, setDownloadUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'preview' | 'content'>('preview');
 
   useEffect(() => {
     if (open && file) {
       loadFileContent();
+      // Default to content tab if we have content_text but not a previewable format
+      const ext = file.file_name.split('.').pop()?.toLowerCase();
+      const isPreviewable = ['pdf', 'md', 'txt'].includes(ext || '');
+      if (!isPreviewable && file.content_text) {
+        setActiveTab('content');
+      } else {
+        setActiveTab('preview');
+      }
     } else {
       setContent(null);
       setDownloadUrl(null);
@@ -95,12 +105,20 @@ export const FilePreviewDialog = ({ open, onOpenChange, file }: FilePreviewDialo
     return '文档';
   };
 
+  const ext = file?.file_name.split('.').pop()?.toLowerCase();
   const isPdfFile = file?.file_type.includes('pdf');
-  const isTextFile = ['md', 'txt'].includes(file?.file_name.split('.').pop()?.toLowerCase() || '');
+  const isTextFile = ['md', 'txt'].includes(ext || '');
+  const isOfficeFile = ['docx', 'pptx', 'xlsx'].includes(ext || '');
+  const hasExtractedContent = !!file?.content_text;
+
+  // For Office files, use Microsoft Office Online Viewer
+  const getOfficeViewerUrl = (url: string) => {
+    return `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(url)}`;
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-5xl max-h-[85vh] flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 pr-8">
             <FileText className="w-5 h-5 text-primary" />
@@ -111,6 +129,22 @@ export const FilePreviewDialog = ({ open, onOpenChange, file }: FilePreviewDialo
           </DialogTitle>
         </DialogHeader>
 
+        {/* Tabs for preview and content */}
+        {hasExtractedContent && (
+          <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'preview' | 'content')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="preview" className="gap-2">
+                <Eye className="w-4 h-4" />
+                原始预览
+              </TabsTrigger>
+              <TabsTrigger value="content" className="gap-2">
+                <FileCode className="w-4 h-4" />
+                提取内容
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        )}
+
         <div className="flex-1 min-h-0 flex flex-col">
           {loading ? (
             <div className="flex-1 flex items-center justify-center py-12">
@@ -120,8 +154,13 @@ export const FilePreviewDialog = ({ open, onOpenChange, file }: FilePreviewDialo
             <div className="flex-1 flex items-center justify-center py-12">
               <p className="text-destructive">{error}</p>
             </div>
+          ) : activeTab === 'content' && hasExtractedContent ? (
+            // Show extracted content
+            <ScrollArea className="flex-1 max-h-[500px] rounded-lg border bg-muted/30">
+              <pre className="p-4 text-sm whitespace-pre-wrap font-mono leading-relaxed">{file?.content_text}</pre>
+            </ScrollArea>
           ) : isPdfFile && downloadUrl ? (
-            <div className="flex-1 min-h-[400px]">
+            <div className="flex-1 min-h-[500px]">
               <iframe
                 src={`${downloadUrl}#toolbar=0`}
                 className="w-full h-full rounded-lg border"
@@ -131,6 +170,25 @@ export const FilePreviewDialog = ({ open, onOpenChange, file }: FilePreviewDialo
           ) : isTextFile && content ? (
             <ScrollArea className="flex-1 max-h-[500px] rounded-lg border bg-muted/30">
               <pre className="p-4 text-sm whitespace-pre-wrap font-mono">{content}</pre>
+            </ScrollArea>
+          ) : isOfficeFile && downloadUrl ? (
+            <div className="flex-1 min-h-[500px] flex flex-col">
+              <div className="flex-1 rounded-lg border overflow-hidden">
+                <iframe
+                  src={getOfficeViewerUrl(downloadUrl)}
+                  className="w-full h-full"
+                  title={file?.file_name}
+                  frameBorder="0"
+                />
+              </div>
+              <p className="text-xs text-muted-foreground mt-2 text-center">
+                使用 Microsoft Office Online 预览 · 如无法显示请下载后查看
+              </p>
+            </div>
+          ) : hasExtractedContent ? (
+            // If we have extracted content but can't preview, show it
+            <ScrollArea className="flex-1 max-h-[500px] rounded-lg border bg-muted/30">
+              <pre className="p-4 text-sm whitespace-pre-wrap font-mono leading-relaxed">{file?.content_text}</pre>
             </ScrollArea>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center py-12 text-center">
