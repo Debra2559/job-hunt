@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square, Search, FolderInput } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square, Search, FolderInput, Tag } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -74,6 +74,79 @@ const TAG_COLORS: Record<string, string> = {
   '就业指导': 'bg-orange-500',
   '校园生活': 'bg-pink-500',
   '行政服务': 'bg-cyan-500',
+};
+
+// Tag Editor Component
+interface TagEditorProps {
+  fileId: string;
+  tags: string[];
+  onAddTag: (fileId: string, currentTags: string[], newTag: string) => void;
+  onRemoveTag: (fileId: string, currentTags: string[], tagToRemove: string) => void;
+  getTagColor: (tag: string) => string;
+}
+
+const TagEditor = ({ fileId, tags, onAddTag, onRemoveTag, getTagColor }: TagEditorProps) => {
+  const [newTag, setNewTag] = useState('');
+  const [isOpen, setIsOpen] = useState(false);
+
+  const suggestedTags = ['政策法规', '学业指导', '心理健康', '就业指导', '校园生活', '行政服务'];
+
+  return (
+    <div className="flex flex-wrap items-center gap-1">
+      {tags.map(tag => (
+        <Badge 
+          key={tag} 
+          variant="secondary" 
+          className={`${getTagColor(tag)} text-white text-xs flex items-center gap-1`}
+        >
+          {tag}
+          <X 
+            className="w-3 h-3 cursor-pointer hover:opacity-70" 
+            onClick={() => onRemoveTag(fileId, tags, tag)}
+          />
+        </Badge>
+      ))}
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
+        <PopoverTrigger asChild>
+          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
+            <Plus className="w-3 h-3" />
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-48 p-2" align="start">
+          <div className="space-y-2">
+            <Input
+              placeholder="输入标签..."
+              value={newTag}
+              onChange={(e) => setNewTag(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && newTag.trim()) {
+                  onAddTag(fileId, tags, newTag);
+                  setNewTag('');
+                  setIsOpen(false);
+                }
+              }}
+              className="h-8"
+            />
+            <div className="flex flex-wrap gap-1">
+              {suggestedTags.filter(t => !tags.includes(t)).slice(0, 4).map(tag => (
+                <Badge 
+                  key={tag}
+                  variant="outline"
+                  className="cursor-pointer hover:bg-muted text-xs"
+                  onClick={() => {
+                    onAddTag(fileId, tags, tag);
+                    setIsOpen(false);
+                  }}
+                >
+                  {tag}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </PopoverContent>
+      </Popover>
+    </div>
+  );
 };
 
 interface UploadProgress {
@@ -1185,79 +1258,6 @@ export const KnowledgeManagement = () => {
         onOpenChange={setPreviewOpen}
         file={previewFile}
       />
-    </div>
-  );
-};
-
-// Tag Editor Component
-interface TagEditorProps {
-  fileId: string;
-  tags: string[];
-  onAddTag: (fileId: string, currentTags: string[], newTag: string) => void;
-  onRemoveTag: (fileId: string, currentTags: string[], tagToRemove: string) => void;
-  getTagColor: (tag: string) => string;
-}
-
-const TagEditor = ({ fileId, tags, onAddTag, onRemoveTag, getTagColor }: TagEditorProps) => {
-  const [newTag, setNewTag] = useState('');
-  const [isOpen, setIsOpen] = useState(false);
-
-  const suggestedTags = ['政策法规', '学业指导', '心理健康', '就业指导', '校园生活', '行政服务'];
-
-  return (
-    <div className="flex flex-wrap items-center gap-1">
-      {tags.map(tag => (
-        <Badge 
-          key={tag} 
-          variant="secondary" 
-          className={`${getTagColor(tag)} text-white text-xs flex items-center gap-1`}
-        >
-          {tag}
-          <X 
-            className="w-3 h-3 cursor-pointer hover:opacity-70" 
-            onClick={() => onRemoveTag(fileId, tags, tag)}
-          />
-        </Badge>
-      ))}
-      <Popover open={isOpen} onOpenChange={setIsOpen}>
-        <PopoverTrigger asChild>
-          <Button variant="ghost" size="sm" className="h-6 w-6 p-0">
-            <Plus className="w-3 h-3" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-48 p-2" align="start">
-          <div className="space-y-2">
-            <Input
-              placeholder="输入标签..."
-              value={newTag}
-              onChange={(e) => setNewTag(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && newTag.trim()) {
-                  onAddTag(fileId, tags, newTag);
-                  setNewTag('');
-                  setIsOpen(false);
-                }
-              }}
-              className="h-8"
-            />
-            <div className="flex flex-wrap gap-1">
-              {suggestedTags.filter(t => !tags.includes(t)).slice(0, 4).map(tag => (
-                <Badge 
-                  key={tag}
-                  variant="outline"
-                  className="cursor-pointer hover:bg-muted text-xs"
-                  onClick={() => {
-                    onAddTag(fileId, tags, tag);
-                    setIsOpen(false);
-                  }}
-                >
-                  {tag}
-                </Badge>
-              ))}
-            </div>
-          </div>
-        </PopoverContent>
-      </Popover>
     </div>
   );
 };
