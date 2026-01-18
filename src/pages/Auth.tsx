@@ -54,7 +54,7 @@ export default function Auth() {
   
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [rememberMe, setRememberMe] = useState(true);
+  const [rememberMe, setRememberMe] = useState<boolean>(true);
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
 
