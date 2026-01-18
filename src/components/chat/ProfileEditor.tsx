@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { Camera, Loader2, User } from 'lucide-react';
+import { Camera, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -25,6 +26,14 @@ interface ProfileEditorProps {
   children: React.ReactNode;
 }
 
+type DuplicateAction = 'replace' | 'keep-both' | 'keep-original' | null;
+
+interface PendingUpload {
+  file: File;
+  fileName: string;
+  existingPath: string;
+}
+
 export function ProfileEditor({
   userId,
   displayName,
@@ -43,11 +52,48 @@ export function ProfileEditor({
     college: college || '',
     grade: grade || '',
   });
+  const [duplicateDialogOpen, setDuplicateDialogOpen] = useState(false);
+  const [pendingUpload, setPendingUpload] = useState<PendingUpload | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const checkDuplicateFile = async (fileName: string): Promise<string | null> => {
+    // Check if file exists in user's folder
+    const { data, error } = await supabase.storage
+      .from('avatars')
+      .list(userId, { search: fileName });
+
+    if (error) {
+      console.error('Error checking for duplicate:', error);
+      return null;
+    }
+
+    const existing = data?.find((f) => f.name === fileName);
+    return existing ? `${userId}/${fileName}` : null;
+  };
+
+  const uploadFile = async (file: File, filePath: string, upsert: boolean = false) => {
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, { upsert });
+
+    if (uploadError) throw uploadError;
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    // Add cache busting parameter
+    return `${publicUrl}?t=${Date.now()}`;
+  };
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Reset input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
 
     // Validate file type
     if (!file.type.startsWith('image/')) {
@@ -61,25 +107,27 @@ export function ProfileEditor({
       return;
     }
 
+    const fileExt = file.name.split('.').pop();
+    const baseFileName = file.name.replace(/\.[^/.]+$/, '');
+    const fileName = `${baseFileName}.${fileExt}`;
+
     setUploadingAvatar(true);
 
     try {
-      // Create unique file path
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${userId}/avatar-${Date.now()}.${fileExt}`;
+      // Check for duplicate
+      const existingPath = await checkDuplicateFile(fileName);
 
-      // Upload to Supabase Storage
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file, { upsert: true });
+      if (existingPath) {
+        // Show duplicate dialog
+        setPendingUpload({ file, fileName, existingPath });
+        setDuplicateDialogOpen(true);
+        setUploadingAvatar(false);
+        return;
+      }
 
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
+      // No duplicate, upload directly
+      const filePath = `${userId}/${fileName}`;
+      const publicUrl = await uploadFile(file, filePath);
       setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
       toast.success('头像上传成功');
     } catch (error) {
@@ -87,6 +135,47 @@ export function ProfileEditor({
       toast.error('头像上传失败');
     } finally {
       setUploadingAvatar(false);
+    }
+  };
+
+  const handleDuplicateAction = async (action: DuplicateAction) => {
+    if (!pendingUpload || !action) {
+      setDuplicateDialogOpen(false);
+      setPendingUpload(null);
+      return;
+    }
+
+    setDuplicateDialogOpen(false);
+    setUploadingAvatar(true);
+
+    try {
+      const { file, fileName } = pendingUpload;
+
+      if (action === 'keep-original') {
+        // User wants to keep original, do nothing
+        toast.info('已取消上传');
+      } else if (action === 'replace') {
+        // Replace existing file
+        const filePath = `${userId}/${fileName}`;
+        const publicUrl = await uploadFile(file, filePath, true);
+        setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
+        toast.success('头像已替换');
+      } else if (action === 'keep-both') {
+        // Keep both - add timestamp to new file name
+        const fileExt = fileName.split('.').pop();
+        const baseName = fileName.replace(/\.[^/.]+$/, '');
+        const newFileName = `${baseName}_${Date.now()}.${fileExt}`;
+        const filePath = `${userId}/${newFileName}`;
+        const publicUrl = await uploadFile(file, filePath);
+        setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
+        toast.success('头像上传成功（已重命名）');
+      }
+    } catch (error) {
+      console.error('Error handling duplicate:', error);
+      toast.error('操作失败');
+    } finally {
+      setUploadingAvatar(false);
+      setPendingUpload(null);
     }
   };
 
@@ -250,6 +339,32 @@ export function ProfileEditor({
           </Button>
         </div>
       </DialogContent>
+
+      {/* Duplicate File Dialog */}
+      <AlertDialog open={duplicateDialogOpen} onOpenChange={setDuplicateDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>文件已存在</AlertDialogTitle>
+            <AlertDialogDescription>
+              已存在同名文件 "{pendingUpload?.fileName}"，请选择处理方式：
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+            <AlertDialogCancel onClick={() => handleDuplicateAction('keep-original')}>
+              保留原文件
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => handleDuplicateAction('keep-both')}
+              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
+            >
+              全部保留
+            </AlertDialogAction>
+            <AlertDialogAction onClick={() => handleDuplicateAction('replace')}>
+              替换
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 }
