@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import { GraduationCap, Mail, Lock, User, Building, Calendar, IdCard, ArrowLeft, ArrowRight } from 'lucide-react';
 import { z } from 'zod';
@@ -53,6 +54,7 @@ export default function Auth() {
   
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const navigate = useNavigate();
 
@@ -118,7 +120,7 @@ export default function Auth() {
     setLoading(true);
 
     try {
-      const { error } = await signIn(email, password);
+      const { error } = await signIn(email, password, rememberMe);
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
           toast.error('邮箱或密码错误');
@@ -290,6 +292,20 @@ export default function Auth() {
                     required
                   />
                 </div>
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="rememberMe"
+                  checked={rememberMe}
+                  onCheckedChange={(checked) => setRememberMe(checked === true)}
+                />
+                <Label
+                  htmlFor="rememberMe"
+                  className="text-sm font-normal text-muted-foreground cursor-pointer"
+                >
+                  记住登录状态
+                </Label>
               </div>
 
               <Button type="submit" className="w-full" disabled={loading}>
