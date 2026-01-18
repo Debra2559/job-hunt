@@ -1,5 +1,42 @@
 import { Group, QuickTag, Conversation, AITool } from '@/types/chat';
 
+export const colleges = [
+  '计算机科学与技术学院',
+  '电子信息工程学院',
+  '机械工程学院',
+  '材料科学与工程学院',
+  '土木工程学院',
+  '建筑与城市规划学院',
+  '经济与管理学院',
+  '理学院',
+  '化学化工学院',
+  '生命科学学院',
+  '环境科学与工程学院',
+  '人文学院',
+  '外国语学院',
+  '艺术与设计学院',
+  '法学院',
+  '马克思主义学院',
+  '体育学院',
+  '医学院',
+  '药学院',
+  '国际教育学院',
+];
+
+export const grades = [
+  '大一',
+  '大二',
+  '大三',
+  '大四',
+  '研一',
+  '研二',
+  '研三',
+  '博一',
+  '博二',
+  '博三',
+  '博四',
+];
+
 export const groups: Group[] = [
   { id: 'academic', name: '学业相关', icon: 'GraduationCap' },
   { id: 'life', name: '生活服务', icon: 'Home' },

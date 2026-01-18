@@ -26,10 +26,18 @@ interface SidebarProps {
   onRenameConversation: (id: string, newTitle: string) => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
+  userId: string;
   userName?: string;
   userCollege?: string;
+  userGrade?: string;
   userAvatarUrl?: string;
   onSignOut: () => void;
+  onProfileUpdated: (profile: {
+    display_name: string | null;
+    avatar_url: string | null;
+    college: string | null;
+    grade: string | null;
+  }) => void;
   isNewConversation?: boolean;
   isAdmin?: boolean;
   // Tag props
@@ -52,10 +60,13 @@ export function Sidebar({
   onRenameConversation,
   showFavorites,
   onToggleFavorites,
+  userId,
   userName,
   userCollege,
+  userGrade,
   userAvatarUrl,
   onSignOut,
+  onProfileUpdated,
   isNewConversation,
   isAdmin,
   tags = [],
@@ -441,10 +452,13 @@ export function Sidebar({
 
       {/* User Profile at Bottom Left */}
       <UserProfile 
+        userId={userId}
         college={userCollege}
+        grade={userGrade}
         displayName={userName}
         avatarUrl={userAvatarUrl}
         onSignOut={onSignOut}
+        onProfileUpdated={onProfileUpdated}
       />
     </div>
   );
