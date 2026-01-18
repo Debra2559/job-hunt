@@ -51,12 +51,13 @@ export function ChatArea({
           </div>
         ) : (
           <div className="max-w-3xl mx-auto py-8 px-6 space-y-6">
-            {messages.map((message) => (
+            {messages.map((message, index) => (
               <ChatMessage
                 key={message.id}
                 message={message}
                 onToggleFavorite={onToggleFavorite}
                 userId={userId}
+                isStreaming={isTyping && index === messages.length - 1}
               />
             ))}
             <div ref={messagesEndRef} />
