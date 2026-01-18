@@ -28,6 +28,23 @@ function formatTime(date: Date | undefined): string {
   }
 }
 
+// Predefined feedback tags
+const POSITIVE_TAGS = [
+  { id: 'accurate', label: '回答准确' },
+  { id: 'clear', label: '解释清晰' },
+  { id: 'helpful', label: '很有帮助' },
+  { id: 'fast', label: '响应迅速' },
+  { id: 'professional', label: '专业可靠' },
+];
+
+const NEGATIVE_TAGS = [
+  { id: 'inaccurate', label: '回答不准确' },
+  { id: 'unclear', label: '解释不清' },
+  { id: 'irrelevant', label: '答非所问' },
+  { id: 'incomplete', label: '回答不完整' },
+  { id: 'slow', label: '响应太慢' },
+];
+
 export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = false }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
@@ -36,9 +53,9 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   const [showFeedbackInput, setShowFeedbackInput] = useState(false);
   const [feedbackContent, setFeedbackContent] = useState('');
   const [pendingFeedbackType, setPendingFeedbackType] = useState<'positive' | 'negative' | null>(null);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const hasSources = message.sources && message.sources.length > 0;
   const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
-
   // Don't render empty messages
   if (!message.content || message.content.trim() === '') {
     return null;
@@ -56,10 +73,19 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
 
     // Show input for both positive and negative feedback
     setPendingFeedbackType(type);
+    setSelectedTags([]);
     setShowFeedbackInput(true);
   };
 
-  const submitFeedback = async (type: 'positive' | 'negative', content: string) => {
+  const toggleTag = (tagId: string) => {
+    setSelectedTags(prev => 
+      prev.includes(tagId) 
+        ? prev.filter(t => t !== tagId)
+        : [...prev, tagId]
+    );
+  };
+
+  const submitFeedback = async (type: 'positive' | 'negative', content: string, tags: string[]) => {
     if (!userId || submitting) return;
 
     setSubmitting(true);
@@ -78,6 +104,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
           message_id: message.id,
           feedback_type: type,
           content: content || null,
+          tags: tags.length > 0 ? tags : null,
         })
         .select()
         .single();
@@ -118,6 +145,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
       setFeedbackType(type);
       setShowFeedbackInput(false);
       setFeedbackContent('');
+      setSelectedTags([]);
       setPendingFeedbackType(null);
       toast.success(type === 'positive' ? '感谢您的好评！' : '感谢您的反馈，我们会继续改进');
     } catch (error) {
@@ -130,13 +158,14 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
 
   const handleSubmitFeedback = () => {
     if (pendingFeedbackType) {
-      submitFeedback(pendingFeedbackType, feedbackContent);
+      submitFeedback(pendingFeedbackType, feedbackContent, selectedTags);
     }
   };
 
   const handleCancelFeedback = () => {
     setShowFeedbackInput(false);
     setFeedbackContent('');
+    setSelectedTags([]);
     setPendingFeedbackType(null);
   };
 
@@ -291,6 +320,28 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                 </>
               )}
             </div>
+            
+            {/* Tags selection */}
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {(pendingFeedbackType === 'positive' ? POSITIVE_TAGS : NEGATIVE_TAGS).map((tag) => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleTag(tag.id)}
+                  className={cn(
+                    "px-2 py-0.5 text-xs rounded-full border transition-all",
+                    selectedTags.includes(tag.id)
+                      ? pendingFeedbackType === 'positive'
+                        ? "bg-green-500 text-white border-green-500"
+                        : "bg-red-500 text-white border-red-500"
+                      : "bg-background hover:bg-muted border-border"
+                  )}
+                >
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+            
             <div className="flex items-start gap-2">
               <Textarea
                 value={feedbackContent}
@@ -300,7 +351,6 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   : "请告诉我们哪里需要改进..."
                 }
                 className="min-h-[60px] text-sm resize-none"
-                autoFocus
               />
             </div>
             <div className="flex justify-end gap-2 mt-2">
@@ -316,7 +366,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
               <Button
                 size="sm"
                 onClick={handleSubmitFeedback}
-                disabled={submitting || (pendingFeedbackType === 'negative' && !feedbackContent.trim())}
+                disabled={submitting || (pendingFeedbackType === 'negative' && !feedbackContent.trim() && selectedTags.length === 0)}
                 className={pendingFeedbackType === 'positive' ? "bg-green-500 hover:bg-green-600" : ""}
               >
                 <Send className="w-3.5 h-3.5 mr-1" />

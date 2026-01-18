@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +15,20 @@ import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FeedbackTrendChart } from './FeedbackTrendChart';
 
+// Tag label mappings
+const TAG_LABELS: Record<string, string> = {
+  accurate: '回答准确',
+  clear: '解释清晰',
+  helpful: '很有帮助',
+  fast: '响应迅速',
+  professional: '专业可靠',
+  inaccurate: '回答不准确',
+  unclear: '解释不清',
+  irrelevant: '答非所问',
+  incomplete: '回答不完整',
+  slow: '响应太慢',
+};
+
 interface FeedbackWithMessage {
   id: string;
   user_id: string;
@@ -24,6 +39,7 @@ interface FeedbackWithMessage {
   status: string;
   admin_notes: string | null;
   resolved_at: string | null;
+  tags: string[] | null;
   message_content?: string;
   user_display_name?: string;
 }
@@ -237,6 +253,7 @@ export function FeedbackManagement() {
                   <TableHead className="w-20">类型</TableHead>
                   <TableHead className="w-24">状态</TableHead>
                   <TableHead>用户</TableHead>
+                  <TableHead className="max-w-[150px]">标签</TableHead>
                   <TableHead className="max-w-xs">反馈内容</TableHead>
                   <TableHead className="max-w-xs">相关消息</TableHead>
                   <TableHead className="w-36">时间</TableHead>
@@ -246,7 +263,7 @@ export function FeedbackManagement() {
               <TableBody>
                 {filteredFeedbacks.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                       暂无反馈数据
                     </TableCell>
                   </TableRow>
@@ -269,6 +286,28 @@ export function FeedbackManagement() {
                       </TableCell>
                       <TableCell className="font-medium text-sm">
                         {feedback.user_display_name}
+                      </TableCell>
+                      <TableCell className="max-w-[150px]">
+                        {feedback.tags && feedback.tags.length > 0 ? (
+                          <div className="flex flex-wrap gap-1">
+                            {feedback.tags.map((tag) => (
+                              <Badge 
+                                key={tag} 
+                                variant="outline" 
+                                className={cn(
+                                  "text-[10px] px-1.5 py-0",
+                                  feedback.feedback_type === 'positive' 
+                                    ? "border-green-500/30 text-green-600 bg-green-500/10"
+                                    : "border-red-500/30 text-red-600 bg-red-500/10"
+                                )}
+                              >
+                                {TAG_LABELS[tag] || tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
                       </TableCell>
                       <TableCell className="max-w-xs">
                         {feedback.content ? (
