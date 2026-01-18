@@ -55,12 +55,15 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState<boolean>(true);
-  const { signIn, signUp, signInWithGoogle, user } = useAuth();
+  const [checkingAuth, setCheckingAuth] = useState(true);
+  const { signIn, signUp, signInWithGoogle, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in and verified
   useEffect(() => {
     const checkUserStatus = async () => {
+      if (authLoading) return; // Wait for auth to initialize
+      
       if (user) {
         // Check if user has verified profile
         const { data } = await supabase
@@ -71,11 +74,22 @@ export default function Auth() {
         
         if (data?.is_verified) {
           navigate('/', { replace: true });
+          return;
         }
       }
+      setCheckingAuth(false);
     };
     checkUserStatus();
-  }, [user, navigate]);
+  }, [user, authLoading, navigate]);
+
+  // Show loading while checking auth status
+  if (checkingAuth || authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const validateAccountInputs = () => {
     const emailResult = emailSchema.safeParse(email);
