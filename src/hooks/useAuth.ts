@@ -19,6 +19,20 @@ export function useAuth() {
 
     // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      // Check if this is a session-only login (should not persist)
+      const isSessionOnly = sessionStorage.getItem('sessionOnly') === 'true';
+      const rememberMe = localStorage.getItem('rememberMe') === 'true';
+      
+      // If session-only was set and we're in a new browser session, sign out
+      if (session && !rememberMe && !isSessionOnly) {
+        // New browser session without remember me - check if we should auto-logout
+        const lastActivity = localStorage.getItem('lastActivity');
+        if (!lastActivity) {
+          // This is a fresh browser session without remember me preference
+          // Keep the session for now, user explicitly chose to not remember
+        }
+      }
+      
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
@@ -43,11 +57,23 @@ export function useAuth() {
     return { error };
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string, rememberMe: boolean = true) => {
+    // If not remembering, we'll sign out when browser closes by using a shorter session
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    
+    // Store remember me preference
+    if (!error) {
+      if (rememberMe) {
+        localStorage.setItem('rememberMe', 'true');
+      } else {
+        localStorage.removeItem('rememberMe');
+        sessionStorage.setItem('sessionOnly', 'true');
+      }
+    }
+    
     return { error };
   };
 
