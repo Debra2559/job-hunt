@@ -52,11 +52,11 @@ async function semanticSearch(
 
     console.log("Generated query embedding, searching...");
 
-    // Use vector similarity search
+    // Use vector similarity search with lower threshold to get more results
     const { data, error } = await supabase.rpc('match_knowledge_files', {
       query_embedding: queryEmbedding,
-      match_threshold: 0.3,
-      match_count: 5,
+      match_threshold: 0.15, // Lower threshold to include more results
+      match_count: 8, // Get more results
     });
 
     if (error) {
@@ -72,8 +72,30 @@ async function semanticSearch(
   }
 }
 
-// Fallback: basic keyword search
-async function basicSearch(supabase: any, query: string): Promise<string[]> {
+// Get random knowledge files as fallback context
+async function getRandomKnowledge(supabase: any, limit: number = 3): Promise<Array<{ file_name: string; content_text: string; tags: string[] }>> {
+  try {
+    const { data, error } = await supabase
+      .from('knowledge_files')
+      .select('file_name, content_text, tags')
+      .eq('status', 'ready')
+      .not('content_text', 'is', null)
+      .limit(limit);
+
+    if (error || !data) {
+      console.error("Random knowledge error:", error);
+      return [];
+    }
+
+    return data;
+  } catch (e) {
+    console.error("Error getting random knowledge:", e);
+    return [];
+  }
+}
+
+// Fallback: basic keyword search - improved to always return some results
+async function basicSearch(supabase: any, query: string): Promise<Array<{ file_name: string; content_text: string; tags: string[]; matched: boolean }>> {
   try {
     // Get files with content
     const { data: files, error } = await supabase
@@ -81,7 +103,7 @@ async function basicSearch(supabase: any, query: string): Promise<string[]> {
       .select('file_name, content_text, tags')
       .eq('status', 'ready')
       .not('content_text', 'is', null)
-      .limit(10);
+      .limit(15);
 
     if (error || !files) {
       console.error("Basic search error:", error);
@@ -90,7 +112,8 @@ async function basicSearch(supabase: any, query: string): Promise<string[]> {
 
     // Simple keyword matching
     const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 1);
-    const results: string[] = [];
+    const results: Array<{ file_name: string; content_text: string; tags: string[]; matched: boolean }> = [];
+    const unmatched: typeof results = [];
 
     for (const file of files) {
       if (!file.content_text) continue;
@@ -101,16 +124,20 @@ async function basicSearch(supabase: any, query: string): Promise<string[]> {
       // Check if any keyword matches
       const matches = keywords.some(k => content.includes(k) || tags.includes(k));
       
-      if (matches || results.length < 3) {
-        // Truncate content for context
-        const truncated = file.content_text.length > 2000 
-          ? file.content_text.substring(0, 2000) + '...' 
-          : file.content_text;
-        results.push(`【${file.file_name}】\n${truncated}`);
+      if (matches) {
+        results.push({ ...file, matched: true });
+      } else {
+        unmatched.push({ ...file, matched: false });
       }
     }
 
-    return results;
+    // If we have matched results, return them; otherwise return some unmatched as fallback
+    if (results.length > 0) {
+      return results.slice(0, 5);
+    }
+    
+    // Return first few unmatched files as general context
+    return unmatched.slice(0, 3);
   } catch (e) {
     console.error("Error in basic search:", e);
     return [];
@@ -118,6 +145,7 @@ async function basicSearch(supabase: any, query: string): Promise<string[]> {
 }
 
 // Get knowledge context with semantic search - returns both context string and sources
+// ALWAYS tries to return some knowledge context
 async function getKnowledgeContext(
   supabase: any, 
   userQuery: string, 
@@ -137,8 +165,8 @@ async function getKnowledgeContext(
       const contents = semanticResults.map(r => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
         const similarity = `[相关度: ${(r.similarity * 100).toFixed(0)}%]`;
-        const truncated = r.content_text.length > 2000 
-          ? r.content_text.substring(0, 2000) + '...' 
+        const truncated = r.content_text.length > 2500 
+          ? r.content_text.substring(0, 2500) + '...' 
           : r.content_text;
         return `【${r.file_name}】${tags} ${similarity}\n${truncated}`;
       });
@@ -154,13 +182,52 @@ async function getKnowledgeContext(
     const basicResults = await basicSearch(supabase, userQuery);
     
     if (basicResults.length > 0) {
+      const contents = basicResults.map(r => {
+        const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
+        const matchLabel = r.matched ? '[关键词匹配]' : '[参考资料]';
+        const truncated = r.content_text.length > 2000 
+          ? r.content_text.substring(0, 2000) + '...' 
+          : r.content_text;
+        return `【${r.file_name}】${tags} ${matchLabel}\n${truncated}`;
+      });
+
+      // Create sources for basic search too
+      const sources = basicResults.map(r => ({
+        fileName: r.file_name,
+        similarity: r.matched ? 0.5 : 0.2, // Approximate similarity
+        tags: r.tags || [],
+      }));
+
       return {
-        context: `\n\n以下是可能相关的知识库内容：\n\n${basicResults.join('\n\n---\n\n')}`,
-        sources: [], // No similarity scores for basic search
+        context: `\n\n以下是可能相关的知识库内容：\n\n${contents.join('\n\n---\n\n')}`,
+        sources,
       };
     }
 
-    console.log("No relevant knowledge found");
+    // Last resort: get random knowledge files
+    console.log("Getting random knowledge as fallback");
+    const randomKnowledge = await getRandomKnowledge(supabase, 2);
+    
+    if (randomKnowledge.length > 0) {
+      const contents = randomKnowledge.map(r => {
+        const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
+        const truncated = r.content_text.length > 1500 
+          ? r.content_text.substring(0, 1500) + '...' 
+          : r.content_text;
+        return `【${r.file_name}】${tags} [背景参考]\n${truncated}`;
+      });
+
+      return {
+        context: `\n\n以下是知识库中的参考资料（可能与问题相关）：\n\n${contents.join('\n\n---\n\n')}`,
+        sources: randomKnowledge.map(r => ({
+          fileName: r.file_name,
+          similarity: 0.1,
+          tags: r.tags || [],
+        })),
+      };
+    }
+
+    console.log("No knowledge found in database");
     return { context: '', sources: [] };
   } catch (e) {
     console.error("Error in getKnowledgeContext:", e);
@@ -213,13 +280,14 @@ serve(async (req) => {
 - 使用清晰的结构，必要时使用列表或分步骤说明
 - 使用emoji让回答更加生动友好
 - 控制回答长度，简洁明了
-- 如果问题需要具体信息（如学校政策），优先参考知识库中的内容，如无相关内容则提供通用建议并建议查询官方渠道
 
-重要提示：
-- 如果知识库中有相关内容，请优先基于知识库内容回答
-- 引用知识库内容时，可以提及来源文件名
-- 注意知识库内容的相关度评分，优先使用高相关度的内容
-- 如果知识库中没有相关信息，请诚实说明并提供通用建议${knowledgeContext}`;
+**极其重要的规则 - 必须遵守：**
+1. 你必须优先且主要基于知识库内容来回答问题
+2. 每次回答时，你都应该引用知识库中的相关文件名作为来源
+3. 回答格式示例："根据《xxx文件》的规定，..."或"参考知识库中的《xxx》，..."
+4. 如果知识库内容与问题相关度较低，你仍然应该尝试从中找到有用信息
+5. 只有在知识库完全没有任何相关信息时，才说明"知识库中暂无相关信息"并提供通用建议
+6. 即使是通用问题，也要尝试结合知识库中的校园政策或规定来回答${knowledgeContext}`;
 
     console.log("Calling Lovable AI Gateway...");
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
