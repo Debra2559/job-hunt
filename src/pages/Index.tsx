@@ -64,6 +64,14 @@ const Index = () => {
     }
   }, [authLoading, user, navigate]);
 
+  // Redirect to auth if logged in but missing/unverified profile
+  useEffect(() => {
+    if (authLoading || profileLoading) return;
+    if (user && (!profile || !profile.is_verified)) {
+      navigate('/auth', { replace: true });
+    }
+  }, [authLoading, profileLoading, user, profile, navigate]);
+
   // Load user profile
   useEffect(() => {
     const loadProfile = async () => {
@@ -262,10 +270,13 @@ const Index = () => {
     );
   }
 
-  // Redirect to auth if not verified (should not normally happen as registration includes verification)
+  // If profile is missing/unverified, we trigger a redirect in an effect above.
   if (user && (!profile || !profile.is_verified)) {
-    navigate('/auth', { replace: true });
-    return null;
+    return (
+      <div className="flex h-screen items-center justify-center bg-background">
+        <p className="text-muted-foreground">正在跳转...</p>
+      </div>
+    );
   }
 
   return (
