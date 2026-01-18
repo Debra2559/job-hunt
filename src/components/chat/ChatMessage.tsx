@@ -207,31 +207,51 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
         
         {/* Knowledge Sources for AI messages */}
         {!isUser && hasSources && (
-          <div className="mt-2">
+          <div className="mt-3">
             <button
               onClick={() => setShowSources(!showSources)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors px-2 py-1 rounded-md border border-border/50 bg-background"
+              className={cn(
+                "inline-flex items-center gap-1.5 text-xs font-medium transition-all duration-200 px-3 py-1.5 rounded-full",
+                showSources 
+                  ? "bg-primary/10 text-primary border border-primary/20" 
+                  : "text-muted-foreground hover:text-primary hover:bg-primary/5 border border-transparent"
+              )}
             >
               <FileText className="w-3.5 h-3.5" />
               <span>参考来源 ({message.sources!.length})</span>
               {showSources ? (
-                <ChevronUp className="w-3.5 h-3.5" />
+                <ChevronUp className="w-3 h-3 ml-0.5" />
               ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
+                <ChevronDown className="w-3 h-3 ml-0.5" />
               )}
             </button>
             
             {showSources && (
-              <div className="mt-2 p-3 bg-muted/30 rounded-lg space-y-2 border border-border/30">
+              <div className="mt-2 overflow-hidden rounded-xl border border-border/40 bg-gradient-to-b from-muted/20 to-muted/40 backdrop-blur-sm">
                 {message.sources!.map((source, index) => (
-                  <div key={index} className="flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <FileText className="w-4 h-4 text-primary flex-shrink-0" />
-                      <span className="truncate">{source.fileName}</span>
+                  <div 
+                    key={index} 
+                    className={cn(
+                      "flex items-center justify-between gap-3 px-4 py-2.5 transition-colors hover:bg-muted/30",
+                      index !== message.sources!.length - 1 && "border-b border-border/30"
+                    )}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                        <FileText className="w-3.5 h-3.5 text-primary" />
+                      </div>
+                      <span className="text-sm truncate text-foreground/80">{source.fileName}</span>
                     </div>
-                    <span className="text-muted-foreground flex-shrink-0">
+                    <div className={cn(
+                      "text-xs font-semibold px-2 py-0.5 rounded-full flex-shrink-0",
+                      source.similarity >= 0.9 
+                        ? "bg-green-500/10 text-green-600" 
+                        : source.similarity >= 0.7 
+                          ? "bg-primary/10 text-primary" 
+                          : "bg-muted text-muted-foreground"
+                    )}>
                       {(source.similarity * 100).toFixed(0)}%
-                    </span>
+                    </div>
                   </div>
                 ))}
               </div>
