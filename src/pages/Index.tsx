@@ -2,7 +2,6 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
-import { StudentVerification } from '@/components/auth/StudentVerification';
 import { Message, Conversation, KnowledgeSource } from '@/types/chat';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -263,9 +262,10 @@ const Index = () => {
     );
   }
 
-  // Show student verification if not verified
+  // Redirect to auth if not verified (should not normally happen as registration includes verification)
   if (user && (!profile || !profile.is_verified)) {
-    return <StudentVerification userId={user.id} onVerified={handleVerified} />;
+    navigate('/auth', { replace: true });
+    return null;
   }
 
   return (
