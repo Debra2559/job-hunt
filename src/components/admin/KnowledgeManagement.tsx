@@ -699,7 +699,7 @@ export const KnowledgeManagement = () => {
     };
     return category ? (colorMap[category.color] || 'bg-gray-500') : 'bg-gray-400';
   };
-  };
+
 
   // Count files without embeddings
   const filesWithoutEmbedding = files.filter(f => f.status === 'ready' && f.content_text && !f.embedding);
