@@ -76,6 +76,7 @@ export type Database = {
           resolved_at: string | null
           resolved_by: string | null
           status: string
+          tags: string[] | null
           user_id: string
         }
         Insert: {
@@ -88,6 +89,7 @@ export type Database = {
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          tags?: string[] | null
           user_id: string
         }
         Update: {
@@ -100,6 +102,7 @@ export type Database = {
           resolved_at?: string | null
           resolved_by?: string | null
           status?: string
+          tags?: string[] | null
           user_id?: string
         }
         Relationships: [
