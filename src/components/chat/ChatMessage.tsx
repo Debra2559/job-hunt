@@ -14,6 +14,7 @@ interface ChatMessageProps {
   message: Message;
   onToggleFavorite: (id: string) => void;
   userId?: string;
+  isStreaming?: boolean;
 }
 
 function formatTime(date: Date | undefined): string {
@@ -25,12 +26,13 @@ function formatTime(date: Date | undefined): string {
   }
 }
 
-export function ChatMessage({ message, onToggleFavorite, userId }: ChatMessageProps) {
+export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = false }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showSources, setShowSources] = useState(false);
   const hasSources = message.sources && message.sources.length > 0;
+  const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
 
   // Don't render empty messages
   if (!message.content || message.content.trim() === '') {
@@ -97,6 +99,9 @@ export function ChatMessage({ message, onToggleFavorite, userId }: ChatMessagePr
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {message.content}
               </ReactMarkdown>
+              {isCurrentlyStreaming && (
+                <span className="inline-block w-2 h-4 ml-0.5 bg-primary/80 animate-pulse rounded-sm" />
+              )}
             </div>
           )}
         </div>
