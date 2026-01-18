@@ -6,11 +6,163 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Improved keyword-based search with scoring
+// Calculate TF-IDF inspired similarity score
+function calculateSimilarity(
+  keywords: string[],
+  content: string,
+  fileName: string,
+  tags: string[],
+  totalDocs: number,
+  docFrequency: Map<string, number>
+): { score: number; matchedKeywords: string[]; details: { keyword: string; weight: number }[] } {
+  const contentLower = content.toLowerCase();
+  const fileNameLower = fileName.toLowerCase();
+  const tagsLower = tags.join(' ').toLowerCase();
+  const contentLength = content.length;
+  
+  let totalScore = 0;
+  const matchedKeywords: string[] = [];
+  const details: { keyword: string; weight: number }[] = [];
+  
+  for (const keyword of keywords) {
+    // Count occurrences (term frequency)
+    const regex = new RegExp(keyword, 'gi');
+    const contentMatches = (content.match(regex) || []).length;
+    const fileNameMatch = fileNameLower.includes(keyword);
+    const tagsMatch = tagsLower.includes(keyword);
+    
+    if (contentMatches > 0 || fileNameMatch || tagsMatch) {
+      matchedKeywords.push(keyword);
+      
+      // Term frequency with logarithmic scaling (prevents long docs from dominating)
+      const tf = contentMatches > 0 ? 1 + Math.log(contentMatches) : 0;
+      
+      // Inverse document frequency (rarer terms are more important)
+      const df = docFrequency.get(keyword) || 1;
+      const idf = Math.log(1 + totalDocs / df);
+      
+      // Base TF-IDF score
+      let keywordScore = tf * idf;
+      
+      // Position bonus: keywords appearing in first 500 chars are more relevant
+      const firstOccurrence = contentLower.indexOf(keyword);
+      if (firstOccurrence >= 0 && firstOccurrence < 500) {
+        keywordScore *= 1.3; // 30% bonus for early occurrence
+      }
+      
+      // Filename match bonus (very strong indicator of relevance)
+      if (fileNameMatch) {
+        keywordScore += 3 * idf; // Strong bonus for filename match
+      }
+      
+      // Tags match bonus (curated metadata is valuable)
+      if (tagsMatch) {
+        keywordScore += 2 * idf;
+      }
+      
+      // Density bonus: higher density = more focused document
+      const density = contentMatches / (contentLength / 100);
+      if (density > 0.5) {
+        keywordScore *= 1.2;
+      }
+      
+      totalScore += keywordScore;
+      details.push({ keyword, weight: keywordScore });
+    }
+  }
+  
+  // Keyword coverage factor: matching more keywords = higher relevance
+  const coverageRatio = matchedKeywords.length / keywords.length;
+  const coverageBonus = 0.5 + coverageRatio * 0.5; // 0.5 to 1.0 multiplier
+  totalScore *= coverageBonus;
+  
+  // Consecutive keyword bonus: if multiple keywords appear near each other
+  if (matchedKeywords.length >= 2) {
+    for (let i = 0; i < matchedKeywords.length - 1; i++) {
+      const k1 = matchedKeywords[i];
+      const k2 = matchedKeywords[i + 1];
+      const pos1 = contentLower.indexOf(k1);
+      const pos2 = contentLower.indexOf(k2);
+      if (pos1 >= 0 && pos2 >= 0 && Math.abs(pos1 - pos2) < 100) {
+        totalScore *= 1.15; // 15% bonus for proximity
+      }
+    }
+  }
+  
+  return { score: totalScore, matchedKeywords, details };
+}
+
+// Normalize score to 0-1 range using sigmoid-like function
+function normalizeScore(score: number, maxScore: number): number {
+  if (maxScore <= 0) return 0.5;
+  // Use a scaled sigmoid to map scores to 0.3-0.98 range
+  // This ensures even low matches show some relevance, and high matches don't hit 100%
+  const normalized = score / maxScore;
+  const sigmoid = 1 / (1 + Math.exp(-5 * (normalized - 0.5)));
+  return 0.3 + sigmoid * 0.68; // Range: 0.3 to 0.98
+}
+
+// Chinese text segmentation - extract meaningful terms from Chinese text
+function segmentChinese(text: string): string[] {
+  const stopWords = new Set([
+    '的', '是', '在', '有', '和', '了', '我', '你', '他', '她', '它', '们', 
+    '这', '那', '什么', '怎么', '如何', '吗', '呢', '吧', '啊', '请', '能', 
+    '可以', '想', '要', '问', '一下', '关于', '一些', '一个', '哪些', '哪个',
+    '为什么', '怎样', '还是', '或者', '但是', '因为', '所以', '如果', '虽然',
+    '就是', '那么', '这个', '那个', '都是', '不是', '没有', '已经', '正在'
+  ]);
+  
+  // Common Chinese word patterns (high-value terms)
+  const commonTerms = [
+    '华中农业大学', '信息学院', '毕业生', '就业', '政策', '西部计划', '志愿服务',
+    '研究生', '支教团', '签约', '单位', '灵活就业', '基层', '实习', '工作',
+    '学生', '学校', '学院', '考研', '保研', '出国', '留学', '创业', '公务员',
+    '选调生', '教师', '研支团', '三支一扶', '特岗', '村官', '招聘', '面试',
+    '简历', '求职', '薪资', '待遇', '补贴', '奖学金', '助学金', '贷款',
+    '心理', '咨询', '辅导员', '导师', '课程', '学分', '论文', '答辩'
+  ];
+  
+  const results = new Set<string>();
+  const cleanText = text.toLowerCase().replace(/[，。？！、；：""''（）【】《》\s]/g, '');
+  
+  // First, extract known common terms
+  for (const term of commonTerms) {
+    if (cleanText.includes(term.toLowerCase())) {
+      results.add(term.toLowerCase());
+    }
+  }
+  
+  // Then, use n-gram approach for Chinese characters (2-4 chars)
+  // This helps catch terms not in our dictionary
+  const chineseChars = cleanText.match(/[\u4e00-\u9fa5]+/g) || [];
+  for (const segment of chineseChars) {
+    // Extract 2-char, 3-char, and 4-char n-grams
+    for (let len = 2; len <= Math.min(4, segment.length); len++) {
+      for (let i = 0; i <= segment.length - len; i++) {
+        const ngram = segment.substring(i, i + len);
+        if (!stopWords.has(ngram)) {
+          results.add(ngram);
+        }
+      }
+    }
+  }
+  
+  // Also extract English words and numbers
+  const englishWords = text.toLowerCase().match(/[a-z]+/gi) || [];
+  for (const word of englishWords) {
+    if (word.length >= 2) {
+      results.add(word);
+    }
+  }
+  
+  return Array.from(results);
+}
+
+// Improved keyword-based search with TF-IDF scoring
 async function keywordSearch(
   supabase: any, 
   query: string
-): Promise<Array<{ file_name: string; content_text: string; tags: string[]; score: number; id: string }>> {
+): Promise<Array<{ file_name: string; content_text: string; tags: string[]; score: number; similarity: number; id: string; matchDetails: string }>> {
   try {
     // Get all files with content
     const { data: files, error } = await supabase
@@ -26,46 +178,72 @@ async function keywordSearch(
 
     console.log(`Found ${files.length} knowledge files to search`);
 
-    // Extract keywords from query (filter short words and common words)
-    const stopWords = new Set(['的', '是', '在', '有', '和', '了', '我', '你', '他', '她', '它', '们', '这', '那', '什么', '怎么', '如何', '吗', '呢', '吧', '啊', '请', '能', '可以', '想', '要', '问', '一下', '关于', '一些', '一个']);
-    const keywords = query
-      .toLowerCase()
-      .replace(/[，。？！、；：""''（）【】《》\s]/g, ' ')
-      .split(/\s+/)
-      .filter(k => k.length >= 2 && !stopWords.has(k));
+    // Use Chinese segmentation to extract keywords
+    const keywords = segmentChinese(query);
     
-    console.log("Search keywords:", keywords.join(", "));
+    // Prioritize longer terms (they're more specific)
+    keywords.sort((a, b) => b.length - a.length);
+    
+    // Take top 15 keywords (avoid too many n-grams)
+    const topKeywords = keywords.slice(0, 15);
+    
+    console.log("Search keywords:", topKeywords.join(", "));
+    
+    if (topKeywords.length === 0) {
+      console.log("No valid keywords extracted");
+      return [];
+    }
 
-    const results: Array<{ file_name: string; content_text: string; tags: string[]; score: number; id: string }> = [];
+    // Build document frequency map (how many docs contain each keyword)
+    const docFrequency = new Map<string, number>();
+    for (const keyword of topKeywords) {
+      let count = 0;
+      for (const file of files) {
+        if (!file.content_text) continue;
+        const content = file.content_text.toLowerCase();
+        const fileName = file.file_name.toLowerCase();
+        const tags = (file.tags || []).join(' ').toLowerCase();
+        if (content.includes(keyword) || fileName.includes(keyword) || tags.includes(keyword)) {
+          count++;
+        }
+      }
+      docFrequency.set(keyword, count);
+    }
+    
+    console.log("Top document frequencies:", 
+      Array.from(docFrequency.entries())
+        .filter(([_, count]) => count > 0)
+        .slice(0, 10)
+        .map(([k, v]) => `${k}:${v}`)
+        .join(", "));
+
+    const results: Array<{ 
+      file_name: string; 
+      content_text: string; 
+      tags: string[]; 
+      score: number; 
+      similarity: number;
+      id: string;
+      matchDetails: string;
+    }> = [];
 
     for (const file of files) {
       if (!file.content_text) continue;
       
-      const content = file.content_text.toLowerCase();
-      const fileName = file.file_name.toLowerCase();
-      const tags = (file.tags || []).join(' ').toLowerCase();
-      
-      let score = 0;
-      let matchedKeywords: string[] = [];
-      
-      for (const keyword of keywords) {
-        // Count occurrences in content
-        const contentMatches = (content.match(new RegExp(keyword, 'g')) || []).length;
-        // Check filename match (higher weight)
-        const fileNameMatch = fileName.includes(keyword) ? 3 : 0;
-        // Check tags match (higher weight)
-        const tagsMatch = tags.includes(keyword) ? 2 : 0;
-        
-        if (contentMatches > 0 || fileNameMatch > 0 || tagsMatch > 0) {
-          score += Math.min(contentMatches, 10) + fileNameMatch + tagsMatch;
-          matchedKeywords.push(keyword);
-        }
-      }
+      const { score, matchedKeywords, details } = calculateSimilarity(
+        topKeywords,
+        file.content_text,
+        file.file_name,
+        file.tags || [],
+        files.length,
+        docFrequency
+      );
       
       if (score > 0) {
-        // Boost score by percentage of keywords matched
-        const keywordCoverage = matchedKeywords.length / keywords.length;
-        score = score * (0.5 + keywordCoverage * 0.5);
+        const matchDetails = details
+          .sort((a, b) => b.weight - a.weight)
+          .map(d => `${d.keyword}(${d.weight.toFixed(1)})`)
+          .join(', ');
         
         results.push({
           id: file.id,
@@ -73,6 +251,8 @@ async function keywordSearch(
           content_text: file.content_text,
           tags: file.tags || [],
           score,
+          similarity: 0, // Will be normalized later
+          matchDetails,
         });
       }
     }
@@ -80,7 +260,22 @@ async function keywordSearch(
     // Sort by score descending
     results.sort((a, b) => b.score - a.score);
     
+    // Normalize scores to similarity (0-1)
+    const maxScore = results.length > 0 ? results[0].score : 1;
+    for (const result of results) {
+      result.similarity = normalizeScore(result.score, maxScore);
+    }
+    
     console.log(`Keyword search found ${results.length} matching files`);
+    if (results.length > 0) {
+      console.log("Top matches:", results.slice(0, 3).map(r => ({
+        file: r.file_name,
+        score: r.score.toFixed(2),
+        similarity: (r.similarity * 100).toFixed(0) + '%',
+        details: r.matchDetails
+      })));
+    }
+    
     return results.slice(0, 5);
   } catch (e) {
     console.error("Error in keyword search:", e);
@@ -127,20 +322,21 @@ async function getKnowledgeContext(
       const sources = keywordResults.map(r => ({
         id: r.id,
         fileName: r.file_name,
-        similarity: Math.min(r.score / 10, 1), // Normalize score to 0-1 range for similarity
+        similarity: r.similarity, // Use pre-calculated normalized similarity
         tags: r.tags || [],
       }));
 
       const contents = keywordResults.map(r => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
-        const scoreLabel = `[匹配度: ${Math.min(Math.round(r.score * 10), 100)}%]`;
+        const scoreLabel = `[匹配度: ${Math.round(r.similarity * 100)}%]`;
         const truncated = r.content_text.length > 3000 
           ? r.content_text.substring(0, 3000) + '...' 
           : r.content_text;
         return `【${r.file_name}】${tags} ${scoreLabel}\n${truncated}`;
       });
       
-      console.log(`Returning ${sources.length} keyword matched sources`);
+      console.log(`Returning ${sources.length} keyword matched sources with similarities:`, 
+        sources.map(s => `${s.fileName}: ${(s.similarity * 100).toFixed(0)}%`));
       return {
         context: `\n\n以下是与问题相关的知识库内容：\n\n${contents.join('\n\n---\n\n')}`,
         sources,
