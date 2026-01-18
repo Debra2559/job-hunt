@@ -3,11 +3,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { MessageSquare, ThumbsUp, ThumbsDown, RefreshCw, MessageCircle } from 'lucide-react';
+import { MessageSquare, ThumbsUp, ThumbsDown, RefreshCw, MessageCircle, CheckCircle, Clock, AlertCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface FeedbackWithMessage {
   id: string;
@@ -16,14 +20,31 @@ interface FeedbackWithMessage {
   feedback_type: string;
   content: string | null;
   created_at: string;
+  status: string;
+  admin_notes: string | null;
+  resolved_at: string | null;
   message_content?: string;
   user_display_name?: string;
 }
+
+type StatusType = 'pending' | 'in_progress' | 'resolved' | 'ignored';
+
+const statusConfig: Record<StatusType, { label: string; icon: typeof Clock; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
+  pending: { label: '待处理', icon: Clock, variant: 'secondary' },
+  in_progress: { label: '处理中', icon: AlertCircle, variant: 'default', className: 'bg-amber-500 hover:bg-amber-600' },
+  resolved: { label: '已解决', icon: CheckCircle, variant: 'default', className: 'bg-emerald-500 hover:bg-emerald-600' },
+  ignored: { label: '已忽略', icon: Clock, variant: 'outline' },
+};
 
 export function FeedbackManagement() {
   const [feedbacks, setFeedbacks] = useState<FeedbackWithMessage[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [selectedFeedback, setSelectedFeedback] = useState<FeedbackWithMessage | null>(null);
+  const [adminNotes, setAdminNotes] = useState('');
+  const [newStatus, setNewStatus] = useState<StatusType>('pending');
+  const [updating, setUpdating] = useState(false);
+  const [activeTab, setActiveTab] = useState('all');
 
   useEffect(() => {
     loadFeedbacks();
@@ -31,7 +52,6 @@ export function FeedbackManagement() {
 
   const loadFeedbacks = async () => {
     try {
-      // Fetch feedbacks
       const { data: feedbackData, error: feedbackError } = await supabase
         .from('feedbacks')
         .select('*')
@@ -39,13 +59,11 @@ export function FeedbackManagement() {
 
       if (feedbackError) throw feedbackError;
 
-      // Enrich with message content and user info
       const enrichedFeedbacks = await Promise.all(
         (feedbackData || []).map(async (feedback) => {
           let message_content = '';
           let user_display_name = '';
 
-          // Get message content if message_id exists
           if (feedback.message_id) {
             const { data: messageData } = await supabase
               .from('messages')
@@ -55,7 +73,6 @@ export function FeedbackManagement() {
             message_content = messageData?.content || '';
           }
 
-          // Get user display name
           const { data: profileData } = await supabase
             .from('profiles')
             .select('display_name')
@@ -85,11 +102,69 @@ export function FeedbackManagement() {
     loadFeedbacks();
   };
 
+  const handleOpenStatusDialog = (feedback: FeedbackWithMessage) => {
+    setSelectedFeedback(feedback);
+    setNewStatus((feedback.status as StatusType) || 'pending');
+    setAdminNotes(feedback.admin_notes || '');
+  };
+
+  const handleUpdateStatus = async () => {
+    if (!selectedFeedback) return;
+
+    setUpdating(true);
+    try {
+      const updateData: Record<string, unknown> = {
+        status: newStatus,
+        admin_notes: adminNotes || null,
+      };
+
+      if (newStatus === 'resolved') {
+        updateData.resolved_at = new Date().toISOString();
+      }
+
+      const { error } = await supabase
+        .from('feedbacks')
+        .update(updateData)
+        .eq('id', selectedFeedback.id);
+
+      if (error) throw error;
+
+      toast.success('状态更新成功');
+      setSelectedFeedback(null);
+      loadFeedbacks();
+    } catch (error) {
+      console.error('Error updating feedback:', error);
+      toast.error('更新失败');
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   const positiveCount = feedbacks.filter(f => f.feedback_type === 'positive').length;
   const negativeCount = feedbacks.filter(f => f.feedback_type === 'negative').length;
+  const pendingCount = feedbacks.filter(f => f.feedback_type === 'negative' && f.status === 'pending').length;
   const satisfactionRate = feedbacks.length > 0 
     ? ((positiveCount / feedbacks.length) * 100).toFixed(1) 
     : '0';
+
+  const filteredFeedbacks = feedbacks.filter(f => {
+    if (activeTab === 'all') return true;
+    if (activeTab === 'negative') return f.feedback_type === 'negative';
+    if (activeTab === 'pending') return f.feedback_type === 'negative' && f.status === 'pending';
+    if (activeTab === 'resolved') return f.status === 'resolved';
+    return true;
+  });
+
+  const renderStatusBadge = (status: string) => {
+    const config = statusConfig[status as StatusType] || statusConfig.pending;
+    const Icon = config.icon;
+    return (
+      <Badge variant={config.variant} className={`flex items-center gap-1 w-fit ${config.className || ''}`}>
+        <Icon className="w-3 h-3" />
+        {config.label}
+      </Badge>
+    );
+  };
 
   return (
     <Card>
@@ -100,7 +175,7 @@ export function FeedbackManagement() {
               <MessageSquare className="w-5 h-5" />
               反馈管理
             </CardTitle>
-            <CardDescription>用户反馈记录与分析</CardDescription>
+            <CardDescription>用户反馈记录与跟进处理</CardDescription>
           </div>
           <div className="flex items-center gap-3">
             <div className="flex gap-2">
@@ -112,6 +187,12 @@ export function FeedbackManagement() {
                 <ThumbsDown className="w-3 h-3" />
                 {negativeCount}
               </Badge>
+              {pendingCount > 0 && (
+                <Badge variant="secondary" className="flex items-center gap-1 bg-amber-500/20 text-amber-600 border-amber-500/30">
+                  <Clock className="w-3 h-3" />
+                  待处理 {pendingCount}
+                </Badge>
+              )}
               <Badge variant="secondary" className="flex items-center gap-1">
                 满意度 {satisfactionRate}%
               </Badge>
@@ -129,6 +210,15 @@ export function FeedbackManagement() {
         </div>
       </CardHeader>
       <CardContent>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
+          <TabsList>
+            <TabsTrigger value="all">全部 ({feedbacks.length})</TabsTrigger>
+            <TabsTrigger value="negative">差评 ({negativeCount})</TabsTrigger>
+            <TabsTrigger value="pending">待处理 ({pendingCount})</TabsTrigger>
+            <TabsTrigger value="resolved">已解决 ({feedbacks.filter(f => f.status === 'resolved').length})</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
         {loading ? (
           <div className="flex justify-center py-8">
             <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -138,47 +228,59 @@ export function FeedbackManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-24">类型</TableHead>
+                  <TableHead className="w-20">类型</TableHead>
+                  <TableHead className="w-24">状态</TableHead>
                   <TableHead>用户</TableHead>
-                  <TableHead className="max-w-md">相关消息</TableHead>
-                  <TableHead>反馈内容</TableHead>
-                  <TableHead className="w-40">时间</TableHead>
+                  <TableHead className="max-w-xs">反馈内容</TableHead>
+                  <TableHead className="max-w-xs">相关消息</TableHead>
+                  <TableHead className="w-36">时间</TableHead>
+                  <TableHead className="w-24">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {feedbacks.length === 0 ? (
+                {filteredFeedbacks.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                       暂无反馈数据
                     </TableCell>
                   </TableRow>
                 ) : (
-                  feedbacks.map((feedback) => (
+                  filteredFeedbacks.map((feedback) => (
                     <TableRow key={feedback.id}>
                       <TableCell>
                         {feedback.feedback_type === 'positive' ? (
                           <Badge variant="default" className="flex items-center gap-1 w-fit bg-emerald-500 hover:bg-emerald-600">
                             <ThumbsUp className="w-3 h-3" />
-                            好评
                           </Badge>
                         ) : (
                           <Badge variant="destructive" className="flex items-center gap-1 w-fit">
                             <ThumbsDown className="w-3 h-3" />
-                            差评
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell>
+                        {renderStatusBadge(feedback.status)}
+                      </TableCell>
+                      <TableCell className="font-medium text-sm">
                         {feedback.user_display_name}
                       </TableCell>
-                      <TableCell className="max-w-md">
+                      <TableCell className="max-w-xs">
+                        {feedback.content ? (
+                          <p className="text-sm truncate" title={feedback.content}>
+                            {feedback.content}
+                          </p>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-xs">
                         {feedback.message_content ? (
                           <Dialog>
                             <DialogTrigger asChild>
                               <button className="text-left text-sm text-muted-foreground hover:text-foreground transition-colors truncate max-w-full block">
                                 <span className="flex items-center gap-1.5">
                                   <MessageCircle className="w-3.5 h-3.5 flex-shrink-0" />
-                                  <span className="truncate">{feedback.message_content.slice(0, 60)}...</span>
+                                  <span className="truncate">{feedback.message_content.slice(0, 40)}...</span>
                                 </span>
                               </button>
                             </DialogTrigger>
@@ -194,14 +296,70 @@ export function FeedbackManagement() {
                             </DialogContent>
                           </Dialog>
                         ) : (
-                          <span className="text-muted-foreground">-</span>
+                          <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">
-                        {feedback.content || '-'}
-                      </TableCell>
                       <TableCell className="text-muted-foreground text-sm">
-                        {format(new Date(feedback.created_at), 'yyyy-MM-dd HH:mm')}
+                        {format(new Date(feedback.created_at), 'MM-dd HH:mm')}
+                      </TableCell>
+                      <TableCell>
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleOpenStatusDialog(feedback)}
+                            >
+                              处理
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>处理反馈</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4 py-4">
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">状态</label>
+                                <Select value={newStatus} onValueChange={(v) => setNewStatus(v as StatusType)}>
+                                  <SelectTrigger>
+                                    <SelectValue />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="pending">待处理</SelectItem>
+                                    <SelectItem value="in_progress">处理中</SelectItem>
+                                    <SelectItem value="resolved">已解决</SelectItem>
+                                    <SelectItem value="ignored">已忽略</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div className="space-y-2">
+                                <label className="text-sm font-medium">管理员备注</label>
+                                <Textarea
+                                  value={adminNotes}
+                                  onChange={(e) => setAdminNotes(e.target.value)}
+                                  placeholder="添加处理备注..."
+                                  className="min-h-[100px]"
+                                />
+                              </div>
+                              {feedback.content && (
+                                <div className="space-y-2">
+                                  <label className="text-sm font-medium text-muted-foreground">用户反馈</label>
+                                  <div className="p-3 bg-muted/50 rounded-lg text-sm">
+                                    {feedback.content}
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            <DialogFooter>
+                              <DialogClose asChild>
+                                <Button variant="outline">取消</Button>
+                              </DialogClose>
+                              <Button onClick={handleUpdateStatus} disabled={updating}>
+                                {updating ? '更新中...' : '保存'}
+                              </Button>
+                            </DialogFooter>
+                          </DialogContent>
+                        </Dialog>
                       </TableCell>
                     </TableRow>
                   ))

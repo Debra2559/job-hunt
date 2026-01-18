@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
@@ -9,6 +9,8 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 
 interface ChatMessageProps {
   message: Message;
@@ -31,6 +33,9 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showSources, setShowSources] = useState(false);
+  const [showFeedbackInput, setShowFeedbackInput] = useState(false);
+  const [feedbackContent, setFeedbackContent] = useState('');
+  const [pendingFeedbackType, setPendingFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const hasSources = message.sources && message.sources.length > 0;
   const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
 
@@ -39,14 +44,28 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
     return null;
   }
 
-  const handleFeedback = async (type: 'positive' | 'negative') => {
+  const handleFeedbackClick = (type: 'positive' | 'negative') => {
     if (!userId || submitting || message.id.startsWith('temp-')) return;
     
     // If clicking the same feedback, remove it
     if (feedbackType === type) {
       setFeedbackType(null);
+      setShowFeedbackInput(false);
       return;
     }
+
+    // For negative feedback, show input first
+    if (type === 'negative') {
+      setPendingFeedbackType(type);
+      setShowFeedbackInput(true);
+    } else {
+      // For positive, submit directly
+      submitFeedback(type, '');
+    }
+  };
+
+  const submitFeedback = async (type: 'positive' | 'negative', content: string) => {
+    if (!userId || submitting) return;
 
     setSubmitting(true);
     try {
@@ -56,11 +75,15 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
           user_id: userId,
           message_id: message.id,
           feedback_type: type,
+          content: content || null,
         });
 
       if (error) throw error;
       
       setFeedbackType(type);
+      setShowFeedbackInput(false);
+      setFeedbackContent('');
+      setPendingFeedbackType(null);
       toast.success(type === 'positive' ? '感谢您的好评！' : '感谢您的反馈，我们会继续改进');
     } catch (error) {
       console.error('Error submitting feedback:', error);
@@ -68,6 +91,18 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleSubmitFeedback = () => {
+    if (pendingFeedbackType) {
+      submitFeedback(pendingFeedbackType, feedbackContent);
+    }
+  };
+
+  const handleCancelFeedback = () => {
+    setShowFeedbackInput(false);
+    setFeedbackContent('');
+    setPendingFeedbackType(null);
   };
 
   return (
@@ -151,7 +186,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
             {!message.id.startsWith('temp-') && (
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                  onClick={() => handleFeedback('positive')}
+                  onClick={() => handleFeedbackClick('positive')}
                   disabled={submitting}
                   className={cn(
                     "p-1 rounded-md transition-all duration-200",
@@ -164,7 +199,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   <ThumbsUp className="w-3.5 h-3.5" />
                 </button>
                 <button
-                  onClick={() => handleFeedback('negative')}
+                  onClick={() => handleFeedbackClick('negative')}
                   disabled={submitting}
                   className={cn(
                     "p-1 rounded-md transition-all duration-200",
@@ -196,6 +231,40 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {/* Feedback input form */}
+        {showFeedbackInput && (
+          <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-border/50 animate-fade-in">
+            <div className="flex items-start gap-2">
+              <Textarea
+                value={feedbackContent}
+                onChange={(e) => setFeedbackContent(e.target.value)}
+                placeholder="请告诉我们哪里需要改进..."
+                className="min-h-[60px] text-sm resize-none"
+                autoFocus
+              />
+            </div>
+            <div className="flex justify-end gap-2 mt-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleCancelFeedback}
+                disabled={submitting}
+              >
+                <X className="w-3.5 h-3.5 mr-1" />
+                取消
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleSubmitFeedback}
+                disabled={submitting || !feedbackContent.trim()}
+              >
+                <Send className="w-3.5 h-3.5 mr-1" />
+                提交反馈
+              </Button>
+            </div>
           </div>
         )}
         
