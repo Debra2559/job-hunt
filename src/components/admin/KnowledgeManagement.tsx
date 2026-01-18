@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square, Search } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -87,9 +87,20 @@ export const KnowledgeManagement = () => {
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
   const [isDeleting, setIsDeleting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Filter files based on search query
+  const filteredFiles = files.filter(file => {
+    if (!searchQuery.trim()) return true;
+    const query = searchQuery.toLowerCase();
+    const matchesName = file.file_name.toLowerCase().includes(query);
+    const matchesContent = file.content_text?.toLowerCase().includes(query);
+    const matchesTags = file.tags?.some(tag => tag.toLowerCase().includes(query));
+    return matchesName || matchesContent || matchesTags;
+  });
 
   // Selection handlers
   const toggleFileSelection = (fileId: string) => {
@@ -105,10 +116,10 @@ export const KnowledgeManagement = () => {
   };
 
   const toggleSelectAll = () => {
-    if (selectedFiles.size === files.length) {
+    if (selectedFiles.size === filteredFiles.length) {
       setSelectedFiles(new Set());
     } else {
-      setSelectedFiles(new Set(files.map(f => f.id)));
+      setSelectedFiles(new Set(filteredFiles.map(f => f.id)));
     }
   };
 
@@ -580,6 +591,26 @@ export const KnowledgeManagement = () => {
               </CardDescription>
             </div>
             <div className="flex gap-2">
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Input
+                  placeholder="搜索文件名或内容..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-8 w-[200px]"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute right-1 top-1/2 -translate-y-1/2 h-6 w-6"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
               <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="gap-1">
@@ -755,6 +786,12 @@ export const KnowledgeManagement = () => {
               <p>知识库为空</p>
               <p className="text-sm">上传文件开始构建知识库</p>
             </div>
+          ) : filteredFiles.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground">
+              <Search className="w-12 h-12 mx-auto mb-4 opacity-50" />
+              <p>没有找到匹配的文件</p>
+              <p className="text-sm">尝试其他搜索词或清除筛选条件</p>
+            </div>
           ) : (
             <>
               {/* Batch Actions Bar */}
@@ -819,7 +856,7 @@ export const KnowledgeManagement = () => {
                       className="h-6 w-6"
                       onClick={toggleSelectAll}
                     >
-                      {selectedFiles.size === files.length && files.length > 0 ? (
+                      {selectedFiles.size === filteredFiles.length && filteredFiles.length > 0 ? (
                         <CheckSquare className="w-4 h-4 text-primary" />
                       ) : (
                         <Square className="w-4 h-4" />
@@ -836,7 +873,7 @@ export const KnowledgeManagement = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {files.map((file) => (
+                {filteredFiles.map((file) => (
                   <TableRow 
                     key={file.id}
                     className={selectedFiles.has(file.id) ? 'bg-primary/5' : ''}
