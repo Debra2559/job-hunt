@@ -11,7 +11,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FeedbackTrendChart } from './FeedbackTrendChart';
 
 interface FeedbackWithMessage {
   id: string;
@@ -167,7 +168,12 @@ export function FeedbackManagement() {
   };
 
   return (
-    <Card>
+    <div className="space-y-6">
+      {/* Trend Chart */}
+      <FeedbackTrendChart />
+
+      {/* Feedback List */}
+      <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -370,5 +376,6 @@ export function FeedbackManagement() {
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }
