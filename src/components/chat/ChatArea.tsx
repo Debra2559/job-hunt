@@ -3,6 +3,7 @@ import { Message } from '@/types/chat';
 import { ChatMessage } from './ChatMessage';
 import { QuickTags } from './QuickTags';
 import { ChatInput } from './ChatInput';
+import { ThinkingIndicator } from './ThinkingIndicator';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 interface ChatAreaProps {
@@ -60,6 +61,10 @@ export function ChatArea({
                 isStreaming={isTyping && index === messages.length - 1}
               />
             ))}
+            {/* Show thinking indicator when waiting for AI response */}
+            {isTyping && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
+              <ThinkingIndicator />
+            )}
             <div ref={messagesEndRef} />
           </div>
         )}

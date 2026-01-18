@@ -73,8 +73,8 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   return (
     <div
       className={cn(
-        "group flex gap-3 animate-fade-in",
-        isUser ? "justify-end" : "justify-start"
+        "group flex gap-3",
+        isUser ? "justify-end animate-pop-in" : "justify-start animate-fade-in"
       )}
     >
       {!isUser && (
