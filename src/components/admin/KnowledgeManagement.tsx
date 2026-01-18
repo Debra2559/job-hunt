@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter, Sparkles, CheckCircle2, Loader2 } from 'lucide-react';
+import { Upload, FileText, File, Trash2, RefreshCw, FileSpreadsheet, Presentation, Eye, RotateCw, Tag, X, Plus, Filter, Sparkles, CheckCircle2, Loader2, CheckSquare, Square } from 'lucide-react';
 import {
   Table,
   TableBody,
@@ -85,9 +85,74 @@ export const KnowledgeManagement = () => {
   const [allTags, setAllTags] = useState<string[]>([]);
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
+  const [selectedFiles, setSelectedFiles] = useState<Set<string>>(new Set());
+  const [isDeleting, setIsDeleting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dropZoneRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+
+  // Selection handlers
+  const toggleFileSelection = (fileId: string) => {
+    setSelectedFiles(prev => {
+      const next = new Set(prev);
+      if (next.has(fileId)) {
+        next.delete(fileId);
+      } else {
+        next.add(fileId);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedFiles.size === files.length) {
+      setSelectedFiles(new Set());
+    } else {
+      setSelectedFiles(new Set(files.map(f => f.id)));
+    }
+  };
+
+  const handleBatchDelete = async () => {
+    if (selectedFiles.size === 0) return;
+    
+    setIsDeleting(true);
+    const filesToDelete = files.filter(f => selectedFiles.has(f.id));
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (const file of filesToDelete) {
+      try {
+        // Delete from storage
+        const { error: storageError } = await supabase.storage
+          .from('knowledge')
+          .remove([file.file_path]);
+
+        if (storageError) throw storageError;
+
+        // Delete from database
+        const { error: dbError } = await supabase
+          .from('knowledge_files')
+          .delete()
+          .eq('id', file.id);
+
+        if (dbError) throw dbError;
+        successCount++;
+      } catch (error) {
+        console.error('Error deleting file:', error);
+        errorCount++;
+      }
+    }
+
+    setIsDeleting(false);
+    setSelectedFiles(new Set());
+    
+    toast({
+      title: '批量删除完成',
+      description: `成功删除 ${successCount} 个文件${errorCount > 0 ? `，${errorCount} 个失败` : ''}`,
+    });
+
+    fetchFiles();
+  };
 
   const fetchFiles = async () => {
     setLoading(true);
@@ -691,9 +756,76 @@ export const KnowledgeManagement = () => {
               <p className="text-sm">上传文件开始构建知识库</p>
             </div>
           ) : (
+            <>
+              {/* Batch Actions Bar */}
+              {selectedFiles.size > 0 && (
+              <div className="mb-4 p-3 bg-primary/10 rounded-lg flex items-center justify-between">
+                <span className="text-sm font-medium">
+                  已选择 {selectedFiles.size} 个文件
+                </span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedFiles(new Set())}
+                  >
+                    取消选择
+                  </Button>
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        disabled={isDeleting}
+                        className="gap-2"
+                      >
+                        {isDeleting ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Trash2 className="w-4 h-4" />
+                        )}
+                        批量删除
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>确认批量删除</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          确定要删除选中的 {selectedFiles.size} 个文件吗？此操作无法撤销。
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>取消</AlertDialogCancel>
+                        <AlertDialogAction
+                          onClick={handleBatchDelete}
+                          className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        >
+                          确认删除
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                </div>
+              </div>
+            )}
+
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-12">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-6 w-6"
+                      onClick={toggleSelectAll}
+                    >
+                      {selectedFiles.size === files.length && files.length > 0 ? (
+                        <CheckSquare className="w-4 h-4 text-primary" />
+                      ) : (
+                        <Square className="w-4 h-4" />
+                      )}
+                    </Button>
+                  </TableHead>
                   <TableHead>文件名</TableHead>
                   <TableHead>标签</TableHead>
                   <TableHead>大小</TableHead>
@@ -705,11 +837,36 @@ export const KnowledgeManagement = () => {
               </TableHeader>
               <TableBody>
                 {files.map((file) => (
-                  <TableRow key={file.id}>
+                  <TableRow 
+                    key={file.id}
+                    className={selectedFiles.has(file.id) ? 'bg-primary/5' : ''}
+                  >
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6"
+                        onClick={() => toggleFileSelection(file.id)}
+                      >
+                        {selectedFiles.has(file.id) ? (
+                          <CheckSquare className="w-4 h-4 text-primary" />
+                        ) : (
+                          <Square className="w-4 h-4" />
+                        )}
+                      </Button>
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {getFileIcon(file.file_type)}
-                        <span className="truncate max-w-[200px]">{file.file_name}</span>
+                        <span 
+                          className="truncate max-w-[200px] cursor-pointer hover:text-primary hover:underline"
+                          onClick={() => {
+                            setPreviewFile(file);
+                            setPreviewOpen(true);
+                          }}
+                        >
+                          {file.file_name}
+                        </span>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -808,6 +965,7 @@ export const KnowledgeManagement = () => {
                 ))}
               </TableBody>
             </Table>
+            </>
           )}
         </CardContent>
       </Card>
