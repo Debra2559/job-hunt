@@ -6,222 +6,166 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Generate embedding for query using Lovable AI Gateway
-async function generateEmbedding(text: string, apiKey: string): Promise<number[] | null> {
-  try {
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/embeddings", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "text-embedding-3-small",
-        input: text.substring(0, 8000), // Limit input length
-        dimensions: 768,
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("Embedding API error:", response.status, await response.text());
-      return null;
-    }
-
-    const data = await response.json();
-    return data.data?.[0]?.embedding || null;
-  } catch (e) {
-    console.error("Error generating embedding:", e);
-    return null;
-  }
-}
-
-// Semantic search using vector similarity
-async function semanticSearch(
+// Improved keyword-based search with scoring
+async function keywordSearch(
   supabase: any, 
-  query: string, 
-  apiKey: string
-): Promise<Array<{ id: string; file_name: string; content_text: string; tags: string[]; similarity: number }>> {
+  query: string
+): Promise<Array<{ file_name: string; content_text: string; tags: string[]; score: number; id: string }>> {
   try {
-    // Generate embedding for the query
-    const queryEmbedding = await generateEmbedding(query, apiKey);
-    
-    if (!queryEmbedding) {
-      console.log("Failed to generate query embedding, falling back to basic search");
-      return [];
-    }
-
-    console.log("Generated query embedding, searching...");
-
-    // Use vector similarity search with lower threshold to get more results
-    const { data, error } = await supabase.rpc('match_knowledge_files', {
-      query_embedding: queryEmbedding,
-      match_threshold: 0.15, // Lower threshold to include more results
-      match_count: 8, // Get more results
-    });
-
-    if (error) {
-      console.error("Semantic search error:", error);
-      return [];
-    }
-
-    console.log(`Found ${data?.length || 0} relevant documents via semantic search`);
-    return data || [];
-  } catch (e) {
-    console.error("Error in semantic search:", e);
-    return [];
-  }
-}
-
-// Get random knowledge files as fallback context
-async function getRandomKnowledge(supabase: any, limit: number = 3): Promise<Array<{ file_name: string; content_text: string; tags: string[] }>> {
-  try {
-    const { data, error } = await supabase
-      .from('knowledge_files')
-      .select('file_name, content_text, tags')
-      .eq('status', 'ready')
-      .not('content_text', 'is', null)
-      .limit(limit);
-
-    if (error || !data) {
-      console.error("Random knowledge error:", error);
-      return [];
-    }
-
-    return data;
-  } catch (e) {
-    console.error("Error getting random knowledge:", e);
-    return [];
-  }
-}
-
-// Fallback: basic keyword search - improved to always return some results
-async function basicSearch(supabase: any, query: string): Promise<Array<{ file_name: string; content_text: string; tags: string[]; matched: boolean }>> {
-  try {
-    // Get files with content
+    // Get all files with content
     const { data: files, error } = await supabase
       .from('knowledge_files')
-      .select('file_name, content_text, tags')
+      .select('id, file_name, content_text, tags')
       .eq('status', 'ready')
-      .not('content_text', 'is', null)
-      .limit(15);
+      .not('content_text', 'is', null);
 
     if (error || !files) {
-      console.error("Basic search error:", error);
+      console.error("Keyword search error:", error);
       return [];
     }
 
-    // Simple keyword matching
-    const keywords = query.toLowerCase().split(/\s+/).filter(k => k.length > 1);
-    const results: Array<{ file_name: string; content_text: string; tags: string[]; matched: boolean }> = [];
-    const unmatched: typeof results = [];
+    console.log(`Found ${files.length} knowledge files to search`);
+
+    // Extract keywords from query (filter short words and common words)
+    const stopWords = new Set(['的', '是', '在', '有', '和', '了', '我', '你', '他', '她', '它', '们', '这', '那', '什么', '怎么', '如何', '吗', '呢', '吧', '啊', '请', '能', '可以', '想', '要', '问', '一下', '关于', '一些', '一个']);
+    const keywords = query
+      .toLowerCase()
+      .replace(/[，。？！、；：""''（）【】《》\s]/g, ' ')
+      .split(/\s+/)
+      .filter(k => k.length >= 2 && !stopWords.has(k));
+    
+    console.log("Search keywords:", keywords.join(", "));
+
+    const results: Array<{ file_name: string; content_text: string; tags: string[]; score: number; id: string }> = [];
 
     for (const file of files) {
       if (!file.content_text) continue;
       
       const content = file.content_text.toLowerCase();
+      const fileName = file.file_name.toLowerCase();
       const tags = (file.tags || []).join(' ').toLowerCase();
       
-      // Check if any keyword matches
-      const matches = keywords.some(k => content.includes(k) || tags.includes(k));
+      let score = 0;
+      let matchedKeywords: string[] = [];
       
-      if (matches) {
-        results.push({ ...file, matched: true });
-      } else {
-        unmatched.push({ ...file, matched: false });
+      for (const keyword of keywords) {
+        // Count occurrences in content
+        const contentMatches = (content.match(new RegExp(keyword, 'g')) || []).length;
+        // Check filename match (higher weight)
+        const fileNameMatch = fileName.includes(keyword) ? 3 : 0;
+        // Check tags match (higher weight)
+        const tagsMatch = tags.includes(keyword) ? 2 : 0;
+        
+        if (contentMatches > 0 || fileNameMatch > 0 || tagsMatch > 0) {
+          score += Math.min(contentMatches, 10) + fileNameMatch + tagsMatch;
+          matchedKeywords.push(keyword);
+        }
+      }
+      
+      if (score > 0) {
+        // Boost score by percentage of keywords matched
+        const keywordCoverage = matchedKeywords.length / keywords.length;
+        score = score * (0.5 + keywordCoverage * 0.5);
+        
+        results.push({
+          id: file.id,
+          file_name: file.file_name,
+          content_text: file.content_text,
+          tags: file.tags || [],
+          score,
+        });
       }
     }
 
-    // If we have matched results, return them; otherwise return some unmatched as fallback
-    if (results.length > 0) {
-      return results.slice(0, 5);
-    }
+    // Sort by score descending
+    results.sort((a, b) => b.score - a.score);
     
-    // Return first few unmatched files as general context
-    return unmatched.slice(0, 3);
+    console.log(`Keyword search found ${results.length} matching files`);
+    return results.slice(0, 5);
   } catch (e) {
-    console.error("Error in basic search:", e);
+    console.error("Error in keyword search:", e);
     return [];
   }
 }
 
-// Get knowledge context with semantic search - returns both context string and sources
-// ALWAYS tries to return some knowledge context
+// Get some knowledge files as fallback context
+async function getFallbackKnowledge(
+  supabase: any, 
+  limit: number = 3
+): Promise<Array<{ file_name: string; content_text: string; tags: string[]; id: string }>> {
+  try {
+    const { data, error } = await supabase
+      .from('knowledge_files')
+      .select('id, file_name, content_text, tags')
+      .eq('status', 'ready')
+      .not('content_text', 'is', null)
+      .order('updated_at', { ascending: false })
+      .limit(limit);
+
+    if (error || !data) {
+      console.error("Fallback knowledge error:", error);
+      return [];
+    }
+
+    return data;
+  } catch (e) {
+    console.error("Error getting fallback knowledge:", e);
+    return [];
+  }
+}
+
+// Get knowledge context - ALWAYS tries to return some knowledge context
 async function getKnowledgeContext(
   supabase: any, 
-  userQuery: string, 
-  apiKey: string
-): Promise<{ context: string; sources: Array<{ fileName: string; similarity: number; tags: string[] }> }> {
+  userQuery: string
+): Promise<{ context: string; sources: Array<{ fileName: string; score: number; tags: string[]; id: string }> }> {
   try {
-    // Try semantic search first
-    const semanticResults = await semanticSearch(supabase, userQuery, apiKey);
+    // Try keyword search first
+    const keywordResults = await keywordSearch(supabase, userQuery);
     
-    if (semanticResults.length > 0) {
-      const sources = semanticResults.map(r => ({
+    if (keywordResults.length > 0) {
+      const sources = keywordResults.map(r => ({
+        id: r.id,
         fileName: r.file_name,
-        similarity: r.similarity,
+        score: r.score,
         tags: r.tags || [],
       }));
 
-      const contents = semanticResults.map(r => {
+      const contents = keywordResults.map(r => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
-        const similarity = `[相关度: ${(r.similarity * 100).toFixed(0)}%]`;
-        const truncated = r.content_text.length > 2500 
-          ? r.content_text.substring(0, 2500) + '...' 
+        const scoreLabel = `[匹配度: ${Math.min(Math.round(r.score * 10), 100)}%]`;
+        const truncated = r.content_text.length > 3000 
+          ? r.content_text.substring(0, 3000) + '...' 
           : r.content_text;
-        return `【${r.file_name}】${tags} ${similarity}\n${truncated}`;
+        return `【${r.file_name}】${tags} ${scoreLabel}\n${truncated}`;
       });
       
+      console.log(`Returning ${sources.length} keyword matched sources`);
       return {
-        context: `\n\n以下是与问题相关的知识库内容（按相关度排序）：\n\n${contents.join('\n\n---\n\n')}`,
+        context: `\n\n以下是与问题相关的知识库内容：\n\n${contents.join('\n\n---\n\n')}`,
         sources,
       };
     }
 
-    // Fallback to basic search
-    console.log("Falling back to basic search");
-    const basicResults = await basicSearch(supabase, userQuery);
+    // Fallback: get recent knowledge files
+    console.log("No keyword matches, getting fallback knowledge");
+    const fallbackKnowledge = await getFallbackKnowledge(supabase, 3);
     
-    if (basicResults.length > 0) {
-      const contents = basicResults.map(r => {
+    if (fallbackKnowledge.length > 0) {
+      const contents = fallbackKnowledge.map(r => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
-        const matchLabel = r.matched ? '[关键词匹配]' : '[参考资料]';
         const truncated = r.content_text.length > 2000 
           ? r.content_text.substring(0, 2000) + '...' 
           : r.content_text;
-        return `【${r.file_name}】${tags} ${matchLabel}\n${truncated}`;
-      });
-
-      // Create sources for basic search too
-      const sources = basicResults.map(r => ({
-        fileName: r.file_name,
-        similarity: r.matched ? 0.5 : 0.2, // Approximate similarity
-        tags: r.tags || [],
-      }));
-
-      return {
-        context: `\n\n以下是可能相关的知识库内容：\n\n${contents.join('\n\n---\n\n')}`,
-        sources,
-      };
-    }
-
-    // Last resort: get random knowledge files
-    console.log("Getting random knowledge as fallback");
-    const randomKnowledge = await getRandomKnowledge(supabase, 2);
-    
-    if (randomKnowledge.length > 0) {
-      const contents = randomKnowledge.map(r => {
-        const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
-        const truncated = r.content_text.length > 1500 
-          ? r.content_text.substring(0, 1500) + '...' 
-          : r.content_text;
-        return `【${r.file_name}】${tags} [背景参考]\n${truncated}`;
+        return `【${r.file_name}】${tags} [参考资料]\n${truncated}`;
       });
 
       return {
-        context: `\n\n以下是知识库中的参考资料（可能与问题相关）：\n\n${contents.join('\n\n---\n\n')}`,
-        sources: randomKnowledge.map(r => ({
+        context: `\n\n以下是知识库中的参考资料（供参考）：\n\n${contents.join('\n\n---\n\n')}`,
+        sources: fallbackKnowledge.map(r => ({
+          id: r.id,
           fileName: r.file_name,
-          similarity: 0.1,
+          score: 0.1,
           tags: r.tags || [],
         })),
       };
@@ -256,15 +200,15 @@ serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Extract latest user query for semantic search
+    // Extract latest user query for knowledge search
     const latestUserMessage = messages
       .filter((m: any) => m.role === 'user')
       .pop()?.content || '';
     
     console.log("User query for knowledge search:", latestUserMessage.substring(0, 100));
 
-    // Get knowledge base context using semantic search
-    const { context: knowledgeContext, sources } = await getKnowledgeContext(supabase, latestUserMessage, LOVABLE_API_KEY);
+    // Get knowledge base context using keyword search
+    const { context: knowledgeContext, sources } = await getKnowledgeContext(supabase, latestUserMessage);
     console.log("Knowledge context length:", knowledgeContext.length, "Sources:", sources.length);
 
     const systemPrompt = `你是一位友善、专业的校园AI辅导员。你的职责是帮助学生解决学业、生活、心理和行政方面的问题。
@@ -281,13 +225,12 @@ serve(async (req) => {
 - 使用emoji让回答更加生动友好
 - 控制回答长度，简洁明了
 
-**极其重要的规则 - 必须遵守：**
-1. 你必须优先且主要基于知识库内容来回答问题
-2. 每次回答时，你都应该引用知识库中的相关文件名作为来源
-3. 回答格式示例："根据《xxx文件》的规定，..."或"参考知识库中的《xxx》，..."
-4. 如果知识库内容与问题相关度较低，你仍然应该尝试从中找到有用信息
-5. 只有在知识库完全没有任何相关信息时，才说明"知识库中暂无相关信息"并提供通用建议
-6. 即使是通用问题，也要尝试结合知识库中的校园政策或规定来回答${knowledgeContext}`;
+**极其重要的规则 - 必须严格遵守：**
+1. 你必须优先且主要基于下方知识库内容来回答问题
+2. 每次回答时，必须引用知识库中的相关文件名作为来源，格式如："根据《xxx文件》的规定，..."
+3. 如果知识库中有相关内容，必须使用并引用
+4. 即使是通用问题，也要尝试结合知识库中的校园政策或规定来回答
+5. 只有在知识库完全没有任何相关信息时，才可以说明"知识库中暂无相关信息"并提供通用建议${knowledgeContext}`;
 
     console.log("Calling Lovable AI Gateway...");
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -331,34 +274,15 @@ serve(async (req) => {
 
     // Log knowledge usage for statistics (background task)
     if (sources.length > 0) {
-      const authHeader = req.headers.get('Authorization');
-      let conversationId: string | null = null;
-      
-      // Try to extract conversation context if available
-      try {
-        const requestBody = await req.clone().json();
-        conversationId = requestBody.conversationId || null;
-      } catch {}
-
       // Log usage in background (fire and forget)
       (async () => {
         for (const source of sources) {
           try {
-            // Find file id by name
-            const { data: fileData } = await supabase
-              .from('knowledge_files')
-              .select('id')
-              .eq('file_name', source.fileName)
-              .single();
-            
-            if (fileData) {
-              await supabase.from('knowledge_usage').insert({
-                file_id: fileData.id,
-                conversation_id: conversationId,
-                user_query: latestUserMessage.substring(0, 500),
-                similarity: source.similarity,
-              });
-            }
+            await supabase.from('knowledge_usage').insert({
+              file_id: source.id,
+              user_query: latestUserMessage.substring(0, 500),
+              similarity: source.score / 10, // Normalize score
+            });
           } catch (e) {
             console.error('Error logging knowledge usage:', e);
           }
