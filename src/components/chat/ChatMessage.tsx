@@ -205,39 +205,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
           )}
         </div>
         
-        {/* Knowledge Sources for AI messages */}
-        {!isUser && hasSources && (
-          <div className="mt-2">
-            <button
-              onClick={() => setShowSources(!showSources)}
-              className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <FileText className="w-3.5 h-3.5" />
-              <span>参考来源 ({message.sources!.length})</span>
-              {showSources ? (
-                <ChevronUp className="w-3.5 h-3.5" />
-              ) : (
-                <ChevronDown className="w-3.5 h-3.5" />
-              )}
-            </button>
-            
-            {showSources && (
-              <div className="mt-2 p-2.5 bg-muted/50 rounded-lg space-y-1.5">
-                {message.sources!.map((source, index) => (
-                  <div key={index} className="flex items-center justify-between gap-2 text-xs">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <FileText className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-                      <span className="truncate font-medium">{source.fileName}</span>
-                    </div>
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0 flex-shrink-0">
-                      {(source.similarity * 100).toFixed(0)}%
-                    </Badge>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        {/* Knowledge Sources - Hidden from UI but kept for backend tracking */}
         
         {/* Actions and Timestamp for AI messages */}
         {!isUser && (
