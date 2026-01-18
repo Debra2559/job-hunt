@@ -54,14 +54,9 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
       return;
     }
 
-    // For negative feedback, show input first
-    if (type === 'negative') {
-      setPendingFeedbackType(type);
-      setShowFeedbackInput(true);
-    } else {
-      // For positive, submit directly
-      submitFeedback(type, '');
-    }
+    // Show input for both positive and negative feedback
+    setPendingFeedbackType(type);
+    setShowFeedbackInput(true);
   };
 
   const submitFeedback = async (type: 'positive' | 'negative', content: string) => {
@@ -276,12 +271,34 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
 
         {/* Feedback input form */}
         {showFeedbackInput && (
-          <div className="mt-2 p-3 bg-muted/50 rounded-lg border border-border/50 animate-fade-in">
+          <div className={cn(
+            "mt-2 p-3 rounded-lg border animate-fade-in",
+            pendingFeedbackType === 'positive' 
+              ? "bg-green-500/5 border-green-500/20" 
+              : "bg-muted/50 border-border/50"
+          )}>
+            <div className="flex items-center gap-2 mb-2">
+              {pendingFeedbackType === 'positive' ? (
+                <>
+                  <ThumbsUp className="w-4 h-4 text-green-500" />
+                  <span className="text-sm font-medium text-green-600">好评反馈</span>
+                  <span className="text-xs text-muted-foreground">(可选填写)</span>
+                </>
+              ) : (
+                <>
+                  <ThumbsDown className="w-4 h-4 text-red-500" />
+                  <span className="text-sm font-medium text-red-600">改进建议</span>
+                </>
+              )}
+            </div>
             <div className="flex items-start gap-2">
               <Textarea
                 value={feedbackContent}
                 onChange={(e) => setFeedbackContent(e.target.value)}
-                placeholder="请告诉我们哪里需要改进..."
+                placeholder={pendingFeedbackType === 'positive' 
+                  ? "告诉我们您满意的地方...（可选）" 
+                  : "请告诉我们哪里需要改进..."
+                }
                 className="min-h-[60px] text-sm resize-none"
                 autoFocus
               />
@@ -299,10 +316,11 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
               <Button
                 size="sm"
                 onClick={handleSubmitFeedback}
-                disabled={submitting || !feedbackContent.trim()}
+                disabled={submitting || (pendingFeedbackType === 'negative' && !feedbackContent.trim())}
+                className={pendingFeedbackType === 'positive' ? "bg-green-500 hover:bg-green-600" : ""}
               >
                 <Send className="w-3.5 h-3.5 mr-1" />
-                提交反馈
+                {pendingFeedbackType === 'positive' ? '提交好评' : '提交反馈'}
               </Button>
             </div>
           </div>
