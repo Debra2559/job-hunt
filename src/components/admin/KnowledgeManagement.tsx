@@ -67,10 +67,18 @@ const TAG_COLORS: Record<string, string> = {
   '行政服务': 'bg-cyan-500',
 };
 
+interface UploadProgress {
+  fileName: string;
+  progress: number;
+  status: 'uploading' | 'processing' | 'done' | 'error';
+}
+
 export const KnowledgeManagement = () => {
   const [files, setFiles] = useState<KnowledgeFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<UploadProgress[]>([]);
+  const [isDragging, setIsDragging] = useState(false);
   const [previewFile, setPreviewFile] = useState<KnowledgeFile | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [filterTag, setFilterTag] = useState<string | null>(null);
@@ -78,6 +86,7 @@ export const KnowledgeManagement = () => {
   const [batchProcessing, setBatchProcessing] = useState(false);
   const [batchProgress, setBatchProgress] = useState({ current: 0, total: 0 });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const dropZoneRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const fetchFiles = async () => {
@@ -150,16 +159,28 @@ export const KnowledgeManagement = () => {
     return TAG_COLORS[tag] || 'bg-gray-500';
   };
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const selectedFiles = event.target.files;
-    if (!selectedFiles || selectedFiles.length === 0) return;
+  const processFiles = async (fileList: FileList | File[]) => {
+    const filesToUpload = Array.from(fileList);
+    if (filesToUpload.length === 0) return;
 
     setUploading(true);
     
-    for (const file of Array.from(selectedFiles)) {
+    // Initialize progress for all files
+    const initialProgress: UploadProgress[] = filesToUpload.map(file => ({
+      fileName: file.name,
+      progress: 0,
+      status: 'uploading' as const,
+    }));
+    setUploadProgress(initialProgress);
+    
+    for (let i = 0; i < filesToUpload.length; i++) {
+      const file = filesToUpload[i];
       const ext = '.' + file.name.split('.').pop()?.toLowerCase();
       
       if (!ALLOWED_EXTENSIONS.includes(ext)) {
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, status: 'error' as const, progress: 100 } : p
+        ));
         toast({
           variant: 'destructive',
           title: '不支持的文件格式',
@@ -169,6 +190,11 @@ export const KnowledgeManagement = () => {
       }
 
       try {
+        // Update progress to 20%
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, progress: 20 } : p
+        ));
+
         // Generate a safe file path using UUID to avoid encoding issues with Chinese characters
         const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
         const safeFilePath = `${Date.now()}_${crypto.randomUUID()}.${fileExtension}`;
@@ -180,6 +206,11 @@ export const KnowledgeManagement = () => {
 
         if (uploadError) throw uploadError;
 
+        // Update progress to 50%
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, progress: 50 } : p
+        ));
+
         // Determine initial status based on file type
         const needsParsing = ['pdf', 'docx', 'pptx'].includes(fileExtension);
         const isTextFile = ['md', 'txt'].includes(fileExtension);
@@ -189,6 +220,11 @@ export const KnowledgeManagement = () => {
         if (isTextFile) {
           contentText = await file.text();
         }
+
+        // Update progress to 70%
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, progress: 70, status: needsParsing ? 'processing' as const : 'uploading' as const } : p
+        ));
         
         // Create record in database - store original file name for display
         const { data: insertedFile, error: dbError } = await supabase
@@ -206,6 +242,11 @@ export const KnowledgeManagement = () => {
           .single();
 
         if (dbError) throw dbError;
+
+        // Update progress to 90%
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, progress: 90 } : p
+        ));
 
         // Trigger document parsing for PDF, DOCX, PPTX
         if (needsParsing && insertedFile) {
@@ -250,6 +291,11 @@ export const KnowledgeManagement = () => {
           });
         }
 
+        // Update progress to 100% done
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, progress: 100, status: 'done' as const } : p
+        ));
+
         toast({
           title: '上传成功',
           description: needsParsing 
@@ -258,6 +304,9 @@ export const KnowledgeManagement = () => {
         });
       } catch (error: any) {
         console.error('Error uploading file:', error);
+        setUploadProgress(prev => prev.map((p, idx) => 
+          idx === i ? { ...p, status: 'error' as const, progress: 100 } : p
+        ));
         toast({
           variant: 'destructive',
           title: '上传失败',
@@ -269,9 +318,52 @@ export const KnowledgeManagement = () => {
     setUploading(false);
     fetchFiles();
     
+    // Clear progress after a delay
+    setTimeout(() => {
+      setUploadProgress([]);
+    }, 3000);
+    
     // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
+    }
+  };
+
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFiles = event.target.files;
+    if (!selectedFiles || selectedFiles.length === 0) return;
+    await processFiles(selectedFiles);
+  };
+
+  // Drag and drop handlers
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Only set isDragging to false if we're leaving the drop zone entirely
+    if (e.currentTarget === e.target) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const droppedFiles = e.dataTransfer.files;
+    if (droppedFiles && droppedFiles.length > 0) {
+      await processFiles(droppedFiles);
     }
   };
 
@@ -483,6 +575,64 @@ export const KnowledgeManagement = () => {
           </div>
         </CardHeader>
         <CardContent>
+          {/* Drag and Drop Zone */}
+          <div
+            ref={dropZoneRef}
+            onDragEnter={handleDragEnter}
+            onDragLeave={handleDragLeave}
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+            className={`
+              mb-4 p-6 border-2 border-dashed rounded-lg transition-all duration-200 cursor-pointer
+              ${isDragging 
+                ? 'border-primary bg-primary/5 scale-[1.01]' 
+                : 'border-border hover:border-primary/50 hover:bg-muted/30'
+              }
+            `}
+            onClick={() => !uploading && fileInputRef.current?.click()}
+          >
+            <div className="flex flex-col items-center justify-center gap-2 text-center">
+              <Upload className={`w-8 h-8 ${isDragging ? 'text-primary animate-bounce' : 'text-muted-foreground'}`} />
+              <div>
+                <p className={`font-medium ${isDragging ? 'text-primary' : 'text-foreground'}`}>
+                  {isDragging ? '释放以上传文件' : '拖拽文件到此处上传'}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  或点击选择文件 · 支持 PDF、Word、PPT、Markdown、TXT
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Upload Progress */}
+          {uploadProgress.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {uploadProgress.map((item, index) => (
+                <div key={index} className="p-3 bg-muted/50 rounded-lg">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-sm font-medium truncate max-w-[70%]">{item.fileName}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {item.status === 'uploading' && '上传中...'}
+                      {item.status === 'processing' && '解析中...'}
+                      {item.status === 'done' && '✓ 完成'}
+                      {item.status === 'error' && '✗ 失败'}
+                    </span>
+                  </div>
+                  <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div 
+                      className={`h-full transition-all duration-300 rounded-full ${
+                        item.status === 'error' ? 'bg-destructive' :
+                        item.status === 'done' ? 'bg-green-500' :
+                        'bg-primary'
+                      }`}
+                      style={{ width: `${item.progress}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="mb-4 p-4 bg-muted/50 rounded-lg space-y-3">
             <div>
               <p className="text-sm text-muted-foreground">
