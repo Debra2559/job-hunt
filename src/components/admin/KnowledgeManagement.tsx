@@ -701,9 +701,67 @@ export const KnowledgeManagement = () => {
   };
 
 
-  // Count files without embeddings
+  // Count files by status
+  const filesWithoutContent = files.filter(f => f.status === 'ready' && !f.content_text);
   const filesWithoutEmbedding = files.filter(f => f.status === 'ready' && f.content_text && !f.embedding);
   const filesWithEmbedding = files.filter(f => f.embedding);
+
+  // Batch process files without content (re-parse them)
+  const handleBatchParseContent = async () => {
+    const filesToProcess = filesWithoutContent;
+    
+    if (filesToProcess.length === 0) {
+      toast({
+        title: '无需处理',
+        description: '所有文件都已有内容',
+      });
+      return;
+    }
+
+    setBatchProcessing(true);
+    setBatchProgress({ current: 0, total: filesToProcess.length });
+
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < filesToProcess.length; i++) {
+      const file = filesToProcess[i];
+      setBatchProgress({ current: i + 1, total: filesToProcess.length });
+
+      try {
+        const { error } = await supabase.functions.invoke('parse-document', {
+          body: { 
+            fileId: file.id, 
+            filePath: file.file_path, 
+            fileName: file.file_name 
+          },
+        });
+
+        if (error) {
+          console.error(`Error parsing ${file.file_name}:`, error);
+          errorCount++;
+        } else {
+          successCount++;
+        }
+      } catch (error) {
+        console.error(`Error processing ${file.file_name}:`, error);
+        errorCount++;
+      }
+
+      // Small delay to avoid overwhelming the server
+      await new Promise(resolve => setTimeout(resolve, 800));
+    }
+
+    setBatchProcessing(false);
+    setBatchProgress({ current: 0, total: 0 });
+
+    toast({
+      title: '批量解析完成',
+      description: `成功: ${successCount} 个文件，失败: ${errorCount} 个文件`,
+    });
+
+    fetchFiles();
+  };
 
   // Batch generate embeddings for all files
   const handleBatchGenerateEmbeddings = async () => {
@@ -757,6 +815,7 @@ export const KnowledgeManagement = () => {
 
     fetchFiles();
   };
+
 
   return (
     <div className="space-y-6">
@@ -932,40 +991,60 @@ export const KnowledgeManagement = () => {
               </p>
             </div>
             
-            {/* Embedding Status */}
+            {/* Processing Status */}
             <div className="flex items-center justify-between pt-2 border-t border-border/50">
-              <div className="flex items-center gap-4 text-sm">
-                <span className="flex items-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  <span className="text-muted-foreground">已嵌入: {filesWithEmbedding.length}</span>
-                </span>
+              <div className="flex items-center gap-4 text-sm flex-wrap">
+                {filesWithoutContent.length > 0 && (
+                  <span className="flex items-center gap-1.5 text-red-500">
+                    <FileText className="w-4 h-4" />
+                    <span>待解析: {filesWithoutContent.length}</span>
+                  </span>
+                )}
                 <span className="flex items-center gap-1.5">
                   <Sparkles className="w-4 h-4 text-amber-500" />
                   <span className="text-muted-foreground">待嵌入: {filesWithoutEmbedding.length}</span>
                 </span>
+                <span className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-4 h-4 text-green-500" />
+                  <span className="text-muted-foreground">已就绪: {filesWithEmbedding.length}</span>
+                </span>
               </div>
               
-              {filesWithoutEmbedding.length > 0 && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleBatchGenerateEmbeddings}
-                  disabled={batchProcessing}
-                  className="gap-2"
-                >
-                  {batchProcessing ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      处理中 ({batchProgress.current}/{batchProgress.total})
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="w-4 h-4" />
-                      批量生成嵌入
-                    </>
-                  )}
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {filesWithoutContent.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBatchParseContent}
+                    disabled={batchProcessing}
+                    className="gap-2"
+                  >
+                    {batchProcessing ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        解析中 ({batchProgress.current}/{batchProgress.total})
+                      </>
+                    ) : (
+                      <>
+                        <FileText className="w-4 h-4" />
+                        批量解析内容
+                      </>
+                    )}
+                  </Button>
+                )}
+                {filesWithoutEmbedding.length > 0 && !batchProcessing && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleBatchGenerateEmbeddings}
+                    disabled={batchProcessing}
+                    className="gap-2"
+                  >
+                    <Sparkles className="w-4 h-4" />
+                    批量生成嵌入
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
 
