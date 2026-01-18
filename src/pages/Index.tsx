@@ -40,6 +40,7 @@ const Index = () => {
     createTag,
     updateTag,
     deleteTag,
+    reorderTags,
     assignTag,
     removeTagAssignment,
   } = useConversationTags(user?.id);
@@ -292,6 +293,7 @@ const Index = () => {
           onCreateTag={createTag}
           onUpdateTag={updateTag}
           onDeleteTag={deleteTag}
+          onReorderTags={reorderTags}
           onAssignTag={assignTag}
           onRemoveTag={removeTagAssignment}
         />

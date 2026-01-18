@@ -38,6 +38,7 @@ interface SidebarProps {
   onCreateTag?: (name: string, color: string) => Promise<ConversationTag | null>;
   onUpdateTag?: (tagId: string, updates: Partial<{ name: string; color: string }>) => Promise<boolean>;
   onDeleteTag?: (tagId: string) => Promise<boolean>;
+  onReorderTags?: (reorderedTags: ConversationTag[]) => Promise<boolean>;
   onAssignTag?: (conversationId: string, tagId: string) => Promise<boolean>;
   onRemoveTag?: (conversationId: string, tagId: string) => Promise<boolean>;
 }
@@ -62,6 +63,7 @@ export function Sidebar({
   onCreateTag,
   onUpdateTag,
   onDeleteTag,
+  onReorderTags,
   onAssignTag,
   onRemoveTag,
 }: SidebarProps) {
@@ -419,6 +421,7 @@ export function Sidebar({
             onCreateTag={onCreateTag}
             onUpdateTag={onUpdateTag}
             onDeleteTag={onDeleteTag}
+            onReorderTags={onReorderTags}
           />
         </div>
       )}
