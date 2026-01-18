@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { Message } from '@/types/chat';
 import { ChatMessage } from './ChatMessage';
 import { QuickTags } from './QuickTags';
@@ -24,17 +24,65 @@ export function ChatArea({
   userId,
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const prevMessagesLengthRef = useRef(messages.length);
+
+  const smoothScrollToBottom = useCallback(() => {
+    if (!containerRef.current) return;
+    
+    const container = containerRef.current;
+    const targetScroll = container.scrollHeight - container.clientHeight;
+    const startScroll = container.scrollTop;
+    const distance = targetScroll - startScroll;
+    
+    if (distance <= 0) return;
+    
+    const duration = Math.min(500, Math.max(200, distance * 0.5));
+    const startTime = performance.now();
+    
+    const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+    
+    const animateScroll = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const easedProgress = easeOutCubic(progress);
+      
+      container.scrollTop = startScroll + distance * easedProgress;
+      
+      if (progress < 1) {
+        requestAnimationFrame(animateScroll);
+      }
+    };
+    
+    requestAnimationFrame(animateScroll);
+  }, []);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    // Only scroll when new messages are added
+    if (messages.length > prevMessagesLengthRef.current) {
+      // Small delay to allow DOM to update
+      requestAnimationFrame(() => {
+        smoothScrollToBottom();
+      });
+    }
+    prevMessagesLengthRef.current = messages.length;
+  }, [messages, smoothScrollToBottom]);
+
+  // Also scroll when typing indicator appears
+  useEffect(() => {
+    if (isTyping) {
+      requestAnimationFrame(() => {
+        smoothScrollToBottom();
+      });
+    }
+  }, [isTyping, smoothScrollToBottom]);
 
   const showWelcome = messages.length === 0;
 
   return (
     <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-background to-muted/30">
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
+      <div ref={containerRef} className="flex-1 overflow-y-auto scroll-smooth">
         {showWelcome ? (
           <div className="h-full flex flex-col items-center justify-center px-4">
             <div className="text-center mb-10 animate-fade-in">
