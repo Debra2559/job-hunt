@@ -1261,3 +1261,4 @@ export const KnowledgeManagement = () => {
     </div>
   );
 };
+
