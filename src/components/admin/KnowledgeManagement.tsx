@@ -169,26 +169,28 @@ export const KnowledgeManagement = () => {
       }
 
       try {
-        const filePath = `${Date.now()}_${file.name}`;
+        // Generate a safe file path using UUID to avoid encoding issues with Chinese characters
+        const fileExtension = file.name.split('.').pop()?.toLowerCase() || '';
+        const safeFilePath = `${Date.now()}_${crypto.randomUUID()}.${fileExtension}`;
         
-        // Upload to storage
+        // Upload to storage with safe path
         const { error: uploadError } = await supabase.storage
           .from('knowledge')
-          .upload(filePath, file);
+          .upload(safeFilePath, file);
 
         if (uploadError) throw uploadError;
 
         // Determine initial status based on file type
         const needsParsing = ['pdf', 'docx', 'pptx'].includes(ext.replace('.', ''));
         
-        // Create record in database
+        // Create record in database - store original file name for display
         const { data: insertedFile, error: dbError } = await supabase
           .from('knowledge_files')
           .insert({
-            file_name: file.name,
-            file_type: file.type || ext,
+            file_name: file.name, // Keep original name for display
+            file_type: file.type || `.${fileExtension}`,
             file_size: file.size,
-            file_path: filePath,
+            file_path: safeFilePath, // Use safe path for storage
             status: needsParsing ? 'processing' : 'ready',
             tags: [],
           })
@@ -203,7 +205,7 @@ export const KnowledgeManagement = () => {
           supabase.functions.invoke('parse-document', {
             body: {
               fileId: insertedFile.id,
-              filePath: filePath,
+              filePath: safeFilePath,
               fileName: file.name,
             },
           }).then(({ error: parseError }) => {
