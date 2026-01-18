@@ -16,8 +16,10 @@ import { supabase } from '@/integrations/supabase/client';
 
 interface UserProfile {
   display_name: string | null;
+  avatar_url: string | null;
   is_verified: boolean;
   college: string | null;
+  grade: string | null;
 }
 
 const Index = () => {
@@ -74,7 +76,7 @@ const Index = () => {
       try {
         const { data, error } = await supabase
           .from('profiles')
-          .select('display_name, is_verified, college')
+          .select('display_name, avatar_url, is_verified, college, grade')
           .eq('user_id', user.id)
           .maybeSingle();
 
@@ -226,18 +228,27 @@ const Index = () => {
   };
 
   const handleVerified = () => {
-    setProfile({ display_name: null, is_verified: true, college: null });
+    setProfile({ display_name: null, avatar_url: null, is_verified: true, college: null, grade: null });
     // Reload profile to get updated data
     if (user) {
       supabase
         .from('profiles')
-        .select('display_name, is_verified, college')
+        .select('display_name, avatar_url, is_verified, college, grade')
         .eq('user_id', user.id)
         .maybeSingle()
         .then(({ data }) => {
           if (data) setProfile(data);
         });
     }
+  };
+
+  const handleProfileUpdated = (updatedProfile: {
+    display_name: string | null;
+    avatar_url: string | null;
+    college: string | null;
+    grade: string | null;
+  }) => {
+    setProfile((prev) => prev ? { ...prev, ...updatedProfile } : null);
   };
 
   // Show loading while checking auth
@@ -283,9 +294,13 @@ const Index = () => {
           onRenameConversation={handleRenameConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
+          userId={user?.id || ''}
           userName={profile?.display_name || undefined}
           userCollege={profile?.college || undefined}
+          userGrade={profile?.grade || undefined}
+          userAvatarUrl={profile?.avatar_url || undefined}
           onSignOut={handleSignOut}
+          onProfileUpdated={handleProfileUpdated}
           isNewConversation={activeConversationId === null && !showFavorites}
           isAdmin={isAdmin || isSuperAdmin}
           tags={tags}

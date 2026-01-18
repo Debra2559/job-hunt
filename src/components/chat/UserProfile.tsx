@@ -1,20 +1,38 @@
-import { LogOut, ChevronUp } from 'lucide-react';
+import { LogOut, ChevronUp, Settings } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { ProfileEditor } from './ProfileEditor';
 
 interface UserProfileProps {
+  userId: string;
   college?: string;
+  grade?: string;
   displayName?: string;
   avatarUrl?: string;
   onSignOut: () => void;
+  onProfileUpdated: (profile: {
+    display_name: string | null;
+    avatar_url: string | null;
+    college: string | null;
+    grade: string | null;
+  }) => void;
 }
 
-export function UserProfile({ college, displayName, avatarUrl, onSignOut }: UserProfileProps) {
+export function UserProfile({ 
+  userId,
+  college, 
+  grade,
+  displayName, 
+  avatarUrl, 
+  onSignOut,
+  onProfileUpdated,
+}: UserProfileProps) {
   const name = displayName || '用户';
   
   return (
@@ -42,6 +60,20 @@ export function UserProfile({ college, displayName, avatarUrl, onSignOut }: User
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" side="top" className="w-56 bg-popover shadow-lg border border-border/60 rounded-xl p-1 mb-1">
+          <ProfileEditor
+            userId={userId}
+            displayName={displayName}
+            avatarUrl={avatarUrl}
+            college={college}
+            grade={grade}
+            onProfileUpdated={onProfileUpdated}
+          >
+            <DropdownMenuItem onSelect={(e) => e.preventDefault()} className="rounded-lg px-3 py-2.5 cursor-pointer">
+              <Settings className="w-4 h-4 mr-2" />
+              编辑资料
+            </DropdownMenuItem>
+          </ProfileEditor>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onSignOut} className="text-destructive rounded-lg px-3 py-2.5 cursor-pointer hover:bg-destructive/10">
             <LogOut className="w-4 h-4 mr-2" />
             退出登录
