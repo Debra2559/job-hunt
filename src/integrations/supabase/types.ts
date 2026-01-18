@@ -67,27 +67,39 @@ export type Database = {
       }
       feedbacks: {
         Row: {
+          admin_notes: string | null
           content: string | null
           created_at: string
           feedback_type: string
           id: string
           message_id: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          status: string
           user_id: string
         }
         Insert: {
+          admin_notes?: string | null
           content?: string | null
           created_at?: string
           feedback_type: string
           id?: string
           message_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
           user_id: string
         }
         Update: {
+          admin_notes?: string | null
           content?: string | null
           created_at?: string
           feedback_type?: string
           id?: string
           message_id?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          status?: string
           user_id?: string
         }
         Relationships: [
