@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send, Volume2, Loader2, Square } from 'lucide-react';
+import { useState } from 'react';
+import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send, Volume2, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
@@ -55,8 +55,6 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   const [pendingFeedbackType, setPendingFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
   
   const hasSources = message.sources && message.sources.length > 0;
   const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
@@ -65,64 +63,52 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
     return null;
   }
 
-  const handlePlayTTS = async () => {
-    if (isLoadingAudio) return;
+  const handlePlayTTS = () => {
+    // Check if browser supports speech synthesis
+    if (!('speechSynthesis' in window)) {
+      toast.error('您的浏览器不支持语音朗读功能');
+      return;
+    }
     
     // If already playing, stop
-    if (isPlaying && audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
       setIsPlaying(false);
       return;
     }
 
-    setIsLoadingAudio(true);
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ text: message.content }),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`TTS request failed: ${response.status}`);
-      }
-
-      const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-      
-      const audio = new Audio(audioUrl);
-      audioRef.current = audio;
-      
-      audio.onended = () => {
-        setIsPlaying(false);
-        URL.revokeObjectURL(audioUrl);
-      };
-      
-      audio.onerror = () => {
-        setIsPlaying(false);
-        toast.error('音频播放失败');
-      };
-      
-      await audio.play();
-      setIsPlaying(true);
-    } catch (error) {
-      console.error('TTS Error:', error);
-      toast.error('语音生成失败，请稍后重试');
-    } finally {
-      setIsLoadingAudio(false);
+    // Create utterance with message content
+    const utterance = new SpeechSynthesisUtterance(message.content);
+    utterance.lang = 'zh-CN'; // Chinese language
+    utterance.rate = 1.0; // Normal speed
+    utterance.pitch = 1.0; // Normal pitch
+    
+    // Try to find a Chinese voice
+    const voices = window.speechSynthesis.getVoices();
+    const chineseVoice = voices.find(voice => 
+      voice.lang.includes('zh') || voice.lang.includes('CN')
+    );
+    if (chineseVoice) {
+      utterance.voice = chineseVoice;
     }
+    
+    utterance.onstart = () => {
+      setIsPlaying(true);
+    };
+    
+    utterance.onend = () => {
+      setIsPlaying(false);
+    };
+    
+    utterance.onerror = (event) => {
+      console.error('TTS Error:', event);
+      setIsPlaying(false);
+      if (event.error !== 'canceled') {
+        toast.error('语音朗读失败');
+      }
+    };
+    
+    window.speechSynthesis.speak(utterance);
   };
 
   const handleFeedbackClick = (type: 'positive' | 'negative') => {
@@ -363,7 +349,6 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                 {/* TTS Play button */}
                 <button
                   onClick={handlePlayTTS}
-                  disabled={isLoadingAudio}
                   className={cn(
                     "p-1 rounded-md transition-all duration-200",
                     isPlaying
@@ -372,9 +357,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   )}
                   title={isPlaying ? "停止朗读" : "朗读"}
                 >
-                  {isLoadingAudio ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : isPlaying ? (
+                  {isPlaying ? (
                     <Square className="w-3.5 h-3.5" />
                   ) : (
                     <Volume2 className="w-3.5 h-3.5" />
