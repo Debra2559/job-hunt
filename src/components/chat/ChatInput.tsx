@@ -158,7 +158,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-secondary/80 text-secondary-foreground hover:bg-secondary transition-all duration-200">
+                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-background text-muted-foreground hover:bg-secondary transition-all duration-200 border border-border/50">
                       <Wrench className="w-3.5 h-3.5" />
                       工具
                       <ChevronDown className="w-3 h-3" />
