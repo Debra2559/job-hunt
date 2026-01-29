@@ -111,9 +111,9 @@ export function RoleManagement() {
   const getRoleBadge = (role: UserWithRole['role']) => {
     switch (role) {
       case 'super_admin':
-        return <Badge className="bg-gradient-to-r from-purple-500 to-pink-500">超级管理员</Badge>;
+        return <Badge className="bg-primary text-primary-foreground">超级管理员</Badge>;
       case 'admin':
-        return <Badge variant="default">管理员</Badge>;
+        return <Badge className="bg-accent text-accent-foreground">管理员</Badge>;
       default:
         return <Badge variant="secondary">普通用户</Badge>;
     }
