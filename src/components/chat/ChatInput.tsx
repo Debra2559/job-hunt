@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useImperativeHandle, forwardRef } from 'react';
 import { Send, Wrench, ChevronDown, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
@@ -10,20 +10,31 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+export interface ChatInputRef {
+  fillInput: (text: string) => void;
+}
+
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isTyping: boolean;
 }
 
-export function ChatInput({ onSendMessage, isTyping }: ChatInputProps) {
-  const [input, setInput] = useState('');
+export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
+  function ChatInput({ onSendMessage, isTyping }, ref) {
+    const [input, setInput] = useState('');
 
-  const handleSend = () => {
-    if (input.trim() && !isTyping) {
-      onSendMessage(input.trim());
-      setInput('');
-    }
-  };
+    useImperativeHandle(ref, () => ({
+      fillInput: (text: string) => {
+        setInput(text);
+      },
+    }));
+
+    const handleSend = () => {
+      if (input.trim() && !isTyping) {
+        onSendMessage(input.trim());
+        setInput('');
+      }
+    };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -99,4 +110,4 @@ export function ChatInput({ onSendMessage, isTyping }: ChatInputProps) {
       </div>
     </div>
   );
-}
+});

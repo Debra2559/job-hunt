@@ -2,7 +2,7 @@ import { useRef, useEffect, useCallback } from 'react';
 import { Message } from '@/types/chat';
 import { ChatMessage } from './ChatMessage';
 import { QuickTags } from './QuickTags';
-import { ChatInput } from './ChatInput';
+import { ChatInput, ChatInputRef } from './ChatInput';
 import { ThinkingIndicator } from './ThinkingIndicator';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
@@ -25,6 +25,7 @@ export function ChatArea({
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const chatInputRef = useRef<ChatInputRef>(null);
   const prevMessagesLengthRef = useRef(messages.length);
 
   const smoothScrollToBottom = useCallback(() => {
@@ -76,8 +77,11 @@ export function ChatArea({
       });
     }
   }, [isTyping, smoothScrollToBottom]);
-
   const showWelcome = messages.length === 0;
+
+  const handleTagClick = useCallback((text: string) => {
+    chatInputRef.current?.fillInput(text);
+  }, []);
 
   return (
     <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-background to-muted/30">
@@ -121,12 +125,12 @@ export function ChatArea({
       {/* Quick Tags above input - only show when no messages */}
       {showWelcome && (
         <div className="max-w-3xl mx-auto w-full px-4 mb-3">
-          <QuickTags onTagClick={onSendMessage} variant="horizontal" />
+          <QuickTags onTagClick={handleTagClick} variant="horizontal" />
         </div>
       )}
 
       {/* Input Area */}
-      <ChatInput onSendMessage={onSendMessage} isTyping={isTyping} />
+      <ChatInput ref={chatInputRef} onSendMessage={onSendMessage} isTyping={isTyping} />
     </div>
   );
 }
