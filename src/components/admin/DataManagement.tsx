@@ -215,37 +215,43 @@ export function DataManagement() {
       title: '新增用户',
       value: data.totalUsers,
       icon: Users,
-      gradient: 'from-blue-500 to-blue-600',
+      bgClass: 'bg-primary/10',
+      iconClass: 'text-primary',
     },
     {
       title: '新增对话',
       value: data.totalConversations,
       icon: MessageSquare,
-      gradient: 'from-purple-500 to-purple-600',
+      bgClass: 'bg-primary/10',
+      iconClass: 'text-primary',
     },
     {
       title: '用户提问',
       value: data.totalQueries,
       icon: HelpCircle,
-      gradient: 'from-emerald-500 to-emerald-600',
+      bgClass: 'bg-primary/10',
+      iconClass: 'text-primary',
     },
     {
       title: '正向反馈',
       value: data.positiveFeedback,
       icon: ThumbsUp,
-      gradient: 'from-green-500 to-green-600',
+      bgClass: 'bg-accent',
+      iconClass: 'text-accent-foreground',
     },
     {
       title: '负向反馈',
       value: data.negativeFeedback,
       icon: ThumbsDown,
-      gradient: 'from-red-500 to-red-600',
+      bgClass: 'bg-destructive/10',
+      iconClass: 'text-destructive',
     },
     {
       title: '消息总数',
       value: data.totalMessages,
       icon: MessageSquare,
-      gradient: 'from-orange-500 to-orange-600',
+      bgClass: 'bg-muted',
+      iconClass: 'text-muted-foreground',
     },
   ];
 
@@ -325,8 +331,8 @@ export function DataManagement() {
                       <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
                       <p className="text-3xl font-bold tracking-tight">{stat.value.toLocaleString()}</p>
                     </div>
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-sm`}>
-                      <stat.icon className="w-6 h-6 text-white" />
+                    <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center`}>
+                      <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
                     </div>
                   </div>
                 </div>
@@ -364,35 +370,35 @@ export function DataManagement() {
               <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(271, 91%, 65%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(271, 91%, 65%)" stopOpacity={0} />
-                  </linearGradient>
-                  <linearGradient id="colorMessages" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
+                    <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.2} />
                     <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
                   </linearGradient>
+                  <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(160, 70%, 50%)" stopOpacity={0.15} />
+                    <stop offset="95%" stopColor="hsl(160, 70%, 50%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorMessages" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(160, 60%, 60%)" stopOpacity={0.1} />
+                    <stop offset="95%" stopColor="hsl(160, 60%, 60%)" stopOpacity={0} />
+                  </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 18%, 90%)" />
+                <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(222, 20%, 45%)' }} />
+                <YAxis className="text-xs" tick={{ fill: 'hsl(222, 20%, 45%)' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'hsl(0, 0%, 100%)',
+                    border: '1px solid hsl(220, 18%, 90%)',
                     borderRadius: '8px',
                   }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  labelStyle={{ color: 'hsl(222, 47%, 11%)' }}
                 />
                 <Legend />
                 <Area
                   type="monotone"
                   dataKey="users"
                   name="新用户"
-                  stroke="hsl(217, 91%, 60%)"
+                  stroke="hsl(160, 84%, 39%)"
                   fillOpacity={1}
                   fill="url(#colorUsers)"
                   strokeWidth={2}
@@ -401,7 +407,7 @@ export function DataManagement() {
                   type="monotone"
                   dataKey="conversations"
                   name="新对话"
-                  stroke="hsl(271, 91%, 65%)"
+                  stroke="hsl(160, 70%, 50%)"
                   fillOpacity={1}
                   fill="url(#colorConversations)"
                   strokeWidth={2}
@@ -410,7 +416,7 @@ export function DataManagement() {
                   type="monotone"
                   dataKey="messages"
                   name="新消息"
-                  stroke="hsl(160, 84%, 39%)"
+                  stroke="hsl(160, 60%, 60%)"
                   fillOpacity={1}
                   fill="url(#colorMessages)"
                   strokeWidth={2}
@@ -438,20 +444,20 @@ export function DataManagement() {
           <div className="h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={feedbackTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
-                <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 18%, 90%)" />
+                <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(222, 20%, 45%)' }} />
+                <YAxis className="text-xs" tick={{ fill: 'hsl(222, 20%, 45%)' }} />
                 <Tooltip
                   contentStyle={{
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--border))',
+                    backgroundColor: 'hsl(0, 0%, 100%)',
+                    border: '1px solid hsl(220, 18%, 90%)',
                     borderRadius: '8px',
                   }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  labelStyle={{ color: 'hsl(222, 47%, 11%)' }}
                 />
                 <Legend />
-                <Bar dataKey="positive" name="正向反馈" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="negative" name="负向反馈" fill="hsl(0, 84%, 60%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="positive" name="正向反馈" fill="hsl(160, 84%, 39%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="negative" name="负向反馈" fill="hsl(220, 18%, 75%)" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
