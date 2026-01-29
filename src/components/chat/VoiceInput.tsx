@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { useScribe, CommitStrategy } from '@elevenlabs/react';
-import { Mic, MicOff, Loader2 } from 'lucide-react';
+import { Mic, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -77,9 +77,9 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
       onClick={handleToggle}
       disabled={disabled || isConnecting}
       className={cn(
-        "p-2 rounded-full transition-all duration-200",
+        "relative p-2 rounded-full transition-all duration-300",
         isActive
-          ? "bg-destructive/10 text-destructive"
+          ? "text-white"
           : "hover:bg-secondary/80 text-muted-foreground"
       )}
       title={isActive ? "停止语音输入" : "语音输入"}
@@ -87,10 +87,17 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
       {isConnecting ? (
         <Loader2 className="w-4 h-4 animate-spin" />
       ) : isActive ? (
-        <div className="relative">
-          {/* Pulsing animation when active */}
-          <span className="absolute inset-0 rounded-full bg-destructive/30 animate-ping" />
-          <MicOff className="w-4 h-4 relative z-10" />
+        <div className="relative flex items-center justify-center">
+          {/* Animated gradient background */}
+          <span className="absolute inset-[-4px] rounded-full bg-gradient-to-br from-destructive via-destructive to-primary animate-pulse" />
+          {/* Outer pulsing ring */}
+          <span className="absolute inset-[-8px] rounded-full bg-gradient-to-r from-destructive/40 to-primary/40 animate-ping" />
+          {/* Sound wave bars */}
+          <div className="relative z-10 flex items-center justify-center gap-[2px] w-4 h-4">
+            <span className="w-[3px] h-2 bg-white rounded-full animate-soundwave" style={{ animationDelay: '0ms' }} />
+            <span className="w-[3px] h-3 bg-white rounded-full animate-soundwave" style={{ animationDelay: '150ms' }} />
+            <span className="w-[3px] h-2 bg-white rounded-full animate-soundwave" style={{ animationDelay: '300ms' }} />
+          </div>
         </div>
       ) : (
         <Mic className="w-4 h-4" />
