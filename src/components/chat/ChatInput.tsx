@@ -17,10 +17,11 @@ export interface ChatInputRef {
 interface ChatInputProps {
   onSendMessage: (message: string) => void;
   isTyping: boolean;
+  onToolSelect?: (toolId: string, toolName: string) => void;
 }
 
 export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
-  function ChatInput({ onSendMessage, isTyping }, ref) {
+  function ChatInput({ onSendMessage, isTyping, onToolSelect }, ref) {
     const [input, setInput] = useState('');
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -72,7 +73,11 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-52 bg-popover shadow-lg border border-border/60 rounded-xl p-1">
                   {aiTools.map((tool) => (
-                    <DropdownMenuItem key={tool.id} className="flex flex-col items-start gap-0.5 rounded-lg px-3 py-2.5 cursor-pointer">
+                    <DropdownMenuItem 
+                      key={tool.id} 
+                      className="flex flex-col items-start gap-0.5 rounded-lg px-3 py-2.5 cursor-pointer"
+                      onClick={() => onToolSelect?.(tool.id, tool.name)}
+                    >
                       <span className="font-medium text-sm">{tool.name}</span>
                       <span className="text-xs text-muted-foreground">{tool.description}</span>
                     </DropdownMenuItem>

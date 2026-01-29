@@ -83,6 +83,19 @@ export function ChatArea({
     chatInputRef.current?.fillInput(text);
   }, []);
 
+  const handleToolSelect = useCallback((toolId: string, toolName: string) => {
+    // Map tool IDs to prompts that will be sent to the AI
+    const toolPrompts: Record<string, string> = {
+      schedule: '请帮我查询本周的课表',
+      grade: '请帮我分析一下我的历史成绩趋势',
+      library: '请帮我查询图书借阅信息',
+      repair: '我想提交一个宿舍报修申请',
+    };
+    
+    const prompt = toolPrompts[toolId] || `请帮我使用${toolName}功能`;
+    onSendMessage(prompt);
+  }, [onSendMessage]);
+
   return (
     <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-background to-muted/30">
       {/* Messages Area */}
@@ -141,7 +154,12 @@ export function ChatArea({
       )}
 
       {/* Input Area */}
-      <ChatInput ref={chatInputRef} onSendMessage={onSendMessage} isTyping={isTyping} />
+      <ChatInput 
+        ref={chatInputRef} 
+        onSendMessage={onSendMessage} 
+        isTyping={isTyping} 
+        onToolSelect={handleToolSelect}
+      />
     </div>
   );
 }
