@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Sidebar } from '@/components/chat/Sidebar';
 import { ChatArea } from '@/components/chat/ChatArea';
+import { FavoritesView } from '@/components/chat/FavoritesView';
 import { Message, Conversation, KnowledgeSource } from '@/types/chat';
 import { Menu } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -188,6 +189,11 @@ const Index = () => {
     setShowFavorites(false);
   }, []);
 
+  const handleGoToConversationFromFavorites = useCallback((conversationId: string) => {
+    setActiveConversationId(conversationId);
+    setShowFavorites(false);
+  }, []);
+
   const handleDeleteConversation = useCallback(async (id: string) => {
     const success = await deleteConversation(id);
     if (success) {
@@ -311,15 +317,25 @@ const Index = () => {
         />
       )}
 
-      {/* Chat Area */}
-      <ChatArea
-        messages={showFavorites ? favoriteMessages : messages}
-        onSendMessage={handleSendMessage}
-        onToggleFavorite={handleToggleFavorite}
-        isTyping={isTyping}
-        userName={profile?.display_name || undefined}
-        userId={user?.id}
-      />
+      {/* Main Content Area */}
+      {showFavorites ? (
+        <FavoritesView
+          conversations={conversations}
+          onToggleFavorite={handleToggleFavorite}
+          onBack={() => setShowFavorites(false)}
+          onGoToConversation={handleGoToConversationFromFavorites}
+          userId={user?.id}
+        />
+      ) : (
+        <ChatArea
+          messages={messages}
+          onSendMessage={handleSendMessage}
+          onToggleFavorite={handleToggleFavorite}
+          isTyping={isTyping}
+          userName={profile?.display_name || undefined}
+          userId={user?.id}
+        />
+      )}
     </div>
   );
 };
