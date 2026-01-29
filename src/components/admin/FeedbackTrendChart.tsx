@@ -153,16 +153,18 @@ export function FeedbackTrendChart() {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5" />
-              反馈趋势
-            </CardTitle>
-            <CardDescription>
-              反馈数量与满意度变化趋势
-            </CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">反馈趋势</CardTitle>
+              <CardDescription className="mt-0.5">
+                反馈数量与满意度变化趋势
+              </CardDescription>
+            </div>
           </div>
           <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
             <TabsList>
