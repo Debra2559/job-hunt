@@ -57,21 +57,6 @@ const Index = () => {
   const assistantMessageIdRef = useRef<string | null>(null);
   const assistantSourcesRef = useRef<KnowledgeSource[]>([]);
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth', { replace: true });
-    }
-  }, [authLoading, user, navigate]);
-
-  // Redirect to auth if logged in but missing/unverified profile
-  useEffect(() => {
-    if (authLoading || profileLoading) return;
-    if (user && (!profile || !profile.is_verified)) {
-      navigate('/auth', { replace: true });
-    }
-  }, [authLoading, profileLoading, user, profile, navigate]);
-
   // Load user profile
   useEffect(() => {
     const loadProfile = async () => {
@@ -270,14 +255,7 @@ const Index = () => {
     );
   }
 
-  // If profile is missing/unverified, we trigger a redirect in an effect above.
-  if (user && (!profile || !profile.is_verified)) {
-    return (
-      <div className="flex h-screen items-center justify-center bg-background">
-        <p className="text-muted-foreground">正在跳转...</p>
-      </div>
-    );
-  }
+  // NOTE: route guarding is handled in App.tsx; Index assumes authenticated + verified.
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
