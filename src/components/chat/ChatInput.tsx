@@ -1,9 +1,9 @@
-import { useState, useRef, useImperativeHandle, forwardRef, useEffect } from 'react';
-import { Send, Wrench, ChevronDown, Plus, X, FileText, Image as ImageIcon, Calendar, BarChart3, BookOpen, Mic, MicOff } from 'lucide-react';
+import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
+import { Send, Wrench, ChevronDown, Plus, X, FileText, Image as ImageIcon, Calendar, BarChart3, BookOpen } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { aiTools } from '@/data/campusData';
-import { toast } from 'sonner';
+import { VoiceInput } from './VoiceInput';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,8 +19,6 @@ const toolIcons: Record<string, React.ReactNode> = {
   repair: <Wrench className="w-4 h-4 text-primary" />,
 };
 
-// Check if browser supports speech recognition
-const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export interface ChatInputRef {
   fillInput: (text: string) => void;
@@ -41,84 +39,13 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   function ChatInput({ onSendMessage, isTyping, onToolSelect }, ref) {
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-    const [isListening, setIsListening] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const recognitionRef = useRef<any>(null);
 
-    // Initialize speech recognition
-    useEffect(() => {
-      if (!SpeechRecognition) {
-        console.log('Speech recognition not supported');
-        return;
-      }
-
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.lang = 'zh-CN'; // Chinese language
-
-      recognition.onresult = (event: any) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        if (finalTranscript) {
-          setInput(prev => prev + finalTranscript);
-        }
-      };
-
-      recognition.onerror = (event: any) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-        if (event.error === 'not-allowed') {
-          toast.error('请允许麦克风权限以使用语音输入');
-        } else if (event.error === 'no-speech') {
-          toast.info('未检测到语音，请再试一次');
-        }
-      };
-
-      recognition.onend = () => {
-        setIsListening(false);
-      };
-
-      recognitionRef.current = recognition;
-
-      return () => {
-        if (recognitionRef.current) {
-          recognitionRef.current.stop();
-        }
-      };
-    }, []);
-
-    const toggleListening = () => {
-      if (!SpeechRecognition) {
-        toast.error('您的浏览器不支持语音输入功能');
-        return;
-      }
-
-      if (isListening) {
-        recognitionRef.current?.stop();
-        setIsListening(false);
-      } else {
-        try {
-          recognitionRef.current?.start();
-          setIsListening(true);
-          toast.info('正在听取语音...', { duration: 2000 });
-        } catch (error) {
-          console.error('Failed to start speech recognition:', error);
-          toast.error('启动语音识别失败');
-        }
-      }
+    const handleVoiceTranscript = (text: string) => {
+      setInput(prev => prev + text);
     };
+
 
     useImperativeHandle(ref, () => ({
       fillInput: (text: string) => {
@@ -271,25 +198,10 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                   <Plus className="w-4 h-4 text-muted-foreground" />
                 </button>
 
-                {SpeechRecognition && (
-                  <button
-                    onClick={toggleListening}
-                    className={cn(
-                      "p-2 rounded-full transition-all duration-200",
-                      isListening 
-                        ? "bg-destructive/10 text-destructive animate-pulse" 
-                        : "hover:bg-secondary/80 text-muted-foreground"
-                    )}
-                    title={isListening ? "停止语音输入" : "语音输入"}
-                    disabled={isTyping}
-                  >
-                    {isListening ? (
-                      <MicOff className="w-4 h-4" />
-                    ) : (
-                      <Mic className="w-4 h-4" />
-                    )}
-                  </button>
-                )}
+                <VoiceInput 
+                  onTranscript={handleVoiceTranscript}
+                  disabled={isTyping}
+                />
               </div>
 
               <button
