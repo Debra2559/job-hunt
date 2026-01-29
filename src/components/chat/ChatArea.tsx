@@ -90,9 +90,20 @@ export function ChatArea({
         {showWelcome ? (
           <div className="h-full flex flex-col items-center justify-center px-4">
             <div className="text-center mb-10 animate-fade-in">
-              {/* AI Teacher Avatar */}
-              <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-primary/20 mx-auto mb-6">
-                <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
+              {/* AI Teacher Avatar with soft blend */}
+              <div className="relative mx-auto mb-6 w-24 h-24">
+                {/* Soft glow background */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/30 to-secondary/20 blur-xl scale-125" />
+                {/* Avatar container */}
+                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-background to-muted/50 p-0.5">
+                  <div className="w-full h-full rounded-full overflow-hidden bg-background">
+                    <img 
+                      src={aiTeacherAvatar} 
+                      alt="AI辅导员" 
+                      className="w-full h-full object-cover scale-110"
+                    />
+                  </div>
+                </div>
               </div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-3">
                 Hi，{userName || '同学'}~
