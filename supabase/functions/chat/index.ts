@@ -382,8 +382,8 @@ serve(async (req) => {
   }
 
   try {
-    const { messages } = await req.json();
-    console.log("Received chat request with", messages?.length || 0, "messages");
+    const { messages, files } = await req.json();
+    console.log("Received chat request with", messages?.length || 0, "messages and", files?.length || 0, "files");
     
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {
@@ -403,11 +403,30 @@ serve(async (req) => {
     
     console.log("User query for knowledge search:", latestUserMessage.substring(0, 100));
 
+    // Process uploaded files
+    let fileContext = '';
+    if (files && files.length > 0) {
+      console.log("Processing uploaded files:", files.map((f: any) => f.name).join(', '));
+      
+      const fileContents = files.map((f: any) => {
+        if (f.type === 'text') {
+          return `【用户上传的文件: ${f.name}】\n${f.content}`;
+        } else if (f.type === 'image') {
+          return `【用户上传的图片: ${f.name}】（图片已接收，请在回复中描述看到的内容）`;
+        } else {
+          return `【用户上传的文件: ${f.name}】${f.content}`;
+        }
+      });
+      
+      fileContext = `\n\n用户上传的文件内容：\n${fileContents.join('\n\n---\n\n')}`;
+    }
+
     // Get knowledge base context using keyword search
     const { context: knowledgeContext, sources } = await getKnowledgeContext(supabase, latestUserMessage);
     console.log("Knowledge context length:", knowledgeContext.length, "Sources:", sources.length);
 
-    const systemPrompt = `你是一位友善、专业的校园AI辅导员。
+    // Build system prompt with file context if present
+    let systemPrompt = `你是一位友善、专业的校园AI辅导员。
 
 **回答风格要求（必须遵守）：**
 - 回答要**简洁精炼**，直接给出核心信息，避免冗长
@@ -415,13 +434,27 @@ serve(async (req) => {
 - 每个要点控制在1-2句话内
 - 适当使用emoji增加亲和力，但不要过多
 - 不要写太长的开场白，直接进入正题
-- 避免重复和啰嗦的表达
+- 避免重复和啰嗦的表达`;
 
-**极其重要的规则：**
-1. **完全且仅**基于下方知识库内容回答
+    // Add file analysis instructions if files are uploaded
+    if (fileContext) {
+      systemPrompt += `
+
+**用户上传了文件，请仔细分析文件内容：**
+1. 如果是文本文件，请阅读并理解其内容，根据用户问题进行分析
+2. 如果用户没有具体问题，请总结文件的主要内容
+3. 可以结合知识库内容对文件进行补充说明
+${fileContext}`;
+    }
+
+    // Add knowledge base rules
+    systemPrompt += `
+
+**知识库使用规则：**
+1. 优先基于知识库内容回答校园相关问题
 2. **禁止引用文件名**，不要说"根据《xxx》"
 3. 如果知识库中有相关内容，直接回答要点
-4. **如果知识库没有相关信息，必须说："抱歉，我没有找到相关信息，建议咨询学院老师或相关部门。"**
+4. **如果知识库没有相关信息且没有用户上传文件，说："抱歉，我没有找到相关信息，建议咨询学院老师或相关部门。"**
 5. **严禁编造知识库中没有的信息**${knowledgeContext}`;
 
     console.log("Calling Lovable AI Gateway...");
