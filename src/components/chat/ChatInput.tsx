@@ -99,8 +99,12 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     };
 
     const getFileIcon = (file: File) => {
+      const ext = file.name.split('.').pop()?.toLowerCase();
       if (file.type.startsWith('image/')) {
         return <ImageIcon className="w-4 h-4" />;
+      }
+      if (ext === 'pdf') {
+        return <FileText className="w-4 h-4 text-destructive" />;
       }
       return <FileText className="w-4 h-4" />;
     };
@@ -155,7 +159,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               ref={fileInputRef}
               type="file"
               multiple
-              accept="image/*,.pdf,.doc,.docx,.txt,.md"
+              accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.json"
               onChange={handleFileChange}
               className="hidden"
             />
