@@ -1,7 +1,11 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent } from '@/components/ui/card';
-import { BarChart3, ThumbsUp, ThumbsDown, Users, MessageSquare, HelpCircle } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { BarChart3, ThumbsUp, ThumbsDown, Users, MessageSquare, HelpCircle, TrendingUp } from 'lucide-react';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
+import { format, subDays, startOfDay, eachDayOfInterval, subMonths, startOfMonth, eachMonthOfInterval } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -11,6 +15,21 @@ interface AnalyticsData {
   positiveFeedback: number;
   negativeFeedback: number;
 }
+
+interface TrendData {
+  date: string;
+  users: number;
+  conversations: number;
+  messages: number;
+}
+
+interface FeedbackTrendData {
+  date: string;
+  positive: number;
+  negative: number;
+}
+
+type TimeRange = '7d' | '30d' | '6m';
 
 export function DataManagement() {
   const [data, setData] = useState<AnalyticsData>({
@@ -22,35 +41,37 @@ export function DataManagement() {
     negativeFeedback: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [timeRange, setTimeRange] = useState<TimeRange>('7d');
+  const [trendData, setTrendData] = useState<TrendData[]>([]);
+  const [feedbackTrend, setFeedbackTrend] = useState<FeedbackTrendData[]>([]);
 
   useEffect(() => {
     loadAnalytics();
   }, []);
 
+  useEffect(() => {
+    loadTrendData();
+  }, [timeRange]);
+
   const loadAnalytics = async () => {
     try {
-      // Get total users
       const { count: usersCount } = await supabase
         .from('profiles')
         .select('*', { count: 'exact', head: true });
 
-      // Get total conversations
       const { count: convsCount } = await supabase
         .from('conversations')
         .select('*', { count: 'exact', head: true });
 
-      // Get total messages (queries)
       const { count: messagesCount } = await supabase
         .from('messages')
         .select('*', { count: 'exact', head: true });
 
-      // Get user messages count (actual queries)
       const { count: queriesCount } = await supabase
         .from('messages')
         .select('*', { count: 'exact', head: true })
         .eq('role', 'user');
 
-      // Get feedback counts
       const { count: positiveCount } = await supabase
         .from('feedbacks')
         .select('*', { count: 'exact', head: true })
@@ -76,48 +97,122 @@ export function DataManagement() {
     }
   };
 
+  const loadTrendData = async () => {
+    try {
+      const now = new Date();
+      let startDate: Date;
+      let dateFormat: string;
+      let intervals: Date[];
+
+      if (timeRange === '7d') {
+        startDate = subDays(now, 6);
+        dateFormat = 'MM/dd';
+        intervals = eachDayOfInterval({ start: startOfDay(startDate), end: startOfDay(now) });
+      } else if (timeRange === '30d') {
+        startDate = subDays(now, 29);
+        dateFormat = 'MM/dd';
+        intervals = eachDayOfInterval({ start: startOfDay(startDate), end: startOfDay(now) });
+      } else {
+        startDate = subMonths(now, 5);
+        dateFormat = 'yyyy/MM';
+        intervals = eachMonthOfInterval({ start: startOfMonth(startDate), end: startOfMonth(now) });
+      }
+
+      // Fetch all data in date range
+      const [usersRes, convsRes, messagesRes, feedbackRes] = await Promise.all([
+        supabase.from('profiles').select('created_at').gte('created_at', startDate.toISOString()),
+        supabase.from('conversations').select('created_at').gte('created_at', startDate.toISOString()),
+        supabase.from('messages').select('created_at').gte('created_at', startDate.toISOString()),
+        supabase.from('feedbacks').select('created_at, feedback_type').gte('created_at', startDate.toISOString()),
+      ]);
+
+      // Process trend data
+      const trend: TrendData[] = intervals.map((date) => {
+        const dateStr = format(date, dateFormat, { locale: zhCN });
+        const nextDate = timeRange === '6m' 
+          ? new Date(date.getFullYear(), date.getMonth() + 1, 1)
+          : new Date(date.getTime() + 24 * 60 * 60 * 1000);
+
+        const users = (usersRes.data || []).filter((u) => {
+          const d = new Date(u.created_at);
+          return d >= date && d < nextDate;
+        }).length;
+
+        const conversations = (convsRes.data || []).filter((c) => {
+          const d = new Date(c.created_at);
+          return d >= date && d < nextDate;
+        }).length;
+
+        const messages = (messagesRes.data || []).filter((m) => {
+          const d = new Date(m.created_at);
+          return d >= date && d < nextDate;
+        }).length;
+
+        return { date: dateStr, users, conversations, messages };
+      });
+
+      // Process feedback trend
+      const fbTrend: FeedbackTrendData[] = intervals.map((date) => {
+        const dateStr = format(date, dateFormat, { locale: zhCN });
+        const nextDate = timeRange === '6m' 
+          ? new Date(date.getFullYear(), date.getMonth() + 1, 1)
+          : new Date(date.getTime() + 24 * 60 * 60 * 1000);
+
+        const feedbacks = (feedbackRes.data || []).filter((f) => {
+          const d = new Date(f.created_at);
+          return d >= date && d < nextDate;
+        });
+
+        return {
+          date: dateStr,
+          positive: feedbacks.filter((f) => f.feedback_type === 'positive').length,
+          negative: feedbacks.filter((f) => f.feedback_type === 'negative').length,
+        };
+      });
+
+      setTrendData(trend);
+      setFeedbackTrend(fbTrend);
+    } catch (error) {
+      console.error('Error loading trend data:', error);
+    }
+  };
+
   const stats = [
     {
       title: '总用户数',
       value: data.totalUsers,
       icon: Users,
       gradient: 'from-blue-500 to-blue-600',
-      bgLight: 'bg-blue-50',
     },
     {
       title: '总对话数',
       value: data.totalConversations,
       icon: MessageSquare,
       gradient: 'from-purple-500 to-purple-600',
-      bgLight: 'bg-purple-50',
     },
     {
       title: '总提问数',
       value: data.totalQueries,
       icon: HelpCircle,
       gradient: 'from-emerald-500 to-emerald-600',
-      bgLight: 'bg-emerald-50',
     },
     {
       title: '正向反馈',
       value: data.positiveFeedback,
       icon: ThumbsUp,
       gradient: 'from-green-500 to-green-600',
-      bgLight: 'bg-green-50',
     },
     {
       title: '负向反馈',
       value: data.negativeFeedback,
       icon: ThumbsDown,
       gradient: 'from-red-500 to-red-600',
-      bgLight: 'bg-red-50',
     },
     {
       title: '总消息数',
       value: data.totalMessages,
       icon: MessageSquare,
       gradient: 'from-orange-500 to-orange-600',
-      bgLight: 'bg-orange-50',
     },
   ];
 
@@ -171,6 +266,128 @@ export function DataManagement() {
           </Card>
         ))}
       </div>
+
+      {/* Usage Trend Chart */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">使用趋势</CardTitle>
+                <CardDescription className="mt-0.5">用户、对话和消息增长趋势</CardDescription>
+              </div>
+            </div>
+            <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as TimeRange)}>
+              <TabsList>
+                <TabsTrigger value="7d">7天</TabsTrigger>
+                <TabsTrigger value="30d">30天</TabsTrigger>
+                <TabsTrigger value="6m">6个月</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={trendData} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorUsers" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(217, 91%, 60%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorConversations" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(271, 91%, 65%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(271, 91%, 65%)" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="colorMessages" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(160, 84%, 39%)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="users"
+                  name="新用户"
+                  stroke="hsl(217, 91%, 60%)"
+                  fillOpacity={1}
+                  fill="url(#colorUsers)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="conversations"
+                  name="新对话"
+                  stroke="hsl(271, 91%, 65%)"
+                  fillOpacity={1}
+                  fill="url(#colorConversations)"
+                  strokeWidth={2}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="messages"
+                  name="新消息"
+                  stroke="hsl(160, 84%, 39%)"
+                  fillOpacity={1}
+                  fill="url(#colorMessages)"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Feedback Trend Chart */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <ThumbsUp className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">反馈趋势</CardTitle>
+              <CardDescription className="mt-0.5">正向与负向反馈对比</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[250px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={feedbackTrend} margin={{ top: 10, right: 30, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                <XAxis dataKey="date" className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <YAxis className="text-xs" tick={{ fill: 'hsl(var(--muted-foreground))' }} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '8px',
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Legend />
+                <Bar dataKey="positive" name="正向反馈" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="negative" name="负向反馈" fill="hsl(0, 84%, 60%)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
