@@ -75,11 +75,18 @@ export function ProfileEditor({
   };
 
   const uploadBlob = async (blob: Blob, filePath: string, upsert: boolean = false) => {
-    const { error: uploadError } = await supabase.storage
+    console.log('Uploading avatar to path:', filePath, 'blob size:', blob.size);
+    
+    const { error: uploadError, data } = await supabase.storage
       .from('avatars')
       .upload(filePath, blob, { upsert, contentType: 'image/jpeg' });
 
-    if (uploadError) throw uploadError;
+    if (uploadError) {
+      console.error('Upload error details:', uploadError);
+      throw uploadError;
+    }
+
+    console.log('Upload successful:', data);
 
     const { data: { publicUrl } } = supabase.storage
       .from('avatars')
@@ -141,9 +148,9 @@ export function ProfileEditor({
       const publicUrl = await uploadBlob(croppedBlob, filePath);
       setFormData(prev => ({ ...prev, avatarUrl: publicUrl }));
       toast.success('头像上传成功');
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading avatar:', error);
-      toast.error('头像上传失败');
+      toast.error(`头像上传失败: ${error?.message || '未知错误'}`);
     } finally {
       setUploadingAvatar(false);
     }
