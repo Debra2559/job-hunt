@@ -60,6 +60,24 @@ export function ProfileEditor({
   const [originalFileName, setOriginalFileName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Supabase Storage object keys are picky about special characters (e.g. emojis).
+  // We sanitize the filename base to a safe ASCII-ish slug to avoid `Invalid key`.
+  const toSafeFileBase = (name: string) => {
+    const normalized = (name || '')
+      .normalize('NFKD')
+      // Remove diacritics
+      .replace(/[\u0300-\u036f]/g, '')
+      // Keep only safe characters
+      .replace(/[^a-zA-Z0-9_-]+/g, '_')
+      .replace(/_+/g, '_')
+      .replace(/^_+|_+$/g, '')
+      .toLowerCase();
+
+    const base = normalized || 'avatar';
+    // Keep object keys reasonably short
+    return base.slice(0, 64);
+  };
+
   const checkDuplicateFile = async (fileName: string): Promise<string | null> => {
     const { data, error } = await supabase.storage
       .from('avatars')
@@ -130,7 +148,7 @@ export function ProfileEditor({
     }
     setCropImageSrc('');
 
-    const fileName = `${originalFileName}.jpg`;
+    const fileName = `${toSafeFileBase(originalFileName)}.jpg`;
 
     setUploadingAvatar(true);
 
