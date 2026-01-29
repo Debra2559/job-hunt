@@ -14,6 +14,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { FeedbackTrendChart } from './FeedbackTrendChart';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Tag label mappings
 const TAG_LABELS: Record<string, string> = {
@@ -333,9 +335,11 @@ export function FeedbackManagement() {
                               <DialogHeader>
                                 <DialogTitle>AI回复内容</DialogTitle>
                               </DialogHeader>
-                              <ScrollArea className="max-h-96">
-                                <div className="prose prose-sm max-w-none p-4 bg-muted/50 rounded-lg">
-                                  {feedback.message_content}
+                              <ScrollArea className="max-h-[60vh]">
+                                <div className="prose prose-sm max-w-none p-4 bg-muted/50 rounded-lg dark:prose-invert">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {feedback.message_content}
+                                  </ReactMarkdown>
                                 </div>
                               </ScrollArea>
                             </DialogContent>
