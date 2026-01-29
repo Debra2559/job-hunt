@@ -22,17 +22,12 @@ interface ChatInputProps {
 export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   function ChatInput({ onSendMessage, isTyping }, ref) {
     const [input, setInput] = useState('');
-    const [isFilling, setIsFilling] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
 
     useImperativeHandle(ref, () => ({
       fillInput: (text: string) => {
         setInput(text);
-        setIsFilling(true);
-        // Focus the textarea
         textareaRef.current?.focus();
-        // Remove animation class after animation completes
-        setTimeout(() => setIsFilling(false), 400);
       },
     }));
 
@@ -53,23 +48,14 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   return (
     <div className="bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6 px-4">
       <div className="max-w-3xl mx-auto">
-        <div className={cn(
-          "relative border rounded-2xl bg-card shadow-elegant transition-all duration-200",
-          "focus-within:border-primary/40 focus-within:shadow-lg",
-          isFilling 
-            ? "border-primary/60 shadow-lg ring-2 ring-primary/20 animate-[pulse_0.4s_ease-in-out]" 
-            : "border-border/60"
-        )}>
+        <div className="relative border rounded-2xl bg-card shadow-elegant transition-all duration-200 focus-within:border-primary/40 focus-within:shadow-lg border-border/60">
           <Textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="请输入你的问题..."
-            className={cn(
-              "min-h-[56px] max-h-36 resize-none pr-14 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60",
-              isFilling && "text-primary"
-            )}
+            className="min-h-[56px] max-h-36 resize-none pr-14 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
             disabled={isTyping}
           />
           
