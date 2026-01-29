@@ -4,27 +4,93 @@ type ChatMessage = { role: "user" | "assistant"; content: string };
 
 const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/chat`;
 
+// Convert file to base64
+async function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = reader.result as string;
+      // Remove data URL prefix (e.g., "data:image/png;base64,")
+      const base64 = result.split(',')[1] || result;
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+// Read text file content
+async function readTextFile(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsText(file);
+  });
+}
+
 export async function streamChat({
   messages,
+  files,
   onDelta,
   onDone,
   onError,
   onSources,
 }: {
   messages: ChatMessage[];
+  files?: File[];
   onDelta: (deltaText: string) => void;
   onDone: () => void;
   onError: (error: string) => void;
   onSources?: (sources: KnowledgeSource[]) => void;
 }) {
   try {
+    // Process files if any
+    let fileContents: Array<{ name: string; type: string; content: string }> = [];
+    
+    if (files && files.length > 0) {
+      for (const file of files) {
+        const isImage = file.type.startsWith('image/');
+        const isText = file.type.startsWith('text/') || 
+                       file.name.endsWith('.txt') || 
+                       file.name.endsWith('.md') ||
+                       file.name.endsWith('.json');
+        
+        if (isImage) {
+          const base64 = await fileToBase64(file);
+          fileContents.push({
+            name: file.name,
+            type: 'image',
+            content: base64,
+          });
+        } else if (isText) {
+          const text = await readTextFile(file);
+          fileContents.push({
+            name: file.name,
+            type: 'text',
+            content: text,
+          });
+        } else {
+          // For other files, just send the name as placeholder
+          fileContents.push({
+            name: file.name,
+            type: 'file',
+            content: `[文件: ${file.name}, 类型: ${file.type}, 大小: ${(file.size / 1024).toFixed(1)}KB]`,
+          });
+        }
+      }
+    }
+
     const resp = await fetch(CHAT_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
       },
-      body: JSON.stringify({ messages }),
+      body: JSON.stringify({ 
+        messages,
+        files: fileContents.length > 0 ? fileContents : undefined,
+      }),
     });
 
     if (!resp.ok) {

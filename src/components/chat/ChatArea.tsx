@@ -8,7 +8,7 @@ import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 interface ChatAreaProps {
   messages: Message[];
-  onSendMessage: (message: string) => void;
+  onSendMessage: (message: string, files?: File[]) => void;
   onToggleFavorite: (id: string) => void;
   isTyping: boolean;
   userName?: string;

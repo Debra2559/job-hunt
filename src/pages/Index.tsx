@@ -94,8 +94,17 @@ const Index = () => {
   );
 
   const handleSendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, files?: File[]) => {
       if (!user || isTyping) return;
+      
+      // If files are attached, add file info to the message content
+      let messageContent = content;
+      if (files && files.length > 0) {
+        const fileNames = files.map(f => f.name).join(', ');
+        if (!content.trim()) {
+          messageContent = `请分析这些文件: ${fileNames}`;
+        }
+      }
 
       let targetConvId = activeConversationId;
       let currentConv = conversations.find(c => c.id === targetConvId);
@@ -119,7 +128,7 @@ const Index = () => {
       }
 
       // Add user message
-      const userMsg = await addMessage(targetConvId, 'user', content);
+      const userMsg = await addMessage(targetConvId, 'user', messageContent);
       if (!userMsg) {
         toast.error('发送消息失败');
         setIsTyping(false);
@@ -137,11 +146,12 @@ const Index = () => {
       const historyMessages = currentConv?.messages.filter(m => !m.id.startsWith('temp-')) || [];
       const apiMessages = [
         ...historyMessages.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
-        { role: "user" as const, content }
+        { role: "user" as const, content: messageContent }
       ];
 
       await streamChat({
         messages: apiMessages,
+        files: files,
         onDelta: (chunk) => {
           assistantContentRef.current += chunk;
           updateLocalMessage(targetConvId!, tempAssistantId, assistantContentRef.current, assistantSourcesRef.current);
