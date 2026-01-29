@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send, Volume2, Square } from 'lucide-react';
+import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
@@ -350,7 +350,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                 <button
                   onClick={handlePlayTTS}
                   className={cn(
-                    "p-1 rounded-md transition-all duration-200",
+                    "p-1 rounded-md transition-all duration-200 relative",
                     isPlaying
                       ? "text-primary bg-primary/10"
                       : "text-muted-foreground hover:text-primary hover:bg-primary/10"
@@ -358,7 +358,18 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   title={isPlaying ? "停止朗读" : "朗读"}
                 >
                   {isPlaying ? (
-                    <Square className="w-3.5 h-3.5" />
+                    <div className="relative flex items-center justify-center">
+                      {/* Pulsing ring effect */}
+                      <span className="absolute inset-0 rounded-full bg-primary/20 animate-ping" />
+                      {/* Sound wave bars animation */}
+                      <div className="flex items-end gap-0.5 h-3.5 w-3.5">
+                        <span className="w-0.5 bg-primary rounded-full animate-[soundwave_0.5s_ease-in-out_infinite]" style={{ height: '40%', animationDelay: '0ms' }} />
+                        <span className="w-0.5 bg-primary rounded-full animate-[soundwave_0.5s_ease-in-out_infinite]" style={{ height: '70%', animationDelay: '150ms' }} />
+                        <span className="w-0.5 bg-primary rounded-full animate-[soundwave_0.5s_ease-in-out_infinite]" style={{ height: '100%', animationDelay: '300ms' }} />
+                        <span className="w-0.5 bg-primary rounded-full animate-[soundwave_0.5s_ease-in-out_infinite]" style={{ height: '70%', animationDelay: '150ms' }} />
+                        <span className="w-0.5 bg-primary rounded-full animate-[soundwave_0.5s_ease-in-out_infinite]" style={{ height: '40%', animationDelay: '0ms' }} />
+                      </div>
+                    </div>
                   ) : (
                     <Volume2 className="w-3.5 h-3.5" />
                   )}
