@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, ThumbsUp, ThumbsDown, Users, MessageSquare, HelpCircle, TrendingUp } from 'lucide-react';
+import { BarChart3, ThumbsUp, ThumbsDown, Users, MessageSquare, HelpCircle, TrendingUp, Calendar } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
 import { format, subDays, startOfDay, eachDayOfInterval, subMonths, startOfMonth, eachMonthOfInterval } from 'date-fns';
@@ -29,7 +29,7 @@ interface FeedbackTrendData {
   negative: number;
 }
 
-type TimeRange = '7d' | '30d' | '6m';
+type TimeRange = '7d' | '30d' | '6m' | 'all';
 
 export function DataManagement() {
   const [data, setData] = useState<AnalyticsData>({
@@ -41,59 +41,79 @@ export function DataManagement() {
     negativeFeedback: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [statsLoading, setStatsLoading] = useState(false);
+  const [statsTimeRange, setStatsTimeRange] = useState<TimeRange>('all');
   const [timeRange, setTimeRange] = useState<TimeRange>('7d');
   const [trendData, setTrendData] = useState<TrendData[]>([]);
   const [feedbackTrend, setFeedbackTrend] = useState<FeedbackTrendData[]>([]);
 
   useEffect(() => {
-    loadAnalytics();
-  }, []);
+    loadAnalytics(statsTimeRange);
+  }, [statsTimeRange]);
 
   useEffect(() => {
     loadTrendData();
   }, [timeRange]);
 
-  const loadAnalytics = async () => {
+  const getDateRange = (range: TimeRange): Date | null => {
+    const now = new Date();
+    switch (range) {
+      case '7d':
+        return subDays(now, 7);
+      case '30d':
+        return subDays(now, 30);
+      case '6m':
+        return subMonths(now, 6);
+      case 'all':
+        return null;
+    }
+  };
+
+  const loadAnalytics = async (range: TimeRange) => {
+    setStatsLoading(true);
     try {
-      const { count: usersCount } = await supabase
-        .from('profiles')
-        .select('*', { count: 'exact', head: true });
+      const startDate = getDateRange(range);
+      
+      // Build queries with optional date filter
+      let usersQuery = supabase.from('profiles').select('*', { count: 'exact', head: true });
+      let convsQuery = supabase.from('conversations').select('*', { count: 'exact', head: true });
+      let messagesQuery = supabase.from('messages').select('*', { count: 'exact', head: true });
+      let queriesQuery = supabase.from('messages').select('*', { count: 'exact', head: true }).eq('role', 'user');
+      let positiveQuery = supabase.from('feedbacks').select('*', { count: 'exact', head: true }).eq('feedback_type', 'positive');
+      let negativeQuery = supabase.from('feedbacks').select('*', { count: 'exact', head: true }).eq('feedback_type', 'negative');
 
-      const { count: convsCount } = await supabase
-        .from('conversations')
-        .select('*', { count: 'exact', head: true });
+      if (startDate) {
+        const isoDate = startDate.toISOString();
+        usersQuery = usersQuery.gte('created_at', isoDate);
+        convsQuery = convsQuery.gte('created_at', isoDate);
+        messagesQuery = messagesQuery.gte('created_at', isoDate);
+        queriesQuery = queriesQuery.gte('created_at', isoDate);
+        positiveQuery = positiveQuery.gte('created_at', isoDate);
+        negativeQuery = negativeQuery.gte('created_at', isoDate);
+      }
 
-      const { count: messagesCount } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true });
-
-      const { count: queriesCount } = await supabase
-        .from('messages')
-        .select('*', { count: 'exact', head: true })
-        .eq('role', 'user');
-
-      const { count: positiveCount } = await supabase
-        .from('feedbacks')
-        .select('*', { count: 'exact', head: true })
-        .eq('feedback_type', 'positive');
-
-      const { count: negativeCount } = await supabase
-        .from('feedbacks')
-        .select('*', { count: 'exact', head: true })
-        .eq('feedback_type', 'negative');
+      const [usersRes, convsRes, messagesRes, queriesRes, positiveRes, negativeRes] = await Promise.all([
+        usersQuery,
+        convsQuery,
+        messagesQuery,
+        queriesQuery,
+        positiveQuery,
+        negativeQuery,
+      ]);
 
       setData({
-        totalUsers: usersCount || 0,
-        totalConversations: convsCount || 0,
-        totalMessages: messagesCount || 0,
-        totalQueries: queriesCount || 0,
-        positiveFeedback: positiveCount || 0,
-        negativeFeedback: negativeCount || 0,
+        totalUsers: usersRes.count || 0,
+        totalConversations: convsRes.count || 0,
+        totalMessages: messagesRes.count || 0,
+        totalQueries: queriesRes.count || 0,
+        positiveFeedback: positiveRes.count || 0,
+        negativeFeedback: negativeRes.count || 0,
       });
     } catch (error) {
       console.error('Error loading analytics:', error);
     } finally {
       setLoading(false);
+      setStatsLoading(false);
     }
   };
 
@@ -177,21 +197,34 @@ export function DataManagement() {
     }
   };
 
+  const getTimeRangeLabel = (range: TimeRange): string => {
+    switch (range) {
+      case '7d':
+        return '近7天';
+      case '30d':
+        return '近30天';
+      case '6m':
+        return '近6个月';
+      case 'all':
+        return '全部时间';
+    }
+  };
+
   const stats = [
     {
-      title: '总用户数',
+      title: '新增用户',
       value: data.totalUsers,
       icon: Users,
       gradient: 'from-blue-500 to-blue-600',
     },
     {
-      title: '总对话数',
+      title: '新增对话',
       value: data.totalConversations,
       icon: MessageSquare,
       gradient: 'from-purple-500 to-purple-600',
     },
     {
-      title: '总提问数',
+      title: '用户提问',
       value: data.totalQueries,
       icon: HelpCircle,
       gradient: 'from-emerald-500 to-emerald-600',
@@ -209,7 +242,7 @@ export function DataManagement() {
       gradient: 'from-red-500 to-red-600',
     },
     {
-      title: '总消息数',
+      title: '消息总数',
       value: data.totalMessages,
       icon: MessageSquare,
       gradient: 'from-orange-500 to-orange-600',
@@ -238,34 +271,70 @@ export function DataManagement() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <BarChart3 className="w-5 h-5 text-primary" />
-        </div>
-        <div>
-          <h1 className="text-2xl font-bold">数据概览</h1>
-          <p className="text-muted-foreground text-sm">系统使用数据统计</p>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">数据概览</h1>
+            <p className="text-muted-foreground text-sm">系统使用数据统计</p>
+          </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {stats.map((stat) => (
-          <Card key={stat.title} className="overflow-hidden hover:shadow-md transition-shadow">
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
-                  <p className="text-3xl font-bold tracking-tight">{stat.value.toLocaleString()}</p>
-                </div>
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-sm`}>
-                  <stat.icon className="w-6 h-6 text-white" />
-                </div>
+      {/* Stats Time Range Selector */}
+      <Card>
+        <CardHeader className="pb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Calendar className="w-5 h-5 text-primary" />
               </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+              <div>
+                <CardTitle className="text-lg">统计数据</CardTitle>
+                <CardDescription className="mt-0.5">
+                  {getTimeRangeLabel(statsTimeRange)}数据统计
+                </CardDescription>
+              </div>
+            </div>
+            <Tabs value={statsTimeRange} onValueChange={(v) => setStatsTimeRange(v as TimeRange)}>
+              <TabsList>
+                <TabsTrigger value="7d">7天</TabsTrigger>
+                <TabsTrigger value="30d">30天</TabsTrigger>
+                <TabsTrigger value="6m">6个月</TabsTrigger>
+                <TabsTrigger value="all">全部</TabsTrigger>
+              </TabsList>
+            </Tabs>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {statsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {stats.map((stat) => (
+                <div
+                  key={stat.title}
+                  className="p-4 rounded-xl border bg-card hover:shadow-md transition-shadow"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
+                      <p className="text-3xl font-bold tracking-tight">{stat.value.toLocaleString()}</p>
+                    </div>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-sm`}>
+                      <stat.icon className="w-6 h-6 text-white" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Usage Trend Chart */}
       <Card>
