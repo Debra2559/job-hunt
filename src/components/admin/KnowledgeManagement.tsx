@@ -821,13 +821,18 @@ export const KnowledgeManagement = () => {
   return (
     <div className="space-y-6">
       <Card>
-        <CardHeader>
+        <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
-            <div>
-              <CardTitle>知识库管理</CardTitle>
-              <CardDescription>
-                上传文档文件，AI将基于这些知识回答用户问题
-              </CardDescription>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <FileText className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <CardTitle className="text-lg">知识库管理</CardTitle>
+                <CardDescription className="mt-0.5">
+                  上传文档文件，AI将基于这些知识回答用户问题
+                </CardDescription>
+              </div>
             </div>
             <div className="flex gap-2">
               {/* Search Input */}

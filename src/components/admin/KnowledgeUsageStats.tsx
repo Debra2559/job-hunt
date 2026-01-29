@@ -143,11 +143,13 @@ export const KnowledgeUsageStats = () => {
   if (loading) {
     return (
       <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            知识库使用统计
-          </CardTitle>
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-primary" />
+            </div>
+            <CardTitle className="text-lg">知识库使用统计</CardTitle>
+          </div>
         </CardHeader>
         <CardContent>
           <div className="flex items-center justify-center py-8">
@@ -160,23 +162,25 @@ export const KnowledgeUsageStats = () => {
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5" />
-              知识库使用统计
-            </CardTitle>
-            <CardDescription>
-              追踪知识库文件被引用的频率和相关问题
-            </CardDescription>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <BarChart3 className="w-5 h-5 text-primary" />
+            </div>
+            <div>
+              <CardTitle className="text-lg">知识库使用统计</CardTitle>
+              <CardDescription className="mt-0.5">
+                追踪知识库文件被引用的频率和相关问题
+              </CardDescription>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="text-center">
+          <div className="flex items-center gap-6">
+            <div className="text-right">
               <div className="text-2xl font-bold text-primary">{totalReferences}</div>
               <div className="text-xs text-muted-foreground">总引用次数</div>
             </div>
-            <div className="text-center">
+            <div className="text-right">
               <div className="text-2xl font-bold text-primary">{stats.length}</div>
               <div className="text-xs text-muted-foreground">被引用文件</div>
             </div>
