@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send, Volume2, Loader2, Square } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Message } from '@/types/chat';
@@ -54,12 +54,76 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   const [feedbackContent, setFeedbackContent] = useState('');
   const [pendingFeedbackType, setPendingFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isLoadingAudio, setIsLoadingAudio] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  
   const hasSources = message.sources && message.sources.length > 0;
   const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
   // Don't render empty messages
   if (!message.content || message.content.trim() === '') {
     return null;
   }
+
+  const handlePlayTTS = async () => {
+    if (isLoadingAudio) return;
+    
+    // If already playing, stop
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+      setIsPlaying(false);
+      return;
+    }
+
+    setIsLoadingAudio(true);
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/text-to-speech`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          },
+          body: JSON.stringify({ text: message.content }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`TTS request failed: ${response.status}`);
+      }
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      
+      const audio = new Audio(audioUrl);
+      audioRef.current = audio;
+      
+      audio.onended = () => {
+        setIsPlaying(false);
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      audio.onerror = () => {
+        setIsPlaying(false);
+        toast.error('音频播放失败');
+      };
+      
+      await audio.play();
+      setIsPlaying(true);
+    } catch (error) {
+      console.error('TTS Error:', error);
+      toast.error('语音生成失败，请稍后重试');
+    } finally {
+      setIsLoadingAudio(false);
+    }
+  };
 
   const handleFeedbackClick = (type: 'positive' | 'negative') => {
     if (!userId || submitting || message.id.startsWith('temp-')) return;
@@ -294,6 +358,27 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   title="需改进"
                 >
                   <ThumbsDown className="w-3.5 h-3.5" />
+                </button>
+                
+                {/* TTS Play button */}
+                <button
+                  onClick={handlePlayTTS}
+                  disabled={isLoadingAudio}
+                  className={cn(
+                    "p-1 rounded-md transition-all duration-200",
+                    isPlaying
+                      ? "text-primary bg-primary/10"
+                      : "text-muted-foreground hover:text-primary hover:bg-primary/10"
+                  )}
+                  title={isPlaying ? "停止朗读" : "朗读"}
+                >
+                  {isLoadingAudio ? (
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                  ) : isPlaying ? (
+                    <Square className="w-3.5 h-3.5" />
+                  ) : (
+                    <Volume2 className="w-3.5 h-3.5" />
+                  )}
                 </button>
                 
                 {/* Favorite button */}
