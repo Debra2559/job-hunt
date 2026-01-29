@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BarChart3, ThumbsUp, ThumbsDown, Eye, MessageSquare } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { BarChart3, ThumbsUp, ThumbsDown, Users, MessageSquare, HelpCircle } from 'lucide-react';
 
 interface AnalyticsData {
   totalUsers: number;
@@ -76,89 +76,100 @@ export function DataManagement() {
     }
   };
 
-  const StatCard = ({ 
-    title, 
-    value, 
-    icon: Icon, 
-    color 
-  }: { 
-    title: string; 
-    value: number; 
-    icon: React.ComponentType<{ className?: string }>; 
-    color: string;
-  }) => (
-    <Card>
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold mt-1">{value.toLocaleString()}</p>
-          </div>
-          <div className={`p-3 rounded-xl ${color}`}>
-            <Icon className="w-6 h-6 text-white" />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+  const stats = [
+    {
+      title: '总用户数',
+      value: data.totalUsers,
+      icon: Users,
+      gradient: 'from-blue-500 to-blue-600',
+      bgLight: 'bg-blue-50',
+    },
+    {
+      title: '总对话数',
+      value: data.totalConversations,
+      icon: MessageSquare,
+      gradient: 'from-purple-500 to-purple-600',
+      bgLight: 'bg-purple-50',
+    },
+    {
+      title: '总提问数',
+      value: data.totalQueries,
+      icon: HelpCircle,
+      gradient: 'from-emerald-500 to-emerald-600',
+      bgLight: 'bg-emerald-50',
+    },
+    {
+      title: '正向反馈',
+      value: data.positiveFeedback,
+      icon: ThumbsUp,
+      gradient: 'from-green-500 to-green-600',
+      bgLight: 'bg-green-50',
+    },
+    {
+      title: '负向反馈',
+      value: data.negativeFeedback,
+      icon: ThumbsDown,
+      gradient: 'from-red-500 to-red-600',
+      bgLight: 'bg-red-50',
+    },
+    {
+      title: '总消息数',
+      value: data.totalMessages,
+      icon: MessageSquare,
+      gradient: 'from-orange-500 to-orange-600',
+      bgLight: 'bg-orange-50',
+    },
+  ];
 
   if (loading) {
     return (
-      <div className="flex justify-center py-8">
-        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      <div className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+            <BarChart3 className="w-5 h-5 text-primary" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold">数据概览</h1>
+            <p className="text-muted-foreground text-sm">系统使用数据统计</p>
+          </div>
+        </div>
+        <div className="flex justify-center py-12">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            数据概览
-          </CardTitle>
-          <CardDescription>系统使用数据统计</CardDescription>
-        </CardHeader>
-      </Card>
+      {/* Header */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <BarChart3 className="w-5 h-5 text-primary" />
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold">数据概览</h1>
+          <p className="text-muted-foreground text-sm">系统使用数据统计</p>
+        </div>
+      </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <StatCard
-          title="总用户数"
-          value={data.totalUsers}
-          icon={Eye}
-          color="bg-blue-500"
-        />
-        <StatCard
-          title="总对话数"
-          value={data.totalConversations}
-          icon={MessageSquare}
-          color="bg-purple-500"
-        />
-        <StatCard
-          title="总提问数"
-          value={data.totalQueries}
-          icon={BarChart3}
-          color="bg-green-500"
-        />
-        <StatCard
-          title="正向反馈"
-          value={data.positiveFeedback}
-          icon={ThumbsUp}
-          color="bg-emerald-500"
-        />
-        <StatCard
-          title="负向反馈"
-          value={data.negativeFeedback}
-          icon={ThumbsDown}
-          color="bg-red-500"
-        />
-        <StatCard
-          title="总消息数"
-          value={data.totalMessages}
-          icon={MessageSquare}
-          color="bg-orange-500"
-        />
+      {/* Stats Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {stats.map((stat) => (
+          <Card key={stat.title} className="overflow-hidden hover:shadow-md transition-shadow">
+            <CardContent className="p-5">
+              <div className="flex items-center justify-between">
+                <div className="space-y-1">
+                  <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
+                  <p className="text-3xl font-bold tracking-tight">{stat.value.toLocaleString()}</p>
+                </div>
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-sm`}>
+                  <stat.icon className="w-6 h-6 text-white" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );
