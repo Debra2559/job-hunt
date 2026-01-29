@@ -49,71 +49,79 @@ export function UserManagement() {
   );
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="w-5 h-5" />
-              用户管理
-            </CardTitle>
-            <CardDescription>管理所有注册用户</CardDescription>
-          </div>
-          <Badge variant="secondary" className="text-lg px-3 py-1">
-            {users.length} 用户
-          </Badge>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+              <Users className="w-5 h-5 text-primary" />
+            </div>
+            用户管理
+          </h1>
+          <p className="text-muted-foreground mt-1 ml-[52px]">管理所有注册用户</p>
         </div>
-      </CardHeader>
-      <CardContent>
-        <div className="mb-4">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input
-              placeholder="搜索用户..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
-            />
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <p className="text-2xl font-bold text-primary">{users.length}</p>
+            <p className="text-xs text-muted-foreground">总用户数</p>
           </div>
         </div>
+      </div>
 
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-          </div>
-        ) : (
-          <div className="rounded-md border">
+      {/* Search */}
+      <div className="relative max-w-md">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+        <Input
+          placeholder="搜索用户..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="pl-10"
+        />
+      </div>
+
+      {/* Table */}
+      <Card>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : (
             <Table>
               <TableHeader>
-                <TableRow>
-                  <TableHead>用户名</TableHead>
-                  <TableHead>学院</TableHead>
-                  <TableHead>学号</TableHead>
-                  <TableHead>认证状态</TableHead>
-                  <TableHead>注册时间</TableHead>
+                <TableRow className="bg-muted/50">
+                  <TableHead className="font-semibold">用户名</TableHead>
+                  <TableHead className="font-semibold">学院</TableHead>
+                  <TableHead className="font-semibold">学号</TableHead>
+                  <TableHead className="font-semibold">认证状态</TableHead>
+                  <TableHead className="font-semibold">注册时间</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredUsers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center text-muted-foreground py-8">
+                    <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
                       暂无用户数据
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredUsers.map((user) => (
-                    <TableRow key={user.id}>
+                    <TableRow key={user.id} className="hover:bg-muted/30">
                       <TableCell className="font-medium">
                         {user.display_name || '未设置'}
                       </TableCell>
                       <TableCell>{user.college || '-'}</TableCell>
-                      <TableCell>{user.student_id || '-'}</TableCell>
+                      <TableCell className="font-mono text-sm">{user.student_id || '-'}</TableCell>
                       <TableCell>
-                        <Badge variant={user.is_verified ? 'default' : 'secondary'}>
+                        <Badge 
+                          variant={user.is_verified ? 'default' : 'secondary'}
+                          className={user.is_verified ? 'bg-green-500/10 text-green-600 border-green-500/20' : ''}
+                        >
                           {user.is_verified ? '已认证' : '未认证'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-muted-foreground">
+                      <TableCell className="text-muted-foreground text-sm">
                         {format(new Date(user.created_at), 'yyyy-MM-dd HH:mm')}
                       </TableCell>
                     </TableRow>
@@ -121,9 +129,9 @@ export function UserManagement() {
                 )}
               </TableBody>
             </Table>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 }
