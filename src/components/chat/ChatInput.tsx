@@ -1,5 +1,5 @@
 import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Send, Wrench, ChevronDown, Plus, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { Send, Wrench, ChevronDown, Plus, X, FileText, Image as ImageIcon, Calendar, BarChart3, BookOpen } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { aiTools } from '@/data/campusData';
@@ -9,6 +9,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+
+// Map tool IDs to their icons
+const toolIcons: Record<string, React.ReactNode> = {
+  schedule: <Calendar className="w-4 h-4 text-primary" />,
+  grade: <BarChart3 className="w-4 h-4 text-primary" />,
+  library: <BookOpen className="w-4 h-4 text-primary" />,
+  repair: <Wrench className="w-4 h-4 text-primary" />,
+};
 
 export interface ChatInputRef {
   fillInput: (text: string) => void;
@@ -157,14 +165,19 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="start" className="w-52 bg-popover shadow-lg border border-border/60 rounded-xl p-1">
-                    {aiTools.map((tool) => (
+                  {aiTools.map((tool) => (
                       <DropdownMenuItem 
                         key={tool.id} 
-                        className="flex flex-col items-start gap-0.5 rounded-lg px-3 py-2.5 cursor-pointer"
+                        className="flex items-start gap-3 rounded-lg px-3 py-2.5 cursor-pointer"
                         onClick={() => onToolSelect?.(tool.id, tool.name)}
                       >
-                        <span className="font-medium text-sm">{tool.name}</span>
-                        <span className="text-xs text-muted-foreground">{tool.description}</span>
+                        <div className="mt-0.5">
+                          {toolIcons[tool.id]}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-medium text-sm">{tool.name}</span>
+                          <span className="text-xs text-muted-foreground">{tool.description}</span>
+                        </div>
                       </DropdownMenuItem>
                     ))}
                   </DropdownMenuContent>
