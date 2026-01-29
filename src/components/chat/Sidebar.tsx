@@ -351,40 +351,16 @@ export function Sidebar({
                           <button
                             onClick={() => onSelectConversation(conv.id)}
                             className={cn(
-                              "w-full px-3 py-2.5 rounded-xl flex flex-col gap-1.5 text-sm transition-all duration-200 text-left",
+                              "w-full px-3 py-2 rounded-xl flex flex-col gap-1 text-sm transition-all duration-200 text-left pr-20",
                               activeConversationId === conv.id
-                                ? "bg-primary/10 text-primary font-medium shadow-sm"
-                                : hoveredId === conv.id
-                                  ? "bg-sidebar-accent text-sidebar-foreground shadow-sm"
-                                  : "text-sidebar-foreground"
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
                             )}
                           >
-                            <div className="flex items-center gap-3 pr-20">
-                              <MessageSquare className={cn(
-                                "w-4 h-4 flex-shrink-0 transition-colors",
-                                activeConversationId === conv.id ? "text-primary" : "text-muted-foreground"
-                              )} />
-                              <span className="truncate font-medium">{conv.title}</span>
+                            <div className="flex items-center gap-3">
+                              <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                              <span className="truncate">{conv.title}</span>
                             </div>
-                            
-                            {/* Show time and tags on hover or when active */}
-                            <div className={cn(
-                              "flex items-center gap-2 ml-7 transition-all duration-200 overflow-hidden",
-                              (hoveredId === conv.id || activeConversationId === conv.id) 
-                                ? "max-h-10 opacity-100" 
-                                : "max-h-0 opacity-0"
-                            )}>
-                              {/* Time info */}
-                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                {new Date(conv.updatedAt).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                              
-                              {/* Message count */}
-                              <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                                {conv.messages.length} 条消息
-                              </span>
-                            </div>
-
                             {/* Show assigned tags */}
                             {getConversationTags && (() => {
                               const convTags = getConversationTags(conv.id);
@@ -410,8 +386,8 @@ export function Sidebar({
                           {/* Action buttons */}
                           <div
                             className={cn(
-                              "absolute right-2 top-3 flex items-center gap-0.5 transition-all duration-200 bg-sidebar-accent/80 backdrop-blur-sm rounded-lg px-1 py-0.5",
-                              hoveredId === conv.id ? "opacity-100 translate-x-0" : "opacity-0 translate-x-2 pointer-events-none"
+                              "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-all duration-200",
+                              hoveredId === conv.id ? "opacity-100" : "opacity-0"
                             )}
                           >
                             {/* Tag selector */}
@@ -430,8 +406,7 @@ export function Sidebar({
                                 e.stopPropagation();
                                 handleStartEdit(conv);
                               }}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
-                              title="重命名"
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
                             >
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
@@ -440,8 +415,7 @@ export function Sidebar({
                                 e.stopPropagation();
                                 onDeleteConversation(conv.id);
                               }}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
-                              title="删除"
+                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="w-3.5 h-3.5" />
                             </button>
