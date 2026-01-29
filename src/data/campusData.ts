@@ -1,6 +1,7 @@
 import { Group, QuickTag, Conversation, AITool } from '@/types/chat';
 
 export const colleges = [
+  '信息学院',
   '计算机科学与技术学院',
   '电子信息工程学院',
   '机械工程学院',
