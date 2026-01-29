@@ -106,7 +106,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     };
 
     return (
-      <div className="bg-gradient-to-t from-background via-background to-transparent pt-4 pb-6 px-4">
+      <div className="bg-gradient-to-t from-background via-background to-transparent pt-3 sm:pt-4 pb-4 sm:pb-6 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
           <div className="relative border rounded-2xl bg-card shadow-elegant transition-all duration-200 focus-within:border-primary/40 focus-within:shadow-lg border-border/60">
             {/* File previews */}

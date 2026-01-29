@@ -235,16 +235,16 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
       <div className="flex flex-col gap-1">
         <div
           className={cn(
-            "max-w-full rounded-2xl px-5 py-3.5 relative transition-all duration-200",
+            "max-w-[85%] sm:max-w-full rounded-2xl px-3.5 sm:px-5 py-3 sm:py-3.5 relative transition-all duration-200",
             isUser
               ? "bg-gradient-to-br from-accent to-accent/60 text-foreground shadow-sm"
               : "bg-card border border-border/60 text-foreground shadow-elegant"
           )}
         >
           {isUser ? (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
           ) : (
-            <div className="prose prose-sm max-w-none text-sm leading-relaxed">
+            <div className="prose prose-sm max-w-none text-sm leading-relaxed break-words">
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {message.content}
               </ReactMarkdown>

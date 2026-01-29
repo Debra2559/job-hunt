@@ -97,18 +97,18 @@ export function ChatArea({
   }, [onSendMessage]);
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-background to-muted/30">
+    <div className="flex-1 flex flex-col h-full bg-gradient-to-b from-background to-muted/30 w-full min-w-0">
       {/* Messages Area */}
       <div ref={containerRef} className="flex-1 overflow-y-auto scroll-smooth">
         {showWelcome ? (
-          <div className="h-full flex flex-col items-center justify-center px-4">
-            <div className="text-center mb-10 animate-fade-in">
+          <div className="h-full flex flex-col items-center justify-center px-4 pt-14 lg:pt-0">
+            <div className="text-center mb-8 sm:mb-10 animate-fade-in max-w-md">
               {/* AI Teacher Avatar with soft blend */}
-              <div className="relative mx-auto mb-6 w-24 h-24">
+              <div className="relative mx-auto mb-5 sm:mb-6 w-20 h-20 sm:w-24 sm:h-24">
                 {/* Soft glow background */}
                 <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/30 to-secondary/20 blur-xl scale-125" />
                 {/* Avatar container */}
-                <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gradient-to-br from-background to-muted/50 p-0.5">
+                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gradient-to-br from-background to-muted/50 p-0.5">
                   <div className="w-full h-full rounded-full overflow-hidden bg-background">
                     <img 
                       src={aiTeacherAvatar} 
@@ -118,16 +118,16 @@ export function ChatArea({
                   </div>
                 </div>
               </div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-3">
+              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-2 sm:mb-3">
                 Hi，{userName || '同学'}~
               </h1>
-              <p className="text-muted-foreground text-lg">
+              <p className="text-muted-foreground text-base sm:text-lg px-4">
                 我是你的校园AI辅导员，有什么可以帮助你的吗？
               </p>
             </div>
           </div>
         ) : (
-          <div className="max-w-3xl mx-auto py-8 px-6 space-y-6">
+          <div className="max-w-3xl mx-auto py-6 sm:py-8 px-3 sm:px-6 space-y-4 sm:space-y-6 pt-16 lg:pt-8">
             {messages.map((message, index) => (
               <ChatMessage
                 key={message.id}

@@ -190,7 +190,7 @@ export function Sidebar({
   };
 
   return (
-    <div className="w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
+    <div className="w-[280px] sm:w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
       {/* Header with AI Teacher Avatar */}
       <div className="p-5 flex items-center gap-3">
         <div className="relative w-11 h-11">
