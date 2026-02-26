@@ -43,6 +43,7 @@ interface FeedbackWithMessage {
   resolved_at: string | null;
   tags: string[] | null;
   message_content?: string;
+  prev_message_content?: string;
   user_display_name?: string;
 }
 
@@ -81,15 +82,30 @@ export function FeedbackManagement() {
       const enrichedFeedbacks = await Promise.all(
         (feedbackData || []).map(async (feedback) => {
           let message_content = '';
+          let prev_message_content = '';
           let user_display_name = '';
 
           if (feedback.message_id) {
             const { data: messageData } = await supabase
               .from('messages')
-              .select('content')
+              .select('content, conversation_id, created_at')
               .eq('id', feedback.message_id)
               .single();
             message_content = messageData?.content || '';
+
+            // Fetch previous user message in the same conversation
+            if (messageData?.conversation_id && messageData?.created_at) {
+              const { data: prevMsg } = await supabase
+                .from('messages')
+                .select('content')
+                .eq('conversation_id', messageData.conversation_id)
+                .eq('role', 'user')
+                .lt('created_at', messageData.created_at)
+                .order('created_at', { ascending: false })
+                .limit(1)
+                .single();
+              prev_message_content = prevMsg?.content || '';
+            }
           }
 
           const { data: profileData } = await supabase
@@ -102,6 +118,7 @@ export function FeedbackManagement() {
           return {
             ...feedback,
             message_content,
+            prev_message_content,
             user_display_name,
           };
         })
@@ -257,6 +274,7 @@ export function FeedbackManagement() {
                   <TableHead>用户</TableHead>
                   <TableHead className="max-w-[150px]">标签</TableHead>
                   <TableHead className="max-w-xs">反馈内容</TableHead>
+                  <TableHead className="max-w-[200px]">上一条消息</TableHead>
                   <TableHead className="max-w-xs">相关消息</TableHead>
                   <TableHead className="w-36">时间</TableHead>
                   <TableHead className="w-24">操作</TableHead>
@@ -265,7 +283,7 @@ export function FeedbackManagement() {
               <TableBody>
                 {filteredFeedbacks.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                   <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                       暂无反馈数据
                     </TableCell>
                   </TableRow>
@@ -316,6 +334,34 @@ export function FeedbackManagement() {
                           <p className="text-sm truncate" title={feedback.content}>
                             {feedback.content}
                           </p>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell className="max-w-[200px]">
+                        {feedback.prev_message_content ? (
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <button className="text-left text-sm text-muted-foreground hover:text-foreground transition-colors truncate max-w-full block">
+                                <span className="flex items-center gap-1.5">
+                                  <MessageCircle className="w-3.5 h-3.5 flex-shrink-0 text-primary" />
+                                  <span className="truncate">{feedback.prev_message_content.slice(0, 30)}...</span>
+                                </span>
+                              </button>
+                            </DialogTrigger>
+                            <DialogContent className="max-w-2xl">
+                              <DialogHeader>
+                                <DialogTitle>用户提问内容</DialogTitle>
+                              </DialogHeader>
+                              <ScrollArea className="max-h-[60vh]">
+                                <div className="prose prose-sm max-w-none p-4 bg-muted/50 rounded-lg dark:prose-invert">
+                                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                    {feedback.prev_message_content}
+                                  </ReactMarkdown>
+                                </div>
+                              </ScrollArea>
+                            </DialogContent>
+                          </Dialog>
                         ) : (
                           <span className="text-muted-foreground text-sm">-</span>
                         )}
