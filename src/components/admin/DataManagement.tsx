@@ -217,6 +217,7 @@ export function DataManagement() {
       icon: Users,
       bgClass: 'bg-primary/10',
       iconClass: 'text-primary',
+      gradientClass: 'bg-gradient-to-br from-primary to-primary/50',
     },
     {
       title: '新增对话',
@@ -224,6 +225,7 @@ export function DataManagement() {
       icon: MessageSquare,
       bgClass: 'bg-primary/10',
       iconClass: 'text-primary',
+      gradientClass: 'bg-gradient-to-br from-primary to-primary/50',
     },
     {
       title: '用户提问',
@@ -231,6 +233,7 @@ export function DataManagement() {
       icon: HelpCircle,
       bgClass: 'bg-primary/10',
       iconClass: 'text-primary',
+      gradientClass: 'bg-gradient-to-br from-primary to-primary/50',
     },
     {
       title: '正向反馈',
@@ -238,6 +241,7 @@ export function DataManagement() {
       icon: ThumbsUp,
       bgClass: 'bg-accent',
       iconClass: 'text-accent-foreground',
+      gradientClass: 'bg-gradient-to-br from-accent to-accent/50',
     },
     {
       title: '负向反馈',
@@ -245,6 +249,7 @@ export function DataManagement() {
       icon: ThumbsDown,
       bgClass: 'bg-destructive/10',
       iconClass: 'text-destructive',
+      gradientClass: 'bg-gradient-to-br from-destructive to-destructive/50',
     },
     {
       title: '消息总数',
@@ -252,6 +257,7 @@ export function DataManagement() {
       icon: MessageSquare,
       bgClass: 'bg-muted',
       iconClass: 'text-muted-foreground',
+      gradientClass: 'bg-gradient-to-br from-muted to-muted/50',
     },
   ];
 
@@ -324,15 +330,16 @@ export function DataManagement() {
               {stats.map((stat) => (
                 <div
                   key={stat.title}
-                  className="p-4 rounded-xl border bg-card hover:shadow-md transition-shadow"
+                  className="group relative p-5 rounded-2xl border bg-card hover:shadow-lg transition-all duration-300 overflow-hidden"
                 >
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-1">
+                  <div className={`absolute inset-0 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity ${stat.gradientClass}`} />
+                  <div className="relative flex items-center justify-between">
+                    <div className="space-y-1.5">
                       <p className="text-sm text-muted-foreground font-medium">{stat.title}</p>
                       <p className="text-3xl font-bold tracking-tight">{stat.value.toLocaleString()}</p>
                     </div>
-                    <div className={`w-12 h-12 rounded-xl ${stat.bgClass} flex items-center justify-center`}>
-                      <stat.icon className={`w-6 h-6 ${stat.iconClass}`} />
+                    <div className={`w-12 h-12 rounded-2xl ${stat.bgClass} flex items-center justify-center shadow-sm`}>
+                      <stat.icon className={`w-5 h-5 ${stat.iconClass}`} />
                     </div>
                   </div>
                 </div>
