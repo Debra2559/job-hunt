@@ -25,7 +25,7 @@ interface FileUsageStat {
   file_name: string;
   reference_count: number;
   avg_similarity: number;
-  recent_queries: string[];
+  recent_queries: { query: string; time: string }[];
   last_used: string;
 }
 
@@ -90,7 +90,7 @@ export const KnowledgeUsageStats = () => {
         const stat = fileMap.get(fileId)!;
         stat.count++;
         stat.total_similarity += usage.similarity || 0;
-        if (stat.queries.length < 5) {
+        if (stat.queries.length < 15) {
           stat.queries.push({ 
             query: usage.user_query, 
             time: usage.created_at 
@@ -105,7 +105,7 @@ export const KnowledgeUsageStats = () => {
           file_name: s.file_name,
           reference_count: s.count,
           avg_similarity: s.count > 0 ? s.total_similarity / s.count : 0,
-          recent_queries: s.queries.map(q => q.query),
+          recent_queries: s.queries.map(q => ({ query: q.query, time: q.time })),
           last_used: s.last_used,
         }))
         .sort((a, b) => b.reference_count - a.reference_count);
@@ -258,13 +258,18 @@ export const KnowledgeUsageStats = () => {
                                 <div className="text-sm font-medium text-muted-foreground mb-2">
                                   最近相关问题：
                                 </div>
-                                {stat.recent_queries.map((query, idx) => (
+                                {stat.recent_queries.map((item, idx) => (
                                   <div
                                     key={idx}
                                     className="flex items-start gap-2 text-sm p-2 bg-background rounded-md"
                                   >
                                     <MessageSquare className="w-4 h-4 mt-0.5 text-primary shrink-0" />
-                                    <span className="line-clamp-2">{query}</span>
+                                    <span className="line-clamp-2 flex-1">{typeof item === 'string' ? item : item.query}</span>
+                                    {typeof item !== 'string' && item.time && (
+                                      <span className="text-xs text-muted-foreground whitespace-nowrap shrink-0">
+                                        {formatDate(item.time)}
+                                      </span>
+                                    )}
                                   </div>
                                 ))}
                               </div>
