@@ -30,49 +30,20 @@ async function readTextFile(file: File): Promise<string> {
   });
 }
 
-// Parse PDF file using edge function
+// Parse PDF file directly in browser using pdf.js
 async function parsePdfFile(file: File): Promise<string> {
   try {
-    // Upload to temporary storage
-    const tempPath = `temp/${Date.now()}_${file.name}`;
-    const { error: uploadError } = await supabase.storage
-      .from('knowledge')
-      .upload(tempPath, file);
-
-    if (uploadError) {
-      console.error('PDF upload error:', uploadError);
-      return `[PDF文件: ${file.name} - 上传失败]`;
-    }
-
-    // Call parse-document edge function
-    const { data, error } = await supabase.functions.invoke('parse-document', {
-      body: {
-        fileId: `temp_${Date.now()}`,
-        filePath: tempPath,
-        fileName: file.name,
-      },
-    });
-
-    // Delete temp file after parsing
-    await supabase.storage.from('knowledge').remove([tempPath]);
-
-    if (error || !data?.success) {
-      console.error('PDF parse error:', error || data?.error);
-      return `[PDF文件: ${file.name} - 解析失败，请稍后重试]`;
-    }
-
-    // Directly extract text from PDF using pdf.js in browser
     const arrayBuffer = await file.arrayBuffer();
     const text = await extractPdfTextInBrowser(arrayBuffer);
     
-    if (text && text.length > 100) {
+    if (text && text.length > 50) {
       return `[PDF文档: ${file.name}]\n\n${text}`;
     }
     
-    return `[PDF文件: ${file.name} - 已上传，内容待解析]`;
+    return `[PDF文件: ${file.name}, 大小: ${(file.size / 1024).toFixed(1)}KB - 无法提取文本内容，可能是扫描版PDF]`;
   } catch (e) {
     console.error('PDF parsing error:', e);
-    return `[PDF文件: ${file.name} - 处理出错]`;
+    return `[PDF文件: ${file.name} - 解析出错，请重试]`;
   }
 }
 
