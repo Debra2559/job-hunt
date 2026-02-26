@@ -78,7 +78,7 @@ const Admin = () => {
         onBack={() => navigate('/')}
       />
       
-      <main className="flex-1 p-8 overflow-auto">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto pt-16 lg:pt-8">
         {renderContent()}
       </main>
     </div>
