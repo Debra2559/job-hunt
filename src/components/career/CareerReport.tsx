@@ -37,7 +37,6 @@ export interface CareerReportData {
   }[];
   trends: { industry: string; trend: string; description: string }[];
   learningPath: { phase: string; duration: string; actions: string[] }[];
-  resources?: { title: string; url: string; description: string }[];
   jobListings?: BossJobListing[];
 }
 
