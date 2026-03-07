@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Compass, Sparkles } from 'lucide-react';
+import { ArrowLeft, Send, Compass, Sparkles, ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,6 +10,7 @@ import { CareerReport, parseCareerReport, type CareerReportData } from '@/compon
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
+type WebSource = { url: string; title: string; snippet: string };
 
 const CAREER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-agent`;
 
@@ -19,12 +20,38 @@ const QUICK_STARTERS = [
   { label: '📊 了解行业趋势', message: '我想了解一下当前就业市场的热门行业和发展趋势。' },
 ];
 
+function SourceCards({ sources }: { sources: WebSource[] }) {
+  if (sources.length === 0) return null;
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-2 mb-2">
+      {sources.map((s, i) => (
+        <a
+          key={i}
+          href={s.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shrink-0 max-w-[220px] p-3 rounded-xl border bg-card hover:bg-accent/50 hover:border-primary/30 transition-all group"
+        >
+          <div className="flex items-start gap-2">
+            <ExternalLink className="w-3.5 h-3.5 text-primary mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
+            <div className="min-w-0">
+              <p className="text-xs font-medium text-foreground truncate">{s.title}</p>
+              <p className="text-[11px] text-muted-foreground line-clamp-2 mt-0.5">{s.snippet}</p>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  );
+}
+
 export default function Career() {
   const navigate = useNavigate();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
+  const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const assistantContentRef = useRef('');
@@ -64,6 +91,7 @@ export default function Career() {
       const reader = resp.body.getReader();
       const decoder = new TextDecoder();
       let textBuffer = '';
+      let currentSources: WebSource[] = [];
 
       while (true) {
         const { done, value } = await reader.read();
@@ -81,6 +109,13 @@ export default function Career() {
           if (jsonStr === '[DONE]') break;
           try {
             const parsed = JSON.parse(jsonStr);
+
+            // Check for web sources event
+            if (parsed.webSources) {
+              currentSources = parsed.webSources;
+              continue;
+            }
+
             const delta = parsed.choices?.[0]?.delta?.content;
             if (delta) {
               assistantContentRef.current += delta;
@@ -100,12 +135,21 @@ export default function Career() {
         }
       }
 
+      // Save web sources for this assistant message
+      if (currentSources.length > 0) {
+        setWebSources((prev) => {
+          const next = new Map(prev);
+          next.set(newMessages.length, currentSources); // index of assistant msg
+          return next;
+        });
+      }
+
       // Check for career report in final content
       const report = parseCareerReport(assistantContentRef.current);
       if (report) {
         setReports((prev) => {
           const next = new Map(prev);
-          next.set(newMessages.length, report); // index of assistant msg
+          next.set(newMessages.length, report);
           return next;
         });
       }
@@ -125,9 +169,24 @@ export default function Career() {
     }
   };
 
-  // Extract text content without the report JSON block
   const getDisplayContent = (content: string) => {
     return content.replace(/```career-report[\s\S]*?```/g, '').trim();
+  };
+
+  // Custom link renderer for markdown - opens in new tab
+  const markdownComponents = {
+    a: ({ href, children, ...props }: any) => (
+      <a
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline underline-offset-2 hover:text-primary/80 inline-flex items-center gap-0.5"
+        {...props}
+      >
+        {children}
+        <ExternalLink className="w-3 h-3 inline-block" />
+      </a>
+    ),
   };
 
   return (
@@ -143,7 +202,7 @@ export default function Career() {
           </div>
           <div>
             <h1 className="text-sm font-semibold text-foreground">职业规划 Agent</h1>
-            <p className="text-xs text-muted-foreground">AI驱动的个性化职业测评</p>
+            <p className="text-xs text-muted-foreground">AI驱动的个性化职业测评 · 数据来源华中农业大学</p>
           </div>
         </div>
       </header>
@@ -159,7 +218,7 @@ export default function Career() {
               <div className="text-center space-y-2">
                 <h2 className="text-xl font-bold text-foreground">发现你的职业方向 ✨</h2>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  通过AI对话，分析你的性格、专业、兴趣和价值观，结合行业趋势为你推荐最适合的职业方向。
+                  通过AI对话，分析你的性格、专业、兴趣和价值观，结合华中农业大学就业信息和行业趋势，为你推荐最适合的职业方向。
                 </p>
               </div>
               <div className="flex flex-wrap justify-center gap-2">
@@ -178,6 +237,7 @@ export default function Career() {
 
           {messages.map((msg, i) => {
             const reportData = reports.get(i);
+            const sources = webSources.get(i);
             const displayContent = msg.role === 'assistant' ? getDisplayContent(msg.content) : msg.content;
 
             return (
@@ -192,9 +252,12 @@ export default function Career() {
                 >
                   {msg.role === 'assistant' ? (
                     <div className="space-y-4">
+                      {sources && <SourceCards sources={sources} />}
                       {displayContent && (
                         <div className="prose prose-sm max-w-none text-foreground">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{displayContent}</ReactMarkdown>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                            {displayContent}
+                          </ReactMarkdown>
                         </div>
                       )}
                       {reportData && <CareerReport data={reportData} />}
