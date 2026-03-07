@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CareerReport, parseCareerReport, type CareerReportData } from '@/components/career/CareerReport';
+import { openCareerReportPage } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 import { useAuth } from '@/hooks/useAuth';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
@@ -202,19 +203,29 @@ export default function Career() {
     scrollToBottom();
   }, [messages]);
 
-  // Parse reports from loaded messages
+  // Parse reports from loaded messages & auto-open new ones
+  const openedReportsRef = useRef<Set<number>>(new Set());
+  
   useEffect(() => {
     if (!loadingHistory) {
       const newReports = new Map<number, CareerReportData>();
       messages.forEach((msg, i) => {
         if (msg.role === 'assistant') {
           const report = parseCareerReport(msg.content);
-          if (report) newReports.set(i, report);
+          if (report) {
+            newReports.set(i, report);
+            // Auto-open newly generated reports (not from history)
+            if (!openedReportsRef.current.has(i) && !isLoading) {
+              openedReportsRef.current.add(i);
+              // Small delay to let streaming finish
+              setTimeout(() => openCareerReportPage(report), 300);
+            }
+          }
         }
       });
       if (newReports.size > 0) setReports(newReports);
     }
-  }, [loadingHistory, messages.length]);
+  }, [loadingHistory, messages, isLoading]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
@@ -343,7 +354,15 @@ export default function Career() {
                             </ReactMarkdown>
                           </div>
                         )}
-                        {reportData && <CareerReport data={reportData} />}
+                        {reportData && (
+                          <button
+                            onClick={() => openCareerReportPage(reportData)}
+                            className="w-full mt-2 py-3 rounded-2xl text-sm font-semibold bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white hover:opacity-90 transition-all duration-300 active:scale-[0.98] shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] flex items-center justify-center gap-2"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            查看完整报告页面
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
