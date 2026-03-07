@@ -122,6 +122,51 @@ All colors MUST be HSL.
     box-shadow: var(--shadow-primary);
   }
 
+  .shadow-dream {
+    box-shadow: var(--shadow-dream);
+  }
+
+  /* Dreamy floating animation */
+  @keyframes dream-float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(10px, -15px) scale(1.05); }
+    50% { transform: translate(-5px, -25px) scale(1.02); }
+    75% { transform: translate(-15px, -10px) scale(1.07); }
+  }
+
+  @keyframes dream-float-reverse {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    25% { transform: translate(-12px, -10px) scale(1.03); }
+    50% { transform: translate(8px, -20px) scale(1.06); }
+    75% { transform: translate(15px, -8px) scale(1.02); }
+  }
+
+  @keyframes dream-pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+  }
+
+  @keyframes dream-sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1) rotate(180deg); }
+  }
+
+  .dream-orb {
+    animation: dream-float 12s ease-in-out infinite;
+  }
+
+  .dream-orb-2 {
+    animation: dream-float-reverse 15s ease-in-out infinite;
+  }
+
+  .dream-orb-3 {
+    animation: dream-float 18s ease-in-out infinite reverse;
+  }
+
+  .dream-pulse {
+    animation: dream-pulse 4s ease-in-out infinite;
+  }
+
   /* Prose styles for markdown */
   .prose {
     @apply text-foreground;
