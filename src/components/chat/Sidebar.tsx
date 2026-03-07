@@ -329,18 +329,6 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Tag Manager */}
-      {onCreateTag && onUpdateTag && onDeleteTag && (
-        <div className="px-4 mb-2">
-          <TagManager
-            tags={tags}
-            onCreateTag={onCreateTag}
-            onUpdateTag={onUpdateTag}
-            onDeleteTag={onDeleteTag}
-            onReorderTags={onReorderTags}
-          />
-        </div>
-      )}
 
 
       {/* Admin Entry - Above User Profile */}
