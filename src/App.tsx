@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Career from "./pages/Career";
 import NotFound from "./pages/NotFound";
 import { AuthRoute, ProtectedRoute } from "@/components/auth/RouteGuards";
 
