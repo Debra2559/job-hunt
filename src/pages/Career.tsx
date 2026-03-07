@@ -90,22 +90,31 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
 
   return (
     <div className="mt-3 animate-fade-in space-y-2">
-      <div className="flex flex-wrap gap-2">
+      <div className="space-y-2">
         {options.map((opt, i) => (
           <button
             key={i}
             onClick={() => handleClick(i)}
             disabled={disabled}
             className={cn(
-              "px-4 py-2.5 rounded-2xl text-sm font-medium border transition-all duration-200",
-              "active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed",
+              "w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex items-start gap-3",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
               selected.has(i)
-                ? "bg-primary/10 border-primary/40 text-primary ring-1 ring-primary/20"
-                : "bg-background border-border text-foreground hover:bg-accent hover:border-primary/30 hover:shadow-sm"
+                ? "border-primary bg-primary/5 ring-1 ring-primary/30"
+                : "border-border bg-card hover:border-primary/30 hover:bg-accent/50"
             )}
           >
-            {selected.has(i) && <span className="mr-1">✓</span>}
-            {opt.label}
+            <div className={cn(
+              "shrink-0 mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors",
+              selected.has(i)
+                ? "border-primary bg-primary"
+                : "border-muted-foreground/40"
+            )}>
+              {selected.has(i) && (
+                <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+              )}
+            </div>
+            <span className="text-sm font-medium text-foreground">{opt.label}</span>
           </button>
         ))}
       </div>
@@ -113,12 +122,12 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
         <button
           onClick={handleSubmit}
           disabled={disabled}
-          className="px-5 py-2 rounded-2xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-[0.97] shadow-sm"
+          className="w-full px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-[0.98] shadow-sm"
         >
           确认选择（{selected.size}）
         </button>
       )}
-      <p className="text-[11px] text-muted-foreground">可多选，点击「确认选择」提交</p>
+      <p className="text-[11px] text-muted-foreground text-center">可多选，点击「确认选择」提交</p>
     </div>
   );
 }
