@@ -54,16 +54,28 @@ All colors MUST be HSL.
     --quick-tag-border: 220 18% 90%;
     --quick-tag-hover: 160 50% 96%;
     
+    /* Dreamy career tokens */
+    --dream-violet: 270 60% 70%;
+    --dream-pink: 330 70% 76%;
+    --dream-blue: 210 80% 72%;
+    --dream-mint: 160 60% 72%;
+    --dream-peach: 20 80% 80%;
+    
     /* Gradient tokens */
     --gradient-primary: linear-gradient(135deg, hsl(160 84% 39%) 0%, hsl(160 70% 45%) 100%);
     --gradient-accent: linear-gradient(135deg, hsl(160 60% 94%) 0%, hsl(160 50% 96%) 100%);
     --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(220 20% 99%) 100%);
+    --gradient-dream: linear-gradient(135deg, hsl(270 60% 96%) 0%, hsl(330 60% 96%) 30%, hsl(210 60% 96%) 60%, hsl(160 50% 96%) 100%);
+    --gradient-dream-orb1: radial-gradient(circle, hsl(270 60% 85% / 0.4) 0%, transparent 70%);
+    --gradient-dream-orb2: radial-gradient(circle, hsl(330 70% 85% / 0.35) 0%, transparent 70%);
+    --gradient-dream-orb3: radial-gradient(circle, hsl(210 70% 85% / 0.3) 0%, transparent 70%);
     
     /* Shadow tokens */
     --shadow-sm: 0 1px 2px 0 hsl(222 47% 11% / 0.03);
     --shadow-md: 0 4px 12px -2px hsl(222 47% 11% / 0.06), 0 2px 4px -2px hsl(222 47% 11% / 0.04);
     --shadow-lg: 0 12px 32px -4px hsl(222 47% 11% / 0.08), 0 4px 8px -2px hsl(222 47% 11% / 0.04);
     --shadow-primary: 0 4px 16px -4px hsl(160 84% 39% / 0.35);
+    --shadow-dream: 0 8px 32px -8px hsl(270 60% 70% / 0.2), 0 4px 16px -4px hsl(330 70% 76% / 0.15);
   }
 }
 
