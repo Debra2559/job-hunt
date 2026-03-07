@@ -10,7 +10,6 @@ import { streamChat } from '@/lib/chatApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
-import { useConversationTags } from '@/hooks/useConversationTags';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,17 +34,8 @@ const Index = () => {
     updateLocalMessage,
     deleteConversation,
     renameConversation,
+    pinConversation,
   } = useConversations(user?.id);
-  const {
-    tags,
-    getConversationTags,
-    createTag,
-    updateTag,
-    deleteTag,
-    reorderTags,
-    assignTag,
-    removeTagAssignment,
-  } = useConversationTags(user?.id);
   const { isAdmin, isSuperAdmin } = useUserRole(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
@@ -225,6 +215,15 @@ const Index = () => {
     }
   }, [renameConversation]);
 
+  const handlePinConversation = useCallback(async (id: string, pinned: boolean) => {
+    const success = await pinConversation(id, pinned);
+    if (success) {
+      toast.success(pinned ? '已置顶' : '已取消置顶');
+    } else {
+      toast.error('操作失败');
+    }
+  }, [pinConversation]);
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
@@ -297,6 +296,7 @@ const Index = () => {
           onNewConversation={handleNewConversation}
           onDeleteConversation={handleDeleteConversation}
           onRenameConversation={handleRenameConversation}
+          onPinConversation={handlePinConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
           userId={user?.id || ''}
@@ -308,14 +308,6 @@ const Index = () => {
           onProfileUpdated={handleProfileUpdated}
           isNewConversation={activeConversationId === null && !showFavorites}
           isAdmin={isAdmin || isSuperAdmin}
-          tags={tags}
-          getConversationTags={getConversationTags}
-          onCreateTag={createTag}
-          onUpdateTag={updateTag}
-          onDeleteTag={deleteTag}
-          onReorderTags={reorderTags}
-          onAssignTag={assignTag}
-          onRemoveTag={removeTagAssignment}
         />
       </div>
 

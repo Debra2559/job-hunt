@@ -46,6 +46,7 @@ export function useConversations(userId: string | undefined) {
             groupId: conv.group_id,
             createdAt: new Date(conv.created_at),
             updatedAt: new Date(conv.updated_at),
+            isPinned: conv.is_pinned,
           };
         })
       );
@@ -290,6 +291,28 @@ export function useConversations(userId: string | undefined) {
     }
   }, []);
 
+  // Pin/unpin a conversation
+  const pinConversation = useCallback(async (conversationId: string, pinned: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('conversations')
+        .update({ is_pinned: pinned } as any)
+        .eq('id', conversationId);
+
+      if (error) throw error;
+
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.id === conversationId ? { ...conv, isPinned: pinned } : conv
+        )
+      );
+      return true;
+    } catch (error) {
+      console.error('Error pinning conversation:', error);
+      return false;
+    }
+  }, []);
+
   return {
     conversations,
     loading,
@@ -300,6 +323,7 @@ export function useConversations(userId: string | undefined) {
     updateLocalMessage,
     deleteConversation,
     renameConversation,
+    pinConversation,
     setConversations,
   };
 }

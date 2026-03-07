@@ -1,15 +1,11 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Search, Tag, Compass } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ConversationTag } from '@/hooks/useConversationTags';
-import { TagManager } from './TagManager';
-import { ConversationTagSelector } from './ConversationTagSelector';
-import { Input } from '@/components/ui/input';
 
 interface ConversationGroup {
   label: string;
@@ -24,6 +20,7 @@ interface SidebarProps {
   onNewConversation: () => void;
   onDeleteConversation: (id: string) => void;
   onRenameConversation: (id: string, newTitle: string) => void;
+  onPinConversation?: (id: string, pinned: boolean) => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
   userId: string;
@@ -40,15 +37,6 @@ interface SidebarProps {
   }) => void;
   isNewConversation?: boolean;
   isAdmin?: boolean;
-  // Tag props
-  tags?: ConversationTag[];
-  getConversationTags?: (conversationId: string) => ConversationTag[];
-  onCreateTag?: (name: string, color: string) => Promise<ConversationTag | null>;
-  onUpdateTag?: (tagId: string, updates: Partial<{ name: string; color: string }>) => Promise<boolean>;
-  onDeleteTag?: (tagId: string) => Promise<boolean>;
-  onReorderTags?: (reorderedTags: ConversationTag[]) => Promise<boolean>;
-  onAssignTag?: (conversationId: string, tagId: string) => Promise<boolean>;
-  onRemoveTag?: (conversationId: string, tagId: string) => Promise<boolean>;
 }
 
 export function Sidebar({
@@ -58,6 +46,7 @@ export function Sidebar({
   onNewConversation,
   onDeleteConversation,
   onRenameConversation,
+  onPinConversation,
   showFavorites,
   onToggleFavorites,
   userId,
@@ -69,54 +58,21 @@ export function Sidebar({
   onProfileUpdated,
   isNewConversation,
   isAdmin,
-  tags = [],
-  getConversationTags,
-  onCreateTag,
-  onUpdateTag,
-  onDeleteTag,
-  onReorderTags,
-  onAssignTag,
-  onRemoveTag,
 }: SidebarProps) {
   const navigate = useNavigate();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTagFilter, setSelectedTagFilter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    pinned: true,
     today: true,
     yesterday: true,
     week: true,
     older: true,
   });
 
-  // Filter conversations by search and tags
-  const filteredConversations = useMemo(() => {
-    let filtered = conversations;
-
-    // Search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((conv) => 
-        conv.title.toLowerCase().includes(query) ||
-        conv.messages.some((m) => m.content.toLowerCase().includes(query))
-      );
-    }
-
-    // Tag filter
-    if (selectedTagFilter && getConversationTags) {
-      filtered = filtered.filter((conv) => {
-        const convTags = getConversationTags(conv.id);
-        return convTags.some((t) => t.id === selectedTagFilter);
-      });
-    }
-
-    return filtered;
-  }, [conversations, searchQuery, selectedTagFilter, getConversationTags]);
-
-  // Group conversations by time
+  // Group conversations by pinned + time
   const groupedConversations = useMemo((): ConversationGroup[] => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -124,13 +80,18 @@ export function Sidebar({
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const groups: Record<string, Conversation[]> = {
+      pinned: [],
       today: [],
       yesterday: [],
       week: [],
       older: [],
     };
 
-    filteredConversations.forEach((conv) => {
+    conversations.forEach((conv) => {
+      if (conv.isPinned) {
+        groups.pinned.push(conv);
+        return;
+      }
       const convDate = new Date(conv.updatedAt);
       if (convDate >= today) {
         groups.today.push(conv);
@@ -144,13 +105,14 @@ export function Sidebar({
     });
 
     const result: ConversationGroup[] = [];
+    if (groups.pinned.length > 0) result.push({ label: '📌 置顶', key: 'pinned', conversations: groups.pinned });
     if (groups.today.length > 0) result.push({ label: '今天', key: 'today', conversations: groups.today });
     if (groups.yesterday.length > 0) result.push({ label: '昨天', key: 'yesterday', conversations: groups.yesterday });
     if (groups.week.length > 0) result.push({ label: '过去7天', key: 'week', conversations: groups.week });
     if (groups.older.length > 0) result.push({ label: '更早', key: 'older', conversations: groups.older });
 
     return result;
-  }, [filteredConversations]);
+  }, [conversations]);
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
@@ -242,9 +204,9 @@ export function Sidebar({
         </button>
         
         {/* No results */}
-        {filteredConversations.length === 0 && conversations.length > 0 && (
+        {conversations.length === 0 && (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            未找到匹配的对话
+            暂无对话
           </div>
         )}
         
@@ -306,36 +268,14 @@ export function Sidebar({
                           <button
                             onClick={() => onSelectConversation(conv.id)}
                             className={cn(
-                              "w-full px-3 py-2 rounded-xl flex flex-col gap-1 text-sm transition-all duration-200 text-left pr-20",
+                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
                               activeConversationId === conv.id
                                 ? "bg-primary/10 text-primary font-medium"
                                 : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
                             )}
                           >
-                            <div className="flex items-center gap-3">
-                              <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                              <span className="truncate">{conv.title}</span>
-                            </div>
-                            {/* Show assigned tags */}
-                            {getConversationTags && (() => {
-                              const convTags = getConversationTags(conv.id);
-                              if (convTags.length === 0) return null;
-                              return (
-                                <div className="flex gap-1 ml-7 flex-wrap">
-                                  {convTags.slice(0, 3).map((tag) => (
-                                    <span
-                                      key={tag.id}
-                                      className="px-1.5 py-0.5 rounded text-[10px] bg-muted/60 text-muted-foreground"
-                                    >
-                                      {tag.name}
-                                    </span>
-                                  ))}
-                                  {convTags.length > 3 && (
-                                    <span className="text-[10px] text-muted-foreground">+{convTags.length - 3}</span>
-                                  )}
-                                </div>
-                              );
-                            })()}
+                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{conv.title}</span>
                           </button>
                           
                           {/* Action buttons */}
@@ -345,16 +285,19 @@ export function Sidebar({
                               hoveredId === conv.id ? "opacity-100" : "opacity-0"
                             )}
                           >
-                            {/* Tag selector */}
-                            {onAssignTag && onRemoveTag && onCreateTag && getConversationTags && (
-                              <ConversationTagSelector
-                                conversationId={conv.id}
-                                allTags={tags}
-                                assignedTags={getConversationTags(conv.id)}
-                                onAssignTag={onAssignTag}
-                                onRemoveTag={onRemoveTag}
-                                onCreateTag={onCreateTag}
-                              />
+                            {onPinConversation && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onPinConversation(conv.id, !conv.isPinned);
+                                }}
+                                className={cn(
+                                  "p-1.5 rounded-lg hover:bg-primary/10",
+                                  conv.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"
+                                )}
+                              >
+                                <Pin className="w-3.5 h-3.5" />
+                              </button>
                             )}
                             <button
                               onClick={(e) => {
@@ -386,18 +329,6 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Tag Manager */}
-      {onCreateTag && onUpdateTag && onDeleteTag && (
-        <div className="px-4 mb-2">
-          <TagManager
-            tags={tags}
-            onCreateTag={onCreateTag}
-            onUpdateTag={onUpdateTag}
-            onDeleteTag={onDeleteTag}
-            onReorderTags={onReorderTags}
-          />
-        </div>
-      )}
 
 
       {/* Admin Entry - Above User Profile */}

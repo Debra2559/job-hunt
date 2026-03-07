@@ -20,6 +20,7 @@ export interface Conversation {
   groupId: string;
   createdAt: Date;
   updatedAt: Date;
+  isPinned?: boolean;
 }
 
 export interface Group {
