@@ -300,131 +300,250 @@ export default function Career() {
   }
 
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Header */}
-      <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate('/')}
-          className="shrink-0 rounded-xl hover:bg-muted"
-        >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
-        </Button>
-        <div className="flex items-center gap-3 flex-1">
-          <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
-            <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
+    <div className="flex h-screen bg-gradient-to-b from-background to-muted/30">
+      {/* Chat Panel */}
+      <div className={cn(
+        "flex flex-col transition-all duration-500 ease-out",
+        activeReport ? "w-1/2 border-r border-border" : "w-full"
+      )}>
+        {/* Header */}
+        <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate('/')}
+            className="shrink-0 rounded-xl hover:bg-muted"
+          >
+            <ArrowLeft className="w-5 h-5 text-foreground" />
+          </Button>
+          <div className="flex items-center gap-3 flex-1">
+            <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
+              <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
+            </div>
+            <div>
+              <h1 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
+                职业规划
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
+              </h1>
+              <p className="text-xs text-muted-foreground">对话式职业测评与规划</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-              职业规划
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
-            </h1>
-            <p className="text-xs text-muted-foreground">对话式职业测评与规划</p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleNewConversation}
-          disabled={isLoading}
-          className="shrink-0 rounded-xl hover:bg-muted"
-          title="开始新对话"
-        >
-          <RotateCcw className="w-4 h-4 text-muted-foreground" />
-        </Button>
-      </header>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleNewConversation}
+            disabled={isLoading}
+            className="shrink-0 rounded-xl hover:bg-muted"
+            title="开始新对话"
+          >
+            <RotateCcw className="w-4 h-4 text-muted-foreground" />
+          </Button>
+        </header>
 
-      {/* Messages */}
-      <div ref={scrollRef} className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-4 sm:space-y-6">
-          {messages.map((msg, i) => {
-            const reportData = reports.get(i);
-            const sources = webSources.get(i);
-            const displayContent = msg.role === 'assistant' ? getDisplayContent(msg.content) : msg.content;
-            const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !isLoading;
-            const options = isLastAssistant ? parseOptions(msg.content) : [];
+        {/* Messages */}
+        <div ref={scrollRef} className="flex-1 overflow-y-auto">
+          <div className={cn("mx-auto px-3 sm:px-6 py-6 sm:py-8 space-y-4 sm:space-y-6", activeReport ? "max-w-2xl" : "max-w-3xl")}>
+            {messages.map((msg, i) => {
+              const reportData = reports.get(i);
+              const sources = webSources.get(i);
+              const displayContent = msg.role === 'assistant' ? getDisplayContent(msg.content) : msg.content;
+              const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !isLoading;
+              const options = isLastAssistant ? parseOptions(msg.content) : [];
 
-            return (
-              <div key={i} className="animate-fade-in">
-                <div className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                  {msg.role === 'assistant' && (
-                    <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
-                      <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+              return (
+                <div key={i} className="animate-fade-in">
+                  <div className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                    {msg.role === 'assistant' && (
+                      <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
+                        <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    )}
+                    <div
+                      className={cn(
+                        'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
+                        msg.role === 'user'
+                          ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
+                          : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
+                      )}
+                    >
+                      {msg.role === 'assistant' ? (
+                        <div className="space-y-4">
+                          {sources && <SourceCards sources={sources} />}
+                          {displayContent && (
+                            <div className="prose prose-sm max-w-none text-foreground">
+                              <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                                {displayContent}
+                              </ReactMarkdown>
+                            </div>
+                          )}
+                          {reportData && (
+                            <button
+                              onClick={() => setActiveReport(reportData)}
+                              className={cn(
+                                "w-full mt-2 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2",
+                                activeReport === reportData
+                                  ? "bg-primary/10 text-primary border border-primary/20"
+                                  : "bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] hover:opacity-90"
+                              )}
+                            >
+                              <FileText className="w-4 h-4" />
+                              {activeReport === reportData ? '报告预览中' : '查看职业规划报告'}
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                      )}
+                    </div>
+                  </div>
+                  {options.length > 0 && (
+                    <div className="ml-11 mt-2">
+                      <OptionButtons options={options} onSelect={handleSend} disabled={isLoading} />
                     </div>
                   )}
-                  <div
-                    className={cn(
-                      'max-w-[80%] rounded-2xl px-4 py-3 text-sm',
-                      msg.role === 'user'
-                        ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
-                        : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
-                    )}
-                  >
-                    {msg.role === 'assistant' ? (
-                      <div className="space-y-4">
-                        {sources && <SourceCards sources={sources} />}
-                        {displayContent && (
-                          <div className="prose prose-sm max-w-none text-foreground">
-                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                              {displayContent}
-                            </ReactMarkdown>
-                          </div>
-                        )}
-                        {reportData && (
-                          <button
-                            onClick={() => setActiveReport(reportData)}
-                            className="w-full mt-2 py-3 rounded-2xl text-sm font-semibold bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white hover:opacity-90 transition-all duration-300 active:scale-[0.98] shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] flex items-center justify-center gap-2"
-                          >
-                            <FileText className="w-4 h-4" />
-                            查看职业规划报告
-                          </button>
-                        )}
-                      </div>
-                    ) : (
-                      <p className="whitespace-pre-wrap">{msg.content}</p>
-                    )}
-                  </div>
                 </div>
-                {options.length > 0 && (
-                  <div className="ml-11 mt-2">
-                    <OptionButtons options={options} onSelect={handleSend} disabled={isLoading} />
-                  </div>
-                )}
+              );
+            })}
+
+            {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+              <div className="animate-fade-in">
+                <ThinkingIndicator />
               </div>
-            );
-          })}
+            )}
+          </div>
+        </div>
 
-          {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-            <div className="animate-fade-in">
-              <ThinkingIndicator />
+        {/* Input Area */}
+        <div className="shrink-0 border-t border-border bg-background/80 backdrop-blur-sm px-4 py-3">
+          <div className={cn("mx-auto flex items-end gap-2", activeReport ? "max-w-2xl" : "max-w-3xl")}>
+            <Textarea
+              ref={textareaRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="说说你的想法、专业、兴趣..."
+              className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-input border-border focus:border-primary/50 focus:ring-primary/20"
+              rows={1}
+            />
+            <Button
+              onClick={() => handleSend(input)}
+              disabled={!input.trim() || isLoading}
+              size="icon"
+              className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-primary hover:bg-primary/90 shadow-sm border-0"
+            >
+              <Send className="w-4 h-4 text-primary-foreground" />
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      {/* Artifact Preview Panel */}
+      {activeReport && (
+        <div className="w-1/2 flex flex-col bg-background animate-slide-in-right">
+          {/* Panel Header */}
+          <div className="shrink-0 border-b border-border bg-background px-4 py-2.5 flex items-center gap-3">
+            <div className="flex items-center gap-2 flex-1 min-w-0">
+              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[hsl(var(--dream-violet)/0.15)] to-[hsl(var(--dream-pink)/0.1)] flex items-center justify-center">
+                <FileText className="w-3.5 h-3.5 text-[hsl(var(--dream-violet))]" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-semibold text-foreground truncate">职业规划报告</p>
+                <p className="text-[11px] text-muted-foreground">HTML Document</p>
+              </div>
             </div>
-          )}
-        </div>
-      </div>
 
-      {/* Input Area */}
-      <div className="shrink-0 border-t border-border bg-background/80 backdrop-blur-sm px-4 py-3">
-        <div className="max-w-3xl mx-auto flex items-end gap-2">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="说说你的想法、专业、兴趣..."
-            className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-input border-border focus:border-primary/50 focus:ring-primary/20"
-            rows={1}
-          />
-          <Button
-            onClick={() => handleSend(input)}
-            disabled={!input.trim() || isLoading}
-            size="icon"
-            className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-primary hover:bg-primary/90 shadow-sm border-0"
-          >
-            <Send className="w-4 h-4 text-primary-foreground" />
-          </Button>
+            {/* Mode tabs */}
+            <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
+              <button
+                onClick={() => setPreviewMode('preview')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all",
+                  previewMode === 'preview'
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Eye className="w-3.5 h-3.5" />
+                预览
+              </button>
+              <button
+                onClick={() => setPreviewMode('code')}
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all",
+                  previewMode === 'code'
+                    ? "bg-background text-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <Code className="w-3.5 h-3.5" />
+                源码
+              </button>
+            </div>
+
+            {/* Actions */}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg"
+                title="复制HTML"
+                onClick={() => { navigator.clipboard.writeText(reportHTML); }}
+              >
+                <Copy className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg"
+                title="下载HTML"
+                onClick={() => {
+                  const a = document.createElement('a');
+                  a.href = reportBlobUrl;
+                  a.download = `职业规划报告.html`;
+                  a.click();
+                }}
+              >
+                <Download className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg"
+                title="在新标签页打开"
+                onClick={() => window.open(reportBlobUrl, '_blank')}
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg"
+                onClick={() => setActiveReport(null)}
+              >
+                <X className="w-4 h-4 text-muted-foreground" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Panel Content */}
+          <div className="flex-1 overflow-hidden">
+            {previewMode === 'preview' ? (
+              <iframe
+                src={reportBlobUrl}
+                className="w-full h-full border-0"
+                title="职业规划报告预览"
+                sandbox="allow-scripts"
+              />
+            ) : (
+              <div className="h-full overflow-auto bg-[#1e1e2e] p-4">
+                <pre className="text-[13px] leading-relaxed font-mono text-[#cdd6f4] whitespace-pre-wrap break-words">
+                  <code>{reportHTML}</code>
+                </pre>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
