@@ -1,13 +1,13 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, ExternalLink, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { CareerReport, parseCareerReport, type CareerReportData } from '@/components/career/CareerReport';
-import { openCareerReportPage } from '@/components/career/CareerReportHTML';
+import { parseCareerReport, type CareerReportData } from '@/components/career/CareerReport';
+import { generateCareerReportHTML } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 import { useAuth } from '@/hooks/useAuth';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
