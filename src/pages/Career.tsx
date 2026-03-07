@@ -202,19 +202,29 @@ export default function Career() {
     scrollToBottom();
   }, [messages]);
 
-  // Parse reports from loaded messages
+  // Parse reports from loaded messages & auto-open new ones
+  const openedReportsRef = useRef<Set<number>>(new Set());
+  
   useEffect(() => {
     if (!loadingHistory) {
       const newReports = new Map<number, CareerReportData>();
       messages.forEach((msg, i) => {
         if (msg.role === 'assistant') {
           const report = parseCareerReport(msg.content);
-          if (report) newReports.set(i, report);
+          if (report) {
+            newReports.set(i, report);
+            // Auto-open newly generated reports (not from history)
+            if (!openedReportsRef.current.has(i) && !isLoading) {
+              openedReportsRef.current.add(i);
+              // Small delay to let streaming finish
+              setTimeout(() => openCareerReportPage(report), 300);
+            }
+          }
         }
       });
       if (newReports.size > 0) setReports(newReports);
     }
-  }, [loadingHistory, messages.length]);
+  }, [loadingHistory, messages, isLoading]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
