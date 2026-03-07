@@ -1,6 +1,6 @@
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, Sparkles, ExternalLink, Compass } from 'lucide-react';
+import { ArrowLeft, Send, ExternalLink, RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -8,33 +8,26 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CareerReport, parseCareerReport, type CareerReportData } from '@/components/career/CareerReport';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
+import { useAuth } from '@/hooks/useAuth';
+import { useCareerConversation } from '@/hooks/useCareerConversation';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
-type Msg = { role: 'user' | 'assistant'; content: string };
 type WebSource = { url: string; title: string; snippet: string };
 type ParsedOption = { label: string; emoji?: string };
-
-const CAREER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-agent`;
 
 // Parse numbered/lettered options from AI message for interactive buttons
 function parseOptions(content: string): ParsedOption[] {
   const options: ParsedOption[] = [];
-  // Match patterns like: A. xxx / A）xxx / 1. xxx / - **xxx**
-  // Look for option blocks: lines starting with letter/number + dot/bracket
   const lines = content.split('\n');
   
   for (const line of lines) {
     const trimmed = line.trim();
-    // Pattern: "A. text" or "A）text" or "A、text"
     let match = trimmed.match(/^([A-Z])[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
     if (!match) {
-      // Pattern: "1. **text**" or numbered
       match = trimmed.match(/^\d+[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
       if (match) {
         const text = match[1].replace(/\*{1,2}/g, '').trim();
-        // Skip if it's a full question (too long) or contains question mark
         if (text.length > 40 || text.includes('？') || text.includes('?')) continue;
-        // Only treat as option if it looks like a short choice
         if (text.length > 2 && text.length <= 35) {
           options.push({ label: text });
         }
@@ -49,7 +42,6 @@ function parseOptions(content: string): ParsedOption[] {
     }
   }
 
-  // Also try to extract from patterns like 「选项」or "选项" inline
   if (options.length === 0) {
     const inlinePattern = /[「""]([^「""」]{2,25})[」""]/g;
     let inlineMatch;
@@ -57,7 +49,6 @@ function parseOptions(content: string): ParsedOption[] {
     while ((inlineMatch = inlinePattern.exec(content)) !== null) {
       candidates.push(inlineMatch[1]);
     }
-    // Only use if we found 2+ candidates (likely options)
     if (candidates.length >= 2) {
       candidates.forEach(c => options.push({ label: c }));
     }
@@ -110,7 +101,6 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
                   : "border-transparent bg-card shadow-sm hover:shadow-md hover:border-primary/20 hover:bg-accent/40"
               )}
             >
-              {/* Icon circle */}
               <div className={cn(
                 "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all duration-300",
                 isSelected
@@ -119,16 +109,12 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
               )}>
                 {optionIcons[i % optionIcons.length]}
               </div>
-
-              {/* Label */}
               <span className={cn(
                 "flex-1 text-sm font-medium transition-colors",
                 isSelected ? "text-primary" : "text-foreground"
               )}>
                 {opt.label}
               </span>
-
-              {/* Check indicator */}
               <div className={cn(
                 "shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300",
                 isSelected
@@ -145,8 +131,6 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
           );
         })}
       </div>
-
-      {/* Submit button */}
       {selected.size > 0 && (
         <button
           onClick={handleSubmit}
@@ -192,15 +176,13 @@ function SourceCards({ sources }: { sources: WebSource[] }) {
 
 export default function Career() {
   const navigate = useNavigate();
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const { user, loading: authLoading } = useAuth();
+  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, startNewConversation } = useCareerConversation(user?.id);
   const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const assistantContentRef = useRef('');
-  const hasGreeted = useRef(false);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -208,166 +190,60 @@ export default function Career() {
     }, 50);
   };
 
-  const streamResponse = useCallback(async (allMessages: Msg[]) => {
-    setIsLoading(true);
-    assistantContentRef.current = '';
-    scrollToBottom();
-
-    try {
-      const resp = await fetch(CAREER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-        },
-        body: JSON.stringify({ messages: allMessages }),
-      });
-
-      if (!resp.ok || !resp.body) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.error || 'AI服务暂时不可用');
-      }
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let textBuffer = '';
-      let currentSources: WebSource[] = [];
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        textBuffer += decoder.decode(value, { stream: true });
-
-        let newlineIndex: number;
-        while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-          let line = textBuffer.slice(0, newlineIndex);
-          textBuffer = textBuffer.slice(newlineIndex + 1);
-          if (line.endsWith('\r')) line = line.slice(0, -1);
-          if (line.startsWith(':') || line.trim() === '') continue;
-          if (!line.startsWith('data: ')) continue;
-          const jsonStr = line.slice(6).trim();
-          if (jsonStr === '[DONE]') break;
-          try {
-            const parsed = JSON.parse(jsonStr);
-            if (parsed.webSources) {
-              currentSources = parsed.webSources;
-              continue;
-            }
-            const delta = parsed.choices?.[0]?.delta?.content;
-            if (delta) {
-              assistantContentRef.current += delta;
-              setMessages((prev) => {
-                const last = prev[prev.length - 1];
-                if (last?.role === 'assistant') {
-                  return prev.map((m, idx) => idx === prev.length - 1 ? { ...m, content: assistantContentRef.current } : m);
-                }
-                return [...prev, { role: 'assistant', content: assistantContentRef.current }];
-              });
-              scrollToBottom();
-            }
-          } catch {
-            textBuffer = line + '\n' + textBuffer;
-            break;
-          }
-        }
-      }
-
-      if (currentSources.length > 0) {
-        setWebSources((prev) => { const n = new Map(prev); n.set(allMessages.length, currentSources); return n; });
-      }
-      const report = parseCareerReport(assistantContentRef.current);
-      if (report) {
-        setReports((prev) => { const n = new Map(prev); n.set(allMessages.length, report); return n; });
-      }
-    } catch (e: any) {
-      console.error('Career agent error:', e);
-      setMessages((prev) => [...prev, { role: 'assistant', content: `⚠️ ${e.message || '网络错误，请重试'}` }]);
-    } finally {
-      setIsLoading(false);
-      scrollToBottom();
-    }
-  }, []);
-
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || isLoading) return;
-    const userMsg: Msg = { role: 'user', content: content.trim() };
-    const newMessages = [...messages, userMsg];
-    setMessages(newMessages);
-    setInput('');
-    await streamResponse(newMessages);
-  }, [messages, isLoading, streamResponse]);
-
-  // Auto-greet on mount: send an invisible system-like user message to trigger AI greeting
+  // Auto-greet after history is loaded and there are no existing messages
   useEffect(() => {
-    if (hasGreeted.current) return;
-    hasGreeted.current = true;
-    
-    const greetMessages: Msg[] = [
-      { role: 'user', content: '你好，我想进行职业规划。' },
-    ];
-    // Don't show user message, just trigger AI response
-    setIsLoading(true);
-    assistantContentRef.current = '';
+    if (!loadingHistory && !authLoading && messages.length === 0 && !hasGreeted.current) {
+      autoGreet();
+    }
+  }, [loadingHistory, authLoading, messages.length, autoGreet]);
 
-    (async () => {
-      try {
-        const resp = await fetch(CAREER_URL, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
-          },
-          body: JSON.stringify({ messages: greetMessages }),
-        });
+  // Scroll on new messages
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
-        if (!resp.ok || !resp.body) throw new Error('AI服务暂时不可用');
-
-        const reader = resp.body.getReader();
-        const decoder = new TextDecoder();
-        let textBuffer = '';
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          textBuffer += decoder.decode(value, { stream: true });
-
-          let newlineIndex: number;
-          while ((newlineIndex = textBuffer.indexOf('\n')) !== -1) {
-            let line = textBuffer.slice(0, newlineIndex);
-            textBuffer = textBuffer.slice(newlineIndex + 1);
-            if (line.endsWith('\r')) line = line.slice(0, -1);
-            if (line.startsWith(':') || line.trim() === '') continue;
-            if (!line.startsWith('data: ')) continue;
-            const jsonStr = line.slice(6).trim();
-            if (jsonStr === '[DONE]') break;
-            try {
-              const parsed = JSON.parse(jsonStr);
-              const delta = parsed.choices?.[0]?.delta?.content;
-              if (delta) {
-                assistantContentRef.current += delta;
-                setMessages([{ role: 'assistant', content: assistantContentRef.current }]);
-                scrollToBottom();
-              }
-            } catch {
-              textBuffer = line + '\n' + textBuffer;
-              break;
-            }
-          }
+  // Parse reports from loaded messages
+  useEffect(() => {
+    if (!loadingHistory) {
+      const newReports = new Map<number, CareerReportData>();
+      messages.forEach((msg, i) => {
+        if (msg.role === 'assistant') {
+          const report = parseCareerReport(msg.content);
+          if (report) newReports.set(i, report);
         }
-      } catch (e: any) {
-        setMessages([{ role: 'assistant', content: '你好！👋 我是你的职业规划助手，很高兴为你服务。先聊聊你的专业和兴趣吧，你目前学的什么专业呢？' }]);
-      } finally {
-        setIsLoading(false);
-        scrollToBottom();
-      }
-    })();
-  }, []);
+      });
+      if (newReports.size > 0) setReports(newReports);
+    }
+  }, [loadingHistory, messages.length]);
+
+  // Redirect to auth if not logged in
+  useEffect(() => {
+    if (!authLoading && !user) {
+      navigate('/auth', { state: { from: '/career' } });
+    }
+  }, [authLoading, user, navigate]);
+
+  const handleSend = async (content: string) => {
+    if (!content.trim() || isLoading) return;
+    setInput('');
+    await sendMessage(content, (index, sources) => {
+      setWebSources(prev => { const n = new Map(prev); n.set(index, sources); return n; });
+    });
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      sendMessage(input);
+      handleSend(input);
     }
+  };
+
+  const handleNewConversation = async () => {
+    setReports(new Map());
+    setWebSources(new Map());
+    await startNewConversation();
+    // Trigger new greeting
+    setTimeout(() => autoGreet(), 100);
   };
 
   const getDisplayContent = (content: string) => content.replace(/```career-report[\s\S]*?```/g, '').trim();
@@ -387,9 +263,17 @@ export default function Career() {
     ),
   };
 
+  if (authLoading || loadingHistory) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-background to-muted/30">
+        <ThinkingIndicator />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-b from-background to-muted/30">
-      {/* Header - clean style matching main chat */}
+      {/* Header */}
       <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
         <Button
           variant="ghost"
@@ -399,7 +283,7 @@ export default function Career() {
         >
           <ArrowLeft className="w-5 h-5 text-foreground" />
         </Button>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
           <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
             <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
           </div>
@@ -411,6 +295,16 @@ export default function Career() {
             <p className="text-xs text-muted-foreground">对话式职业测评与规划</p>
           </div>
         </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={handleNewConversation}
+          disabled={isLoading}
+          className="shrink-0 rounded-xl hover:bg-muted"
+          title="开始新对话"
+        >
+          <RotateCcw className="w-4 h-4 text-muted-foreground" />
+        </Button>
       </header>
 
       {/* Messages */}
@@ -456,10 +350,9 @@ export default function Career() {
                     )}
                   </div>
                 </div>
-                {/* Interactive option buttons below the last AI message */}
                 {options.length > 0 && (
                   <div className="ml-11 mt-2">
-                    <OptionButtons options={options} onSelect={sendMessage} disabled={isLoading} />
+                    <OptionButtons options={options} onSelect={handleSend} disabled={isLoading} />
                   </div>
                 )}
               </div>
@@ -474,7 +367,7 @@ export default function Career() {
         </div>
       </div>
 
-      {/* Input Area - matching main chat style */}
+      {/* Input Area */}
       <div className="shrink-0 border-t border-border bg-background/80 backdrop-blur-sm px-4 py-3">
         <div className="max-w-3xl mx-auto flex items-end gap-2">
           <Textarea
@@ -487,7 +380,7 @@ export default function Career() {
             rows={1}
           />
           <Button
-            onClick={() => sendMessage(input)}
+            onClick={() => handleSend(input)}
             disabled={!input.trim() || isLoading}
             size="icon"
             className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-primary hover:bg-primary/90 shadow-sm border-0"
