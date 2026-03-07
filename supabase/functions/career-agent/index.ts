@@ -5,82 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Search HZAU website for relevant career/employment information
-async function searchHZAU(query: string): Promise<{ results: { url: string; title: string; snippet: string }[]; context: string }> {
-  const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
-  if (!apiKey) {
-    console.log("FIRECRAWL_API_KEY not configured, skipping web search");
-    return { results: [], context: "" };
-  }
-
-  try {
-    // Search specifically on hzau.edu.cn
-    const searchQuery = `site:hzau.edu.cn ${query}`;
-    console.log("Searching HZAU:", searchQuery);
-
-    const response = await fetch("https://api.firecrawl.dev/v1/search", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        query: searchQuery,
-        limit: 5,
-        lang: "zh",
-        country: "cn",
-        scrapeOptions: {
-          formats: ["markdown"],
-          onlyMainContent: true,
-        },
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("Firecrawl search error:", response.status);
-      return { results: [], context: "" };
-    }
-
-    const data = await response.json();
-    const results = (data.data || []).map((item: any) => ({
-      url: item.url || "",
-      title: item.title || item.metadata?.title || "华中农业大学",
-      snippet: item.description || item.markdown?.substring(0, 200) || "",
-    }));
-
-    // Build context for AI
-    const contextParts = (data.data || []).map((item: any) => {
-      const title = item.title || item.metadata?.title || "";
-      const url = item.url || "";
-      const content = item.markdown ? item.markdown.substring(0, 1500) : item.description || "";
-      return `【${title}】(${url})\n${content}`;
-    });
-
-    const context = contextParts.length > 0
-      ? `\n\n以下是从华中农业大学官网搜索到的相关信息：\n\n${contextParts.join("\n\n---\n\n")}`
-      : "";
-
-    console.log(`Found ${results.length} results from HZAU website`);
-    return { results, context };
-  } catch (e) {
-    console.error("HZAU search error:", e);
-    return { results: [], context: "" };
-  }
-}
-
-// Determine if the query needs web search
-function needsWebSearch(messages: any[]): boolean {
-  const lastMsg = messages.filter((m: any) => m.role === "user").pop()?.content || "";
-  const searchKeywords = [
-    "就业", "招聘", "实习", "政策", "通知", "公告", "活动", "讲座",
-    "考研", "保研", "留学", "选调", "公务员", "创业", "双选会",
-    "学校", "学院", "专业", "课程", "导师", "奖学金", "补贴",
-    "培训", "证书", "比赛", "竞赛", "社团", "志愿", "最新", "最近",
-    "岗位", "工作", "薪资", "行业", "趋势", "发展", "前景",
-  ];
-  return searchKeywords.some((kw) => lastMsg.includes(kw));
-}
-
 const SYSTEM_PROMPT = `你是一位专业的职业规划顾问，专门帮助华中农业大学的学生进行职业测评和规划。
 
 你的任务是通过对话式引导，逐步了解学生的以下维度：
@@ -94,6 +18,7 @@ const SYSTEM_PROMPT = `你是一位专业的职业规划顾问，专门帮助华
 - 每次只问1-2个问题，不要一次性提太多问题
 - 用轻松友善的语气，像朋友聊天一样
 - 适当使用emoji让对话更轻松
+- 不要引用任何外部资料、网站链接或来源，所有建议基于你的专业知识
 - 在收集到足够信息后（通常4-6轮对话），主动生成完整的职业规划报告
 
 **重要：选项式提问格式（必须严格遵守）：**
@@ -118,12 +43,6 @@ B. 团队协作，头脑风暴
 C. 带领团队，指挥协调
 D. 自由灵活，远程办公
 E. 都可以，看具体情况"
-
-**引用网站信息规则：**
-- 当你引用华中农业大学官网的信息时，必须在相关内容后附上来源链接
-- 链接格式：[查看详情](URL) 或 [来源名称](URL)
-- 主动结合学校的就业政策、招聘信息、培训资源等给出建议
-- 如果搜索到相关活动或通知，要推荐给学生
 
 **当你认为已经收集到足够信息时，必须按以下JSON格式输出报告（用 \`\`\`career-report 和 \`\`\` 包裹）：**
 
@@ -158,9 +77,6 @@ E. 都可以，看具体情况"
   ],
   "learningPath": [
     { "phase": "阶段名", "duration": "时间", "actions": ["行动1", "行动2"] }
-  ],
-  "resources": [
-    { "title": "资源名称", "url": "链接地址", "description": "简要描述" }
   ]
 }
 \`\`\`
@@ -168,8 +84,7 @@ E. 都可以，看具体情况"
 在生成报告之前，先用一段文字总结你的分析思路，然后输出报告JSON。
 报告中推荐3-5个岗位，每个岗位的match分数要根据实际匹配度合理分配（60-98之间）。
 性格traits提供5-6个维度，score在30-95之间。
-结合当前就业市场趋势给出建议。
-resources字段包含从学校官网搜索到的相关资源链接。`;
+结合当前就业市场趋势给出建议。`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -181,19 +96,6 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
 
-    // Search HZAU website if the query seems relevant
-    let webContext = "";
-    let webSources: { url: string; title: string; snippet: string }[] = [];
-
-    if (needsWebSearch(messages)) {
-      const lastUserMsg = messages.filter((m: any) => m.role === "user").pop()?.content || "";
-      const { results, context } = await searchHZAU(lastUserMsg);
-      webContext = context;
-      webSources = results;
-    }
-
-    const systemPrompt = SYSTEM_PROMPT + webContext;
-
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -203,7 +105,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: systemPrompt },
+          { role: "system", content: SYSTEM_PROMPT },
           ...messages,
         ],
         stream: true,
@@ -229,37 +131,6 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: "AI服务暂时不可用" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // If we have web sources, prepend them as a special SSE event
-    if (webSources.length > 0) {
-      const sourcesEvent = `data: ${JSON.stringify({ webSources })}\n\n`;
-      const encoder = new TextEncoder();
-      const sourcesChunk = encoder.encode(sourcesEvent);
-
-      // Combine sources event with the AI stream
-      const combinedStream = new ReadableStream({
-        async start(controller) {
-          // Send sources first
-          controller.enqueue(sourcesChunk);
-
-          // Then pipe AI response
-          const reader = response.body!.getReader();
-          try {
-            while (true) {
-              const { done, value } = await reader.read();
-              if (done) break;
-              controller.enqueue(value);
-            }
-          } finally {
-            controller.close();
-          }
-        },
-      });
-
-      return new Response(combinedStream, {
-        headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
       });
     }
 
