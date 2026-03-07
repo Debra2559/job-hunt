@@ -354,7 +354,15 @@ export default function Career() {
                             </ReactMarkdown>
                           </div>
                         )}
-                        {reportData && <CareerReport data={reportData} />}
+                        {reportData && (
+                          <button
+                            onClick={() => openCareerReportPage(reportData)}
+                            className="w-full mt-2 py-3 rounded-2xl text-sm font-semibold bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white hover:opacity-90 transition-all duration-300 active:scale-[0.98] shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] flex items-center justify-center gap-2"
+                          >
+                            <ExternalLink className="w-4 h-4" />
+                            查看完整报告页面
+                          </button>
+                        )}
                       </div>
                     ) : (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
