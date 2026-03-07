@@ -12,8 +12,83 @@ import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 type WebSource = { url: string; title: string; snippet: string };
+type ParsedOption = { label: string; emoji?: string };
 
 const CAREER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-agent`;
+
+// Parse numbered/lettered options from AI message for interactive buttons
+function parseOptions(content: string): ParsedOption[] {
+  const options: ParsedOption[] = [];
+  // Match patterns like: A. xxx / A）xxx / 1. xxx / - **xxx**
+  // Look for option blocks: lines starting with letter/number + dot/bracket
+  const lines = content.split('\n');
+  
+  for (const line of lines) {
+    const trimmed = line.trim();
+    // Pattern: "A. text" or "A）text" or "A、text"
+    let match = trimmed.match(/^([A-Z])[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
+    if (!match) {
+      // Pattern: "1. **text**" or numbered
+      match = trimmed.match(/^\d+[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
+      if (match) {
+        const text = match[1].replace(/\*{1,2}/g, '').trim();
+        // Skip if it's a full question (too long) or contains question mark
+        if (text.length > 40 || text.includes('？') || text.includes('?')) continue;
+        // Only treat as option if it looks like a short choice
+        if (text.length > 2 && text.length <= 35) {
+          options.push({ label: text });
+        }
+        continue;
+      }
+    }
+    if (match && match.length >= 3) {
+      const text = match[2].replace(/\*{1,2}/g, '').trim();
+      if (text.length > 2 && text.length <= 40) {
+        options.push({ label: text, emoji: undefined });
+      }
+    }
+  }
+
+  // Also try to extract from patterns like 「选项」or "选项" inline
+  if (options.length === 0) {
+    const inlinePattern = /[「""]([^「""」]{2,25})[」""]/g;
+    let inlineMatch;
+    const candidates: string[] = [];
+    while ((inlineMatch = inlinePattern.exec(content)) !== null) {
+      candidates.push(inlineMatch[1]);
+    }
+    // Only use if we found 2+ candidates (likely options)
+    if (candidates.length >= 2) {
+      candidates.forEach(c => options.push({ label: c }));
+    }
+  }
+
+  return options;
+}
+
+function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[]; onSelect: (label: string) => void; disabled: boolean }) {
+  if (options.length === 0) return null;
+  return (
+    <div className="flex flex-wrap gap-2 mt-3 animate-fade-in">
+      {options.map((opt, i) => (
+        <button
+          key={i}
+          onClick={() => !disabled && onSelect(opt.label)}
+          disabled={disabled}
+          className={cn(
+            "px-4 py-2.5 rounded-2xl text-sm font-medium border transition-all duration-200",
+            "bg-background border-border text-foreground",
+            "hover:bg-accent hover:border-primary/30 hover:shadow-sm",
+            "active:scale-[0.97]",
+            "disabled:opacity-50 disabled:cursor-not-allowed"
+          )}
+        >
+          {opt.label}
+        </button>
+      ))}
+    </div>
+  );
+}
 
 function SourceCards({ sources }: { sources: WebSource[] }) {
   if (sources.length === 0) return null;
@@ -270,38 +345,48 @@ export default function Career() {
             const reportData = reports.get(i);
             const sources = webSources.get(i);
             const displayContent = msg.role === 'assistant' ? getDisplayContent(msg.content) : msg.content;
+            const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !isLoading;
+            const options = isLastAssistant ? parseOptions(msg.content) : [];
 
             return (
-              <div key={i} className={cn('flex animate-fade-in', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                {msg.role === 'assistant' && (
-                  <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
-                    <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+              <div key={i} className="animate-fade-in">
+                <div className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  {msg.role === 'assistant' && (
+                    <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
+                      <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      'max-w-[80%] rounded-2xl px-4 py-3 text-sm',
+                      msg.role === 'user'
+                        ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
+                        : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
+                    )}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <div className="space-y-4">
+                        {sources && <SourceCards sources={sources} />}
+                        {displayContent && (
+                          <div className="prose prose-sm max-w-none text-foreground">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                              {displayContent}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                        {reportData && <CareerReport data={reportData} />}
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    )}
+                  </div>
+                </div>
+                {/* Interactive option buttons below the last AI message */}
+                {options.length > 0 && (
+                  <div className="ml-11 mt-2">
+                    <OptionButtons options={options} onSelect={sendMessage} disabled={isLoading} />
                   </div>
                 )}
-                <div
-                  className={cn(
-                    'max-w-[80%] rounded-2xl px-4 py-3 text-sm',
-                    msg.role === 'user'
-                      ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
-                      : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
-                  )}
-                >
-                  {msg.role === 'assistant' ? (
-                    <div className="space-y-4">
-                      {sources && <SourceCards sources={sources} />}
-                      {displayContent && (
-                        <div className="prose prose-sm max-w-none text-foreground">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                            {displayContent}
-                          </ReactMarkdown>
-                        </div>
-                      )}
-                      {reportData && <CareerReport data={reportData} />}
-                    </div>
-                  ) : (
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                  )}
-                </div>
               </div>
             );
           })}
