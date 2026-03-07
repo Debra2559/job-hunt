@@ -95,7 +95,7 @@ export function useCareerConversation(userId: string | undefined) {
   }, []);
 
   // Stream response from career agent
-  const streamResponse = useCallback(async (allMessages: Msg[], onSources?: (sources: any[]) => void): Promise<string> => {
+  const streamResponse = useCallback(async (allMessages: Msg[], onSources?: (sources: any[]) => void, onBossJobs?: (jobs: BossJobListing[]) => void): Promise<string> => {
     setIsLoading(true);
     assistantContentRef.current = '';
 
