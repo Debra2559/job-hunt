@@ -259,9 +259,15 @@ export default function Career() {
   const handleSend = async (content: string) => {
     if (!content.trim() || isLoading) return;
     setInput('');
-    await sendMessage(content, (index, sources) => {
-      setWebSources(prev => { const n = new Map(prev); n.set(index, sources); return n; });
-    });
+    await sendMessage(
+      content,
+      (index, sources) => {
+        setWebSources(prev => { const n = new Map(prev); n.set(index, sources); return n; });
+      },
+      (jobs) => {
+        setBossJobs(jobs);
+      }
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
