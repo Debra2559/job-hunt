@@ -219,61 +219,6 @@ export function Sidebar({
         </button>
       </div>
 
-      {/* Search */}
-      <div className="px-4 mb-3">
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="搜索对话..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 bg-sidebar-accent/50 border-sidebar-border text-sm"
-          />
-          {searchQuery && (
-            <button
-              onClick={() => setSearchQuery('')}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded text-muted-foreground hover:text-foreground"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Tag Filter */}
-      {tags.length > 0 && (
-        <div className="px-4 mb-3 flex gap-1.5 flex-wrap">
-          {tags.map((tag) => (
-            <button
-              key={tag.id}
-              onClick={() => setSelectedTagFilter(selectedTagFilter === tag.id ? null : tag.id)}
-              className={cn(
-                "px-2 py-1 rounded-full text-xs transition-all",
-                selectedTagFilter === tag.id
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted/50 text-muted-foreground hover:bg-muted"
-              )}
-            >
-              {tag.name}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Favorites */}
-      <button
-        onClick={onToggleFavorites}
-        className={cn(
-          "mx-4 mb-3 px-4 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200",
-          showFavorites
-            ? "bg-primary/10 text-primary font-medium"
-            : "hover:bg-sidebar-accent text-sidebar-foreground"
-        )}
-      >
-        <Bookmark className="w-4 h-4" />
-        <span>全部收藏</span>
-      </button>
-
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto px-4">
         {/* Temporary new conversation placeholder */}
