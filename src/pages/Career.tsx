@@ -345,38 +345,48 @@ export default function Career() {
             const reportData = reports.get(i);
             const sources = webSources.get(i);
             const displayContent = msg.role === 'assistant' ? getDisplayContent(msg.content) : msg.content;
+            const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !isLoading;
+            const options = isLastAssistant ? parseOptions(msg.content) : [];
 
             return (
-              <div key={i} className={cn('flex animate-fade-in', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
-                {msg.role === 'assistant' && (
-                  <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
-                    <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+              <div key={i} className="animate-fade-in">
+                <div className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  {msg.role === 'assistant' && (
+                    <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
+                      <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div
+                    className={cn(
+                      'max-w-[80%] rounded-2xl px-4 py-3 text-sm',
+                      msg.role === 'user'
+                        ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
+                        : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
+                    )}
+                  >
+                    {msg.role === 'assistant' ? (
+                      <div className="space-y-4">
+                        {sources && <SourceCards sources={sources} />}
+                        {displayContent && (
+                          <div className="prose prose-sm max-w-none text-foreground">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                              {displayContent}
+                            </ReactMarkdown>
+                          </div>
+                        )}
+                        {reportData && <CareerReport data={reportData} />}
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{msg.content}</p>
+                    )}
+                  </div>
+                </div>
+                {/* Interactive option buttons below the last AI message */}
+                {options.length > 0 && (
+                  <div className="ml-11 mt-2">
+                    <OptionButtons options={options} onSelect={sendMessage} disabled={isLoading} />
                   </div>
                 )}
-                <div
-                  className={cn(
-                    'max-w-[80%] rounded-2xl px-4 py-3 text-sm',
-                    msg.role === 'user'
-                      ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
-                      : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
-                  )}
-                >
-                  {msg.role === 'assistant' ? (
-                    <div className="space-y-4">
-                      {sources && <SourceCards sources={sources} />}
-                      {displayContent && (
-                        <div className="prose prose-sm max-w-none text-foreground">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
-                            {displayContent}
-                          </ReactMarkdown>
-                        </div>
-                      )}
-                      {reportData && <CareerReport data={reportData} />}
-                    </div>
-                  ) : (
-                    <p className="whitespace-pre-wrap">{msg.content}</p>
-                  )}
-                </div>
               </div>
             );
           })}
