@@ -150,6 +150,42 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     </div>
   ` : '';
 
+  // Boss直聘 job listings section
+  const bossJobsHTML = data.jobListings?.length ? `
+    <div class="section boss-section">
+      <h3 class="section-title">
+        <span class="section-icon" style="background:linear-gradient(135deg,rgba(0,190,75,0.12),rgba(0,150,60,0.08));color:#00be4b;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </span>
+        热招岗位 · BOSS直聘
+        <span style="font-size:12px;font-weight:400;color:#94a3b8;margin-left:auto;">实时数据</span>
+      </h3>
+      <div class="boss-jobs-grid">
+        ${data.jobListings.map(job => `
+          <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="boss-job-card">
+            <div class="boss-job-top">
+              <div class="boss-job-title">${job.title}</div>
+              ${job.salary ? `<span class="boss-job-salary">${job.salary}</span>` : ''}
+            </div>
+            <div class="boss-job-meta">
+              ${job.company ? `<span class="boss-job-company">${job.company}</span>` : ''}
+              ${job.location ? `<span class="boss-job-location">📍 ${job.location}</span>` : ''}
+            </div>
+            <div class="boss-job-tags">
+              ${job.tags.map(t => `<span class="boss-tag">${t}</span>`).join('')}
+            </div>
+            <span class="boss-job-link">查看详情 →</span>
+          </a>
+        `).join('')}
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <a href="https://www.zhipin.com" target="_blank" rel="noopener noreferrer" class="boss-more-link">
+          前往BOSS直聘查看更多岗位 →
+        </a>
+      </div>
+    </div>
+  ` : '';
+
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -506,6 +542,98 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     color: #94a3b8;
   }
 
+  /* Boss直聘 */
+  .boss-section { border-color: rgba(0,190,75,0.15); }
+  .boss-jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 640px) { .boss-jobs-grid { grid-template-columns: 1fr; } }
+  .boss-job-card {
+    display: block;
+    padding: 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(0,190,75,0.04), rgba(255,255,255,0.9));
+    border: 1px solid rgba(0,190,75,0.12);
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .boss-job-card:hover {
+    border-color: rgba(0,190,75,0.3);
+    box-shadow: 0 6px 20px -6px rgba(0,190,75,0.15);
+    transform: translateY(-2px);
+  }
+  .boss-job-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .boss-job-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .boss-job-salary {
+    font-size: 13px;
+    font-weight: 700;
+    color: #00be4b;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .boss-job-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .boss-job-company { font-weight: 500; }
+  .boss-job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .boss-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: rgba(0,190,75,0.08);
+    color: #059669;
+    border: 1px solid rgba(0,190,75,0.1);
+  }
+  .boss-job-link {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #00be4b;
+    font-weight: 500;
+  }
+  .boss-more-link {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, #00be4b, #059669);
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .boss-more-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -4px rgba(0,190,75,0.4);
+  }
+
   /* Print */
   @media print {
     body { background: white; padding: 0; }
@@ -624,6 +752,8 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   </div>
 
   ${resourcesHTML}
+
+  ${bossJobsHTML}
 
   <div class="report-footer">
     <p>本报告由 AI 职业规划助手生成，仅供参考</p>

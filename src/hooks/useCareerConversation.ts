@@ -1,5 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import type { BossJobListing } from '@/components/career/CareerReport';
 
 type Msg = { role: 'user' | 'assistant'; content: string };
 
@@ -94,7 +95,7 @@ export function useCareerConversation(userId: string | undefined) {
   }, []);
 
   // Stream response from career agent
-  const streamResponse = useCallback(async (allMessages: Msg[], onSources?: (sources: any[]) => void): Promise<string> => {
+  const streamResponse = useCallback(async (allMessages: Msg[], onSources?: (sources: any[]) => void, onBossJobs?: (jobs: BossJobListing[]) => void): Promise<string> => {
     setIsLoading(true);
     assistantContentRef.current = '';
 
@@ -137,6 +138,10 @@ export function useCareerConversation(userId: string | undefined) {
               onSources(parsed.webSources);
               continue;
             }
+            if (parsed.bossJobs && onBossJobs) {
+              onBossJobs(parsed.bossJobs);
+              continue;
+            }
             const delta = parsed.choices?.[0]?.delta?.content;
             if (delta) {
               assistantContentRef.current += delta;
@@ -167,7 +172,11 @@ export function useCareerConversation(userId: string | undefined) {
   }, []);
 
   // Send a user message
-  const sendMessage = useCallback(async (content: string, onSources?: (index: number, sources: any[]) => void) => {
+  const sendMessage = useCallback(async (
+    content: string,
+    onSources?: (index: number, sources: any[]) => void,
+    onBossJobs?: (jobs: BossJobListing[]) => void
+  ) => {
     if (!content.trim() || isLoading) return;
     const userMsg: Msg = { role: 'user', content: content.trim() };
     const newMessages = [...messages, userMsg];
@@ -179,9 +188,11 @@ export function useCareerConversation(userId: string | undefined) {
     }
 
     const sourceIndex = newMessages.length; // index where assistant msg will appear
-    const assistantContent = await streamResponse(newMessages, (sources) => {
-      onSources?.(sourceIndex, sources);
-    });
+    const assistantContent = await streamResponse(
+      newMessages,
+      (sources) => { onSources?.(sourceIndex, sources); },
+      onBossJobs
+    );
 
     if (convId && assistantContent) {
       await saveMessage(convId, 'assistant', assistantContent);

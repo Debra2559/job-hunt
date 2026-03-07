@@ -5,6 +5,104 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Search Boss直聘 for job listings via Firecrawl
+async function searchBossJobs(jobTitles: string[]): Promise<{ title: string; company: string; salary: string; location: string; url: string; tags: string[] }[]> {
+  const apiKey = Deno.env.get("FIRECRAWL_API_KEY");
+  if (!apiKey) {
+    console.log("FIRECRAWL_API_KEY not configured, skipping Boss直聘 search");
+    return [];
+  }
+
+  const allJobs: { title: string; company: string; salary: string; location: string; url: string; tags: string[] }[] = [];
+
+  // Search for top 2-3 job titles to avoid too many API calls
+  const searchTitles = jobTitles.slice(0, 3);
+
+  for (const title of searchTitles) {
+    try {
+      const searchQuery = `site:zhipin.com ${title} 招聘`;
+      console.log("Searching Boss直聘:", searchQuery);
+
+      const response = await fetch("https://api.firecrawl.dev/v1/search", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: searchQuery,
+          limit: 5,
+          lang: "zh",
+          country: "cn",
+        }),
+      });
+
+      if (!response.ok) {
+        console.error("Firecrawl search error:", response.status);
+        continue;
+      }
+
+      const data = await response.json();
+      const results = data.data || [];
+
+      for (const item of results) {
+        const itemUrl = item.url || "";
+        const itemTitle = item.title || "";
+        const description = item.description || "";
+
+        // Only include actual Boss直聘 job listing URLs
+        if (!itemUrl.includes("zhipin.com")) continue;
+
+        // Try to extract job info from title/description
+        const salaryMatch = description.match(/(\d+[-·]\d+[kK万])/);
+        const locationMatch = description.match(/(北京|上海|广州|深圳|杭州|成都|武汉|南京|西安|重庆|苏州|天津|长沙|郑州|合肥)/);
+
+        allJobs.push({
+          title: itemTitle.replace(/[-_|·].*?(BOSS直聘|boss直聘|zhipin).*$/i, "").trim() || title,
+          company: "",
+          salary: salaryMatch ? salaryMatch[1] : "",
+          location: locationMatch ? locationMatch[1] : "",
+          url: itemUrl,
+          tags: [title],
+        });
+      }
+    } catch (e) {
+      console.error(`Error searching Boss直聘 for "${title}":`, e);
+    }
+  }
+
+  // Deduplicate by URL and limit to 8
+  const seen = new Set<string>();
+  const unique = allJobs.filter(j => {
+    if (seen.has(j.url)) return false;
+    seen.add(j.url);
+    return true;
+  });
+
+  console.log(`Found ${unique.length} unique Boss直聘 jobs`);
+  return unique.slice(0, 8);
+}
+
+// Detect if AI is about to generate a report (check recent messages for report-related content)
+function isReportPhase(messages: any[]): boolean {
+  const assistantMsgs = messages.filter((m: any) => m.role === "assistant");
+  const userMsgs = messages.filter((m: any) => m.role === "user");
+  // Heuristic: if we have enough conversation rounds (8+), likely approaching report
+  return userMsgs.length >= 7;
+}
+
+// Extract recommended job titles from a career-report JSON block
+function extractJobTitles(content: string): string[] {
+  const match = content.match(/```career-report\s*([\s\S]*?)```/);
+  if (!match) return [];
+  try {
+    const data = JSON.parse(match[1].trim());
+    return (data.recommendations || []).map((r: any) => r.title).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 const SYSTEM_PROMPT = `你是一位持有GCDF（全球职业规划师）和BCC（认证职业教练）双认证的资深职业规划顾问，专门为华中农业大学学生提供深度职业测评与规划服务。
 
 ## 测评框架（共6大模块，8-12轮对话）
@@ -212,7 +310,42 @@ serve(async (req) => {
       });
     }
 
-    return new Response(response.body, {
+    // We need to buffer the full response to check if it contains a report
+    // If it does, we'll search Boss直聘 and append job listings as a special SSE event
+    const encoder = new TextEncoder();
+
+    const transformStream = new TransformStream({
+      fullContent: "",
+      async transform(chunk, controller) {
+        controller.enqueue(chunk);
+
+        // Accumulate content to detect report
+        const text = new TextDecoder().decode(chunk);
+        (this as any).fullContent = ((this as any).fullContent || "") + text;
+      },
+      async flush(controller) {
+        const fullContent = (this as any).fullContent || "";
+
+        // Check if the response contained a career report
+        const jobTitles = extractJobTitles(fullContent);
+        if (jobTitles.length > 0) {
+          console.log("Report detected, searching Boss直聘 for:", jobTitles);
+          try {
+            const bossJobs = await searchBossJobs(jobTitles);
+            if (bossJobs.length > 0) {
+              const jobsEvent = `data: ${JSON.stringify({ bossJobs })}\n\n`;
+              controller.enqueue(encoder.encode(jobsEvent));
+            }
+          } catch (e) {
+            console.error("Boss直聘 search error:", e);
+          }
+        }
+      },
+    });
+
+    const stream = response.body!.pipeThrough(transformStream);
+
+    return new Response(stream, {
       headers: { ...corsHeaders, "Content-Type": "text/event-stream" },
     });
   } catch (e) {

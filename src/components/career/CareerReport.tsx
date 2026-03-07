@@ -3,6 +3,15 @@ import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, St
 import { openCareerReportPage } from './CareerReportHTML';
 import { cn } from '@/lib/utils';
 
+export interface BossJobListing {
+  title: string;
+  company: string;
+  salary: string;
+  location: string;
+  url: string;
+  tags: string[];
+}
+
 export interface CareerReportData {
   personality: {
     type: string;
@@ -11,6 +20,7 @@ export interface CareerReportData {
   };
   analysis: {
     strengths: string[];
+    weaknesses?: string[];
     interests: string[];
     values: string[];
   };
@@ -23,10 +33,12 @@ export interface CareerReportData {
     reasons: string[];
     skills: string[];
     path: string;
+    risks?: string;
   }[];
   trends: { industry: string; trend: string; description: string }[];
   learningPath: { phase: string; duration: string; actions: string[] }[];
   resources?: { title: string; url: string; description: string }[];
+  jobListings?: BossJobListing[];
 }
 
 export function parseCareerReport(content: string): CareerReportData | null {

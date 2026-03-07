@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { parseCareerReport, type CareerReportData } from '@/components/career/CareerReport';
+import { parseCareerReport, type CareerReportData, type BossJobListing } from '@/components/career/CareerReport';
 import { generateCareerReportHTML } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 import { useAuth } from '@/hooks/useAuth';
@@ -182,6 +182,7 @@ export default function Career() {
   const [input, setInput] = useState('');
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
+  const [bossJobs, setBossJobs] = useState<BossJobListing[]>([]);
   const [activeReport, setActiveReport] = useState<CareerReportData | null>(null);
   const [previewMode, setPreviewMode] = useState<'preview' | 'code'>('preview');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -215,6 +216,10 @@ export default function Career() {
         if (msg.role === 'assistant') {
           const report = parseCareerReport(msg.content);
           if (report) {
+            // Inject boss jobs if available
+            if (bossJobs.length > 0) {
+              report.jobListings = bossJobs;
+            }
             newReports.set(i, report);
             if (!openedReportsRef.current.has(i) && !isLoading) {
               openedReportsRef.current.add(i);
@@ -225,7 +230,7 @@ export default function Career() {
       });
       if (newReports.size > 0) setReports(newReports);
     }
-  }, [loadingHistory, messages, isLoading]);
+  }, [loadingHistory, messages, isLoading, bossJobs]);
 
   // Generate HTML for iframe
   const reportHTML = useMemo(() => {
@@ -254,9 +259,15 @@ export default function Career() {
   const handleSend = async (content: string) => {
     if (!content.trim() || isLoading) return;
     setInput('');
-    await sendMessage(content, (index, sources) => {
-      setWebSources(prev => { const n = new Map(prev); n.set(index, sources); return n; });
-    });
+    await sendMessage(
+      content,
+      (index, sources) => {
+        setWebSources(prev => { const n = new Map(prev); n.set(index, sources); return n; });
+      },
+      (jobs) => {
+        setBossJobs(jobs);
+      }
+    );
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -269,8 +280,8 @@ export default function Career() {
   const handleNewConversation = async () => {
     setReports(new Map());
     setWebSources(new Map());
+    setBossJobs([]);
     await startNewConversation();
-    // Trigger new greeting
     setTimeout(() => autoGreet(), 100);
   };
 
