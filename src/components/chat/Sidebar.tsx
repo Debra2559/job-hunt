@@ -204,9 +204,9 @@ export function Sidebar({
         </button>
         
         {/* No results */}
-        {filteredConversations.length === 0 && conversations.length > 0 && (
+        {conversations.length === 0 && (
           <div className="text-center py-8 text-sm text-muted-foreground">
-            未找到匹配的对话
+            暂无对话
           </div>
         )}
         

@@ -297,6 +297,7 @@ const Index = () => {
           onNewConversation={handleNewConversation}
           onDeleteConversation={handleDeleteConversation}
           onRenameConversation={handleRenameConversation}
+          onPinConversation={handlePinConversation}
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
           userId={user?.id || ''}
@@ -308,14 +309,6 @@ const Index = () => {
           onProfileUpdated={handleProfileUpdated}
           isNewConversation={activeConversationId === null && !showFavorites}
           isAdmin={isAdmin || isSuperAdmin}
-          tags={tags}
-          getConversationTags={getConversationTags}
-          onCreateTag={createTag}
-          onUpdateTag={updateTag}
-          onDeleteTag={deleteTag}
-          onReorderTags={reorderTags}
-          onAssignTag={assignTag}
-          onRemoveTag={removeTagAssignment}
         />
       </div>
 
