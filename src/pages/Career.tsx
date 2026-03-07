@@ -67,25 +67,58 @@ function parseOptions(content: string): ParsedOption[] {
 }
 
 function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[]; onSelect: (label: string) => void; disabled: boolean }) {
+  const [selected, setSelected] = useState<Set<number>>(new Set());
+  
   if (options.length === 0) return null;
+
+  const handleClick = (index: number) => {
+    if (disabled) return;
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(index)) next.delete(index);
+      else next.add(index);
+      return next;
+    });
+  };
+
+  const handleSubmit = () => {
+    if (selected.size === 0 || disabled) return;
+    const labels = Array.from(selected).sort().map(i => options[i].label);
+    onSelect(labels.join('、'));
+    setSelected(new Set());
+  };
+
   return (
-    <div className="flex flex-wrap gap-2 mt-3 animate-fade-in">
-      {options.map((opt, i) => (
+    <div className="mt-3 animate-fade-in space-y-2">
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt, i) => (
+          <button
+            key={i}
+            onClick={() => handleClick(i)}
+            disabled={disabled}
+            className={cn(
+              "px-4 py-2.5 rounded-2xl text-sm font-medium border transition-all duration-200",
+              "active:scale-[0.97] disabled:opacity-50 disabled:cursor-not-allowed",
+              selected.has(i)
+                ? "bg-primary/10 border-primary/40 text-primary ring-1 ring-primary/20"
+                : "bg-background border-border text-foreground hover:bg-accent hover:border-primary/30 hover:shadow-sm"
+            )}
+          >
+            {selected.has(i) && <span className="mr-1">✓</span>}
+            {opt.label}
+          </button>
+        ))}
+      </div>
+      {selected.size > 0 && (
         <button
-          key={i}
-          onClick={() => !disabled && onSelect(opt.label)}
+          onClick={handleSubmit}
           disabled={disabled}
-          className={cn(
-            "px-4 py-2.5 rounded-2xl text-sm font-medium border transition-all duration-200",
-            "bg-background border-border text-foreground",
-            "hover:bg-accent hover:border-primary/30 hover:shadow-sm",
-            "active:scale-[0.97]",
-            "disabled:opacity-50 disabled:cursor-not-allowed"
-          )}
+          className="px-5 py-2 rounded-2xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-[0.97] shadow-sm"
         >
-          {opt.label}
+          确认选择（{selected.size}）
         </button>
-      ))}
+      )}
+      <p className="text-[11px] text-muted-foreground">可多选，点击「确认选择」提交</p>
     </div>
   );
 }
