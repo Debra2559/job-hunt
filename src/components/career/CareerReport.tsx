@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, Star } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, Star, ExternalLink, Link2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface CareerReportData {
@@ -25,6 +25,7 @@ export interface CareerReportData {
   }[];
   trends: { industry: string; trend: string; description: string }[];
   learningPath: { phase: string; duration: string; actions: string[] }[];
+  resources?: { title: string; url: string; description: string }[];
 }
 
 export function parseCareerReport(content: string): CareerReportData | null {
@@ -288,6 +289,31 @@ export function CareerReport({ data }: { data: CareerReportData }) {
           ))}
         </div>
       </div>
+      {/* Resources */}
+      {data.resources && data.resources.length > 0 && (
+        <div className="rounded-2xl border bg-card p-5 space-y-3">
+          <h3 className="font-semibold text-foreground flex items-center gap-2">
+            <Link2 className="w-5 h-5 text-primary" /> 相关资源
+          </h3>
+          <div className="space-y-2">
+            {data.resources.map((res, i) => (
+              <a
+                key={i}
+                href={res.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-start gap-3 p-3 rounded-xl bg-muted/30 hover:bg-accent/50 transition-colors group"
+              >
+                <ExternalLink className="w-4 h-4 text-primary mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">{res.title}</div>
+                  <div className="text-xs text-muted-foreground mt-0.5">{res.description}</div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
