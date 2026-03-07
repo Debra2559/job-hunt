@@ -35,6 +35,7 @@ const Index = () => {
     updateLocalMessage,
     deleteConversation,
     renameConversation,
+    pinConversation,
   } = useConversations(user?.id);
   const {
     tags,
