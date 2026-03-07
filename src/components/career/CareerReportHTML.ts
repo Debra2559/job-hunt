@@ -136,19 +136,6 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     </div>
   `).join('');
 
-  const resourcesHTML = data.resources?.length ? `
-    <div class="section resources-section">
-      <h3 class="section-title"><span class="section-icon" style="background:rgba(251,146,60,0.1);color:#f97316;">${icons.link}</span>相关资源</h3>
-      <div class="resources-grid">
-        ${data.resources.map(r => `
-          <a href="${r.url}" target="_blank" class="resource-card">
-            <div class="resource-title">${r.title}</div>
-            <div class="resource-desc">${r.description}</div>
-          </a>
-        `).join('')}
-      </div>
-    </div>
-  ` : '';
 
   // Boss直聘 job listings section
   const bossJobsHTML = data.jobListings?.length ? `

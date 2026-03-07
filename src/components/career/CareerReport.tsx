@@ -296,34 +296,6 @@ export function CareerReport({ data }: { data: CareerReportData }) {
         </div>
       </div>
 
-      {/* Resources */}
-      {data.resources && data.resources.length > 0 && (
-        <div className="rounded-2xl border border-[hsl(var(--dream-peach)/0.2)] bg-gradient-to-br from-[hsl(var(--dream-peach)/0.06)] to-white/80 backdrop-blur-sm p-5 space-y-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-[hsl(var(--dream-peach)/0.15)] flex items-center justify-center">
-              <Link2 className="w-4 h-4 text-[hsl(var(--dream-peach))]" />
-            </div>
-            <h3 className="font-semibold text-foreground">相关资源</h3>
-          </div>
-          <div className="space-y-2">
-            {data.resources.map((res, i) => (
-              <a
-                key={i}
-                href={res.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-3 p-3 rounded-xl bg-white/50 border border-[hsl(var(--dream-peach)/0.1)] hover:shadow-dream hover:border-[hsl(var(--dream-peach)/0.3)] transition-all duration-300 group"
-              >
-                <ExternalLink className="w-4 h-4 text-[hsl(var(--dream-peach))] mt-0.5 shrink-0 group-hover:scale-110 transition-transform" />
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-foreground group-hover:text-[hsl(var(--dream-violet))] transition-colors">{res.title}</div>
-                  <div className="text-xs text-muted-foreground mt-0.5">{res.description}</div>
-                </div>
-              </a>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
