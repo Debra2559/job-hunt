@@ -182,6 +182,8 @@ export default function Career() {
   const [input, setInput] = useState('');
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
+  const [activeReport, setActiveReport] = useState<CareerReportData | null>(null);
+  const [previewMode, setPreviewMode] = useState<'preview' | 'code'>('preview');
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -203,7 +205,7 @@ export default function Career() {
     scrollToBottom();
   }, [messages]);
 
-  // Parse reports from loaded messages & auto-open new ones
+  // Parse reports from loaded messages & auto-open panel
   const openedReportsRef = useRef<Set<number>>(new Set());
   
   useEffect(() => {
@@ -214,11 +216,9 @@ export default function Career() {
           const report = parseCareerReport(msg.content);
           if (report) {
             newReports.set(i, report);
-            // Auto-open newly generated reports (not from history)
             if (!openedReportsRef.current.has(i) && !isLoading) {
               openedReportsRef.current.add(i);
-              // Small delay to let streaming finish
-              setTimeout(() => openCareerReportPage(report), 300);
+              setTimeout(() => setActiveReport(report), 300);
             }
           }
         }
@@ -226,6 +226,23 @@ export default function Career() {
       if (newReports.size > 0) setReports(newReports);
     }
   }, [loadingHistory, messages, isLoading]);
+
+  // Generate HTML for iframe
+  const reportHTML = useMemo(() => {
+    if (!activeReport) return '';
+    return generateCareerReportHTML(activeReport);
+  }, [activeReport]);
+
+  const reportBlobUrl = useMemo(() => {
+    if (!reportHTML) return '';
+    const blob = new Blob([reportHTML], { type: 'text/html' });
+    return URL.createObjectURL(blob);
+  }, [reportHTML]);
+
+  // Cleanup blob URL
+  useEffect(() => {
+    return () => { if (reportBlobUrl) URL.revokeObjectURL(reportBlobUrl); };
+  }, [reportBlobUrl]);
 
   // Redirect to auth if not logged in
   useEffect(() => {
