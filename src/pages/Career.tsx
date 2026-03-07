@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { CareerReport, parseCareerReport, type CareerReportData } from '@/components/career/CareerReport';
+import { openCareerReportPage } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 import { useAuth } from '@/hooks/useAuth';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
