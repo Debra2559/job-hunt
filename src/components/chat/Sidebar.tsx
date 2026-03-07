@@ -196,7 +196,7 @@ export function Sidebar({
         {/* Career Planning Entry */}
         <button
           onClick={() => navigate('/career')}
-          className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-accent text-foreground border border-border hover:border-primary/30 mb-2"
+          className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground mb-2"
         >
           <Compass className="w-4 h-4 text-primary" />
           <span>职业规划</span>
