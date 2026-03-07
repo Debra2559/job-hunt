@@ -285,16 +285,19 @@ export function Sidebar({
                               hoveredId === conv.id ? "opacity-100" : "opacity-0"
                             )}
                           >
-                            {/* Tag selector */}
-                            {onAssignTag && onRemoveTag && onCreateTag && getConversationTags && (
-                              <ConversationTagSelector
-                                conversationId={conv.id}
-                                allTags={tags}
-                                assignedTags={getConversationTags(conv.id)}
-                                onAssignTag={onAssignTag}
-                                onRemoveTag={onRemoveTag}
-                                onCreateTag={onCreateTag}
-                              />
+                            {onPinConversation && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  onPinConversation(conv.id, !conv.isPinned);
+                                }}
+                                className={cn(
+                                  "p-1.5 rounded-lg hover:bg-primary/10",
+                                  conv.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"
+                                )}
+                              >
+                                <Pin className="w-3.5 h-3.5" />
+                              </button>
                             )}
                             <button
                               onClick={(e) => {
