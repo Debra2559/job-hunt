@@ -46,6 +46,7 @@ export function useConversations(userId: string | undefined) {
             groupId: conv.group_id,
             createdAt: new Date(conv.created_at),
             updatedAt: new Date(conv.updated_at),
+            isPinned: conv.is_pinned,
           };
         })
       );
