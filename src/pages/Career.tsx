@@ -392,13 +392,8 @@ export default function Career() {
           })}
 
           {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-            <div className="flex justify-start animate-fade-in">
-              <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden mr-3 mt-1 bg-gradient-to-br from-primary/20 to-accent/30">
-                <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
-              </div>
-              <div className="bg-[hsl(var(--chat-bubble-ai))] border border-border/50 rounded-2xl px-4 py-3 shadow-sm">
-                <ThinkingIndicator />
-              </div>
+            <div className="animate-fade-in">
+              <ThinkingIndicator />
             </div>
           )}
         </div>
