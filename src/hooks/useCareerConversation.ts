@@ -172,7 +172,11 @@ export function useCareerConversation(userId: string | undefined) {
   }, []);
 
   // Send a user message
-  const sendMessage = useCallback(async (content: string, onSources?: (index: number, sources: any[]) => void) => {
+  const sendMessage = useCallback(async (
+    content: string,
+    onSources?: (index: number, sources: any[]) => void,
+    onBossJobs?: (jobs: BossJobListing[]) => void
+  ) => {
     if (!content.trim() || isLoading) return;
     const userMsg: Msg = { role: 'user', content: content.trim() };
     const newMessages = [...messages, userMsg];
@@ -184,9 +188,11 @@ export function useCareerConversation(userId: string | undefined) {
     }
 
     const sourceIndex = newMessages.length; // index where assistant msg will appear
-    const assistantContent = await streamResponse(newMessages, (sources) => {
-      onSources?.(sourceIndex, sources);
-    });
+    const assistantContent = await streamResponse(
+      newMessages,
+      (sources) => { onSources?.(sourceIndex, sources); },
+      onBossJobs
+    );
 
     if (convId && assistantContent) {
       await saveMessage(convId, 'assistant', assistantContent);
