@@ -35,6 +35,14 @@ const App = () => (
               </AuthRoute>
             }
           />
+          <Route
+            path="/career"
+            element={
+              <ProtectedRoute>
+                <Career />
+              </ProtectedRoute>
+            }
+          />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
