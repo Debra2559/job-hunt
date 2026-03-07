@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Search, Tag } from 'lucide-react';
+import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Search, Tag, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
