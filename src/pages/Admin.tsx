@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
@@ -79,6 +80,16 @@ const Admin = () => {
       />
       
       <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-auto pt-16 lg:pt-8">
+        {/* Mobile back button */}
+        <div className="lg:hidden flex items-center gap-2 mb-4 -mt-2">
+          <button
+            onClick={() => navigate('/')}
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>返回前台</span>
+          </button>
+        </div>
         {renderContent()}
       </main>
     </div>
