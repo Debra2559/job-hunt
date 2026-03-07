@@ -71,6 +71,8 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
   
   if (options.length === 0) return null;
 
+  const optionIcons = ['🎯', '💡', '🌟', '🚀', '✨', '🔮', '📌', '🎨'];
+
   const handleClick = (index: number) => {
     if (disabled) return;
     setSelected(prev => {
@@ -89,45 +91,76 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
   };
 
   return (
-    <div className="mt-3 animate-fade-in space-y-2">
+    <div className="mt-3 animate-fade-in space-y-2.5">
+      <p className="text-xs text-muted-foreground font-medium px-1">点击选择（可多选）</p>
       <div className="space-y-2">
-        {options.map((opt, i) => (
-          <button
-            key={i}
-            onClick={() => handleClick(i)}
-            disabled={disabled}
-            className={cn(
-              "w-full text-left px-4 py-3 rounded-xl border transition-all duration-200 flex items-start gap-3",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              selected.has(i)
-                ? "border-primary bg-primary/5 ring-1 ring-primary/30"
-                : "border-border bg-card hover:border-primary/30 hover:bg-accent/50"
-            )}
-          >
-            <div className={cn(
-              "shrink-0 mt-0.5 w-[18px] h-[18px] rounded-full border-2 flex items-center justify-center transition-colors",
-              selected.has(i)
-                ? "border-primary bg-primary"
-                : "border-muted-foreground/40"
-            )}>
-              {selected.has(i) && (
-                <div className="w-2 h-2 rounded-full bg-primary-foreground" />
+        {options.map((opt, i) => {
+          const isSelected = selected.has(i);
+          return (
+            <button
+              key={i}
+              onClick={() => handleClick(i)}
+              disabled={disabled}
+              className={cn(
+                "group w-full text-left px-4 py-3.5 rounded-2xl border-2 transition-all duration-300 flex items-center gap-3",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "active:scale-[0.98]",
+                isSelected
+                  ? "border-primary bg-primary/8 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_4px_12px_-2px_hsl(var(--primary)/0.12)]"
+                  : "border-transparent bg-card shadow-sm hover:shadow-md hover:border-primary/20 hover:bg-accent/40"
               )}
-            </div>
-            <span className="text-sm font-medium text-foreground">{opt.label}</span>
-          </button>
-        ))}
+            >
+              {/* Icon circle */}
+              <div className={cn(
+                "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all duration-300",
+                isSelected
+                  ? "bg-primary/15 scale-110"
+                  : "bg-muted/60 group-hover:bg-primary/10 group-hover:scale-105"
+              )}>
+                {optionIcons[i % optionIcons.length]}
+              </div>
+
+              {/* Label */}
+              <span className={cn(
+                "flex-1 text-sm font-medium transition-colors",
+                isSelected ? "text-primary" : "text-foreground"
+              )}>
+                {opt.label}
+              </span>
+
+              {/* Check indicator */}
+              <div className={cn(
+                "shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300",
+                isSelected
+                  ? "border-primary bg-primary scale-100"
+                  : "border-muted-foreground/25 scale-90 group-hover:border-primary/40 group-hover:scale-100"
+              )}>
+                {isSelected && (
+                  <svg className="w-3.5 h-3.5 text-primary-foreground" viewBox="0 0 14 14" fill="none">
+                    <path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                )}
+              </div>
+            </button>
+          );
+        })}
       </div>
+
+      {/* Submit button */}
       {selected.size > 0 && (
         <button
           onClick={handleSubmit}
           disabled={disabled}
-          className="w-full px-5 py-2.5 rounded-xl text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 transition-all duration-200 active:scale-[0.98] shadow-sm"
+          className={cn(
+            "w-full py-3 rounded-2xl text-sm font-semibold transition-all duration-300",
+            "bg-primary text-primary-foreground hover:bg-primary/90",
+            "shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]",
+            "active:scale-[0.98] animate-fade-in"
+          )}
         >
-          确认选择（{selected.size}）
+          确认选择（{selected.size}项）→
         </button>
       )}
-      <p className="text-[11px] text-muted-foreground text-center">可多选，点击「确认选择」提交</p>
     </div>
   );
 }
