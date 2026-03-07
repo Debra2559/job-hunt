@@ -216,6 +216,10 @@ export default function Career() {
         if (msg.role === 'assistant') {
           const report = parseCareerReport(msg.content);
           if (report) {
+            // Inject boss jobs if available
+            if (bossJobs.length > 0) {
+              report.jobListings = bossJobs;
+            }
             newReports.set(i, report);
             if (!openedReportsRef.current.has(i) && !isLoading) {
               openedReportsRef.current.add(i);
@@ -226,7 +230,7 @@ export default function Career() {
       });
       if (newReports.size > 0) setReports(newReports);
     }
-  }, [loadingHistory, messages, isLoading]);
+  }, [loadingHistory, messages, isLoading, bossJobs]);
 
   // Generate HTML for iframe
   const reportHTML = useMemo(() => {
