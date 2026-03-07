@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, Star } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, Star, ExternalLink, Link2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export interface CareerReportData {
