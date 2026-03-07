@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, Star, ExternalLink, Link2, Sparkles } from 'lucide-react';
+import { TrendingUp, TrendingDown, Minus, Award, Target, BookOpen, Briefcase, Star, ExternalLink, Link2, Sparkles, FileText } from 'lucide-react';
+import { openCareerReportPage } from './CareerReportHTML';
 import { cn } from '@/lib/utils';
 
 export interface CareerReportData {
@@ -137,6 +138,15 @@ const sectionColors = [
 export function CareerReport({ data }: { data: CareerReportData }) {
   return (
     <div className="space-y-5 animate-fade-in">
+      {/* Export button */}
+      <button
+        onClick={() => openCareerReportPage(data)}
+        className="w-full py-3 rounded-2xl text-sm font-semibold bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white hover:opacity-90 transition-all duration-300 active:scale-[0.98] shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] flex items-center justify-center gap-2"
+      >
+        <FileText className="w-4 h-4" />
+        查看完整报告页面
+      </button>
+
       {/* Personality Section */}
       <div className="rounded-2xl border border-[hsl(var(--dream-violet)/0.2)] bg-gradient-to-br from-[hsl(var(--dream-violet)/0.06)] to-white/80 backdrop-blur-sm p-5 space-y-4">
         <div className="flex items-center gap-2.5">
