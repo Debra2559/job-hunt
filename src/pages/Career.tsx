@@ -182,6 +182,7 @@ export default function Career() {
   const [input, setInput] = useState('');
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
+  const [bossJobs, setBossJobs] = useState<BossJobListing[]>([]);
   const [activeReport, setActiveReport] = useState<CareerReportData | null>(null);
   const [previewMode, setPreviewMode] = useState<'preview' | 'code'>('preview');
   const scrollRef = useRef<HTMLDivElement>(null);
