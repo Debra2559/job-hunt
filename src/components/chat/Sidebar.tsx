@@ -230,6 +230,16 @@ export function Sidebar({
             <span className="truncate text-muted-foreground italic">新对话</span>
           </div>
         )}
+
+        {/* Career Planning Entry */}
+        <button
+          onClick={() => navigate('/career')}
+          className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-accent text-foreground border border-border hover:border-primary/30 mb-2"
+        >
+          <Compass className="w-4 h-4 text-primary" />
+          <span>职业规划</span>
+          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
+        </button>
         
         {/* No results */}
         {filteredConversations.length === 0 && conversations.length > 0 && (
