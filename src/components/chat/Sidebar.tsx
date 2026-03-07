@@ -46,6 +46,7 @@ export function Sidebar({
   onNewConversation,
   onDeleteConversation,
   onRenameConversation,
+  onPinConversation,
   showFavorites,
   onToggleFavorites,
   userId,
@@ -57,23 +58,14 @@ export function Sidebar({
   onProfileUpdated,
   isNewConversation,
   isAdmin,
-  tags = [],
-  getConversationTags,
-  onCreateTag,
-  onUpdateTag,
-  onDeleteTag,
-  onReorderTags,
-  onAssignTag,
-  onRemoveTag,
 }: SidebarProps) {
   const navigate = useNavigate();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedTagFilter, setSelectedTagFilter] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
+    pinned: true,
     today: true,
     yesterday: true,
     week: true,
