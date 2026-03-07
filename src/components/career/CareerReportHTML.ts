@@ -136,19 +136,6 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     </div>
   `).join('');
 
-  const resourcesHTML = data.resources?.length ? `
-    <div class="section resources-section">
-      <h3 class="section-title"><span class="section-icon" style="background:rgba(251,146,60,0.1);color:#f97316;">${icons.link}</span>相关资源</h3>
-      <div class="resources-grid">
-        ${data.resources.map(r => `
-          <a href="${r.url}" target="_blank" class="resource-card">
-            <div class="resource-title">${r.title}</div>
-            <div class="resource-desc">${r.description}</div>
-          </a>
-        `).join('')}
-      </div>
-    </div>
-  ` : '';
 
   // Boss直聘 job listings section
   const bossJobsHTML = data.jobListings?.length ? `
@@ -514,25 +501,6 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   }
   .path-actions li::before { content: '• '; color: #8b5cf6; }
 
-  /* Resources */
-  .resources-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-  @media (max-width: 640px) { .resources-grid { grid-template-columns: 1fr; } }
-  .resource-card {
-    display: block;
-    padding: 16px;
-    border-radius: 12px;
-    background: rgba(251,146,60,0.04);
-    border: 1px solid rgba(251,146,60,0.1);
-    text-decoration: none;
-    transition: all 0.3s;
-  }
-  .resource-card:hover {
-    border-color: rgba(251,146,60,0.25);
-    box-shadow: 0 4px 16px -4px rgba(251,146,60,0.12);
-    transform: translateY(-1px);
-  }
-  .resource-title { font-size: 13px; font-weight: 500; color: #1e293b; }
-  .resource-desc { font-size: 12px; color: #64748b; margin-top: 4px; }
 
   /* Footer */
   .report-footer {
@@ -751,7 +719,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     </div>
   </div>
 
-  ${resourcesHTML}
+  
 
   ${bossJobsHTML}
 
