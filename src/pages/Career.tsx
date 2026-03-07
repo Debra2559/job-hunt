@@ -280,8 +280,8 @@ export default function Career() {
   const handleNewConversation = async () => {
     setReports(new Map());
     setWebSources(new Map());
+    setBossJobs([]);
     await startNewConversation();
-    // Trigger new greeting
     setTimeout(() => autoGreet(), 100);
   };
 
