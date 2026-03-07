@@ -64,6 +64,28 @@ function matchBar(match: number): string {
   </div>`;
 }
 
+// Premium SVG icons (Lucide-style, 20x20)
+const icons = {
+  graduation: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/></svg>`,
+  sparkles: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/></svg>`,
+  trophy: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>`,
+  target: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>`,
+  gem: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12l4 6-10 13L2 9Z"/><path d="M11 3 8 9l4 13 4-13-3-6"/><path d="M2 9h20"/></svg>`,
+  briefcase: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>`,
+  barChart: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>`,
+  bookOpen: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+  link: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>`,
+  trendUp: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>`,
+  trendDown: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/><polyline points="16 17 22 17 22 11"/></svg>`,
+  arrowRight: `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>`,
+  coins: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></svg>`,
+  chartLine: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>`,
+  lightbulb: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>`,
+  route: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>`,
+  printer: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 9V3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v6"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>`,
+  download: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>`,
+};
+
 export function generateCareerReportHTML(data: CareerReportData): string {
   const now = new Date();
   const dateStr = `${now.getFullYear()}年${now.getMonth() + 1}月${now.getDate()}日`;
@@ -79,7 +101,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
           <h4 class="job-title">${job.title}</h4>
           <div class="job-meta">
             <span class="job-tag">${job.category}</span>
-            <span class="job-salary">💰 ${job.salary}</span>
+            <span class="job-salary"><span class="inline-icon" style="color:#8b5cf6;">${icons.coins}</span> ${job.salary}</span>
           </div>
         </div>
         <div class="job-match">
@@ -88,18 +110,18 @@ export function generateCareerReportHTML(data: CareerReportData): string {
         </div>
       </div>
       ${matchBar(job.match)}
-      <p class="job-outlook">📈 ${job.outlook}</p>
+      <p class="job-outlook"><span class="inline-icon" style="color:#10b981;">${icons.chartLine}</span> ${job.outlook}</p>
       <div class="skill-tags">${job.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
-      <p class="job-detail"><strong>✨ 推荐理由：</strong>${job.reasons.join('；')}</p>
-      <p class="job-detail"><strong>🛤️ 成长路径：</strong>${job.path}</p>
+      <p class="job-detail"><strong><span class="inline-icon" style="color:#8b5cf6;">${icons.lightbulb}</span> 推荐理由：</strong>${job.reasons.join('；')}</p>
+      <p class="job-detail"><strong><span class="inline-icon" style="color:#ec4899;">${icons.route}</span> 成长路径：</strong>${job.path}</p>
     </div>
   `).join('');
 
   const trendsHTML = data.trends.map(t => {
-    const icon = t.trend === '上升' ? '📈' : t.trend === '下降' ? '📉' : '➡️';
+    const icon = t.trend === '上升' ? icons.trendUp : t.trend === '下降' ? icons.trendDown : icons.arrowRight;
     const color = t.trend === '上升' ? '#10b981' : t.trend === '下降' ? '#ef4444' : '#6b7280';
     return `<div class="trend-item">
-      <span style="color:${color};font-size:18px;">${icon}</span>
+      <span class="trend-icon-wrap" style="color:${color};background:${color}12;">${icon}</span>
       <div><div class="trend-name">${t.industry}</div><div class="trend-desc">${t.description}</div></div>
     </div>`;
   }).join('');
@@ -116,7 +138,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
 
   const resourcesHTML = data.resources?.length ? `
     <div class="section resources-section">
-      <h3 class="section-title"><span class="section-icon" style="background:rgba(251,146,60,0.1);"><span style="font-size:16px;">🔗</span></span>相关资源</h3>
+      <h3 class="section-title"><span class="section-icon" style="background:rgba(251,146,60,0.1);color:#f97316;">${icons.link}</span>相关资源</h3>
       <div class="resources-grid">
         ${data.resources.map(r => `
           <a href="${r.url}" target="_blank" class="resource-card">
@@ -153,6 +175,14 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     padding: 40px 24px 60px;
   }
 
+  .inline-icon {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-right: 3px;
+    position: relative;
+    top: -1px;
+  }
+
   /* Header */
   .report-header {
     text-align: center;
@@ -179,6 +209,17 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     width: 150px; height: 150px;
     background: radial-gradient(circle, rgba(236,72,153,0.06), transparent);
     border-radius: 50%;
+  }
+  .header-icon {
+    width: 56px; height: 56px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(236,72,153,0.1));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 16px;
+    color: #7c3aed;
+    position: relative;
   }
   .report-header h1 {
     font-size: 28px;
@@ -262,6 +303,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 16px;
+    margin-bottom: 20px;
   }
   @media (max-width: 640px) {
     .analysis-grid { grid-template-columns: 1fr; }
@@ -289,7 +331,15 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     margin-bottom: 12px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+  }
+  .analysis-card .card-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
   .analysis-card ul {
     list-style: none;
@@ -341,7 +391,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     color: #7c3aed;
     border: 1px solid rgba(139,92,246,0.12);
   }
-  .job-salary { font-size: 12px; color: #64748b; }
+  .job-salary { font-size: 12px; color: #64748b; display: flex; align-items: center; }
   .job-match { text-align: right; }
   .match-number {
     font-size: 28px;
@@ -353,7 +403,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     line-height: 1;
   }
   .match-label { font-size: 11px; color: #94a3b8; }
-  .job-outlook { font-size: 13px; color: #475569; margin: 12px 0; }
+  .job-outlook { font-size: 13px; color: #475569; margin: 12px 0; display: flex; align-items: center; }
   .skill-tags { display: flex; flex-wrap: wrap; gap: 6px; margin: 10px 0; }
   .skill-tag {
     font-size: 12px;
@@ -364,7 +414,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     border: 1px solid rgba(59,130,246,0.12);
   }
   .job-detail { font-size: 13px; color: #475569; margin-top: 8px; line-height: 1.7; }
-  .job-detail strong { color: #1e293b; }
+  .job-detail strong { color: #1e293b; display: inline-flex; align-items: center; }
 
   /* Trends */
   .trend-item {
@@ -378,6 +428,14 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     margin-bottom: 10px;
   }
   .trend-item:last-child { margin-bottom: 0; }
+  .trend-icon-wrap {
+    width: 32px; height: 32px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
   .trend-name { font-size: 14px; font-weight: 500; color: #1e293b; }
   .trend-desc { font-size: 12px; color: #64748b; margin-top: 2px; }
 
@@ -476,7 +534,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     font-family: inherit;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
   }
   .print-btn.primary {
     background: linear-gradient(135deg, #7c3aed, #db2777);
@@ -503,7 +561,8 @@ export function generateCareerReportHTML(data: CareerReportData): string {
 <div class="page">
   <!-- Header -->
   <div class="report-header">
-    <h1>🎓 职业规划报告</h1>
+    <div class="header-icon">${icons.graduation}</div>
+    <h1>职业规划报告</h1>
     <div class="subtitle">基于AI对话式测评的个性化分析</div>
     <div class="badge">${data.personality.type}</div>
     <div class="date">生成于 ${dateStr} · 华中农业大学</div>
@@ -512,7 +571,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   <!-- Personality -->
   <div class="section personality-section">
     <h3 class="section-title">
-      <span class="section-icon" style="background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(236,72,153,0.1));"><span style="font-size:16px;">✨</span></span>
+      <span class="section-icon" style="background:linear-gradient(135deg,rgba(139,92,246,0.15),rgba(236,72,153,0.1));color:#8b5cf6;">${icons.sparkles}</span>
       性格画像
     </h3>
     ${generateRadarSVG(data.personality.traits)}
@@ -522,15 +581,15 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   <!-- Analysis -->
   <div class="analysis-grid">
     <div class="analysis-card strengths">
-      <h4>🏆 核心优势</h4>
+      <h4><span class="card-icon" style="background:rgba(139,92,246,0.1);color:#8b5cf6;">${icons.trophy}</span> 核心优势</h4>
       <ul>${strengthsHTML}</ul>
     </div>
     <div class="analysis-card interests">
-      <h4>🎯 兴趣方向</h4>
+      <h4><span class="card-icon" style="background:rgba(236,72,153,0.1);color:#ec4899;">${icons.target}</span> 兴趣方向</h4>
       <ul>${interestsHTML}</ul>
     </div>
     <div class="analysis-card values">
-      <h4>💎 价值观</h4>
+      <h4><span class="card-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">${icons.gem}</span> 价值观</h4>
       <ul>${valuesHTML}</ul>
     </div>
   </div>
@@ -538,7 +597,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   <!-- Jobs -->
   <div class="section" style="border-color:rgba(236,72,153,0.12);">
     <h3 class="section-title">
-      <span class="section-icon" style="background:linear-gradient(135deg,rgba(236,72,153,0.15),rgba(251,146,60,0.1));"><span style="font-size:16px;">💼</span></span>
+      <span class="section-icon" style="background:linear-gradient(135deg,rgba(236,72,153,0.15),rgba(251,146,60,0.1));color:#ec4899;">${icons.briefcase}</span>
       推荐岗位
     </h3>
     ${jobsHTML}
@@ -547,7 +606,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   <!-- Trends -->
   <div class="section" style="border-color:rgba(16,185,129,0.12);">
     <h3 class="section-title">
-      <span class="section-icon" style="background:rgba(16,185,129,0.1);"><span style="font-size:16px;">📊</span></span>
+      <span class="section-icon" style="background:rgba(16,185,129,0.1);color:#10b981;">${icons.barChart}</span>
       行业趋势
     </h3>
     ${trendsHTML}
@@ -556,7 +615,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   <!-- Learning Path -->
   <div class="section" style="border-color:rgba(59,130,246,0.12);">
     <h3 class="section-title">
-      <span class="section-icon" style="background:rgba(59,130,246,0.1);"><span style="font-size:16px;">📚</span></span>
+      <span class="section-icon" style="background:rgba(59,130,246,0.1);color:#3b82f6;">${icons.bookOpen}</span>
       学习路径规划
     </h3>
     <div class="path-timeline">
@@ -573,8 +632,8 @@ export function generateCareerReportHTML(data: CareerReportData): string {
 </div>
 
 <div class="print-bar no-print">
-  <button class="print-btn secondary" onclick="window.print()">🖨️ 打印</button>
-  <button class="print-btn primary" onclick="saveAsHTML()">💾 保存</button>
+  <button class="print-btn secondary" onclick="window.print()">${icons.printer} 打印</button>
+  <button class="print-btn primary" onclick="saveAsHTML()">${icons.download} 保存</button>
 </div>
 
 <script>
