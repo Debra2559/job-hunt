@@ -138,6 +138,10 @@ export function useCareerConversation(userId: string | undefined) {
               onSources(parsed.webSources);
               continue;
             }
+            if (parsed.bossJobs && onBossJobs) {
+              onBossJobs(parsed.bossJobs);
+              continue;
+            }
             const delta = parsed.choices?.[0]?.delta?.content;
             if (delta) {
               assistantContentRef.current += delta;
