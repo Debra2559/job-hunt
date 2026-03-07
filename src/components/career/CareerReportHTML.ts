@@ -542,6 +542,98 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     color: #94a3b8;
   }
 
+  /* Boss直聘 */
+  .boss-section { border-color: rgba(0,190,75,0.15); }
+  .boss-jobs-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 640px) { .boss-jobs-grid { grid-template-columns: 1fr; } }
+  .boss-job-card {
+    display: block;
+    padding: 18px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(0,190,75,0.04), rgba(255,255,255,0.9));
+    border: 1px solid rgba(0,190,75,0.12);
+    text-decoration: none;
+    transition: all 0.3s;
+    position: relative;
+  }
+  .boss-job-card:hover {
+    border-color: rgba(0,190,75,0.3);
+    box-shadow: 0 6px 20px -6px rgba(0,190,75,0.15);
+    transform: translateY(-2px);
+  }
+  .boss-job-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  .boss-job-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .boss-job-salary {
+    font-size: 13px;
+    font-weight: 700;
+    color: #00be4b;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .boss-job-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: #64748b;
+  }
+  .boss-job-company { font-weight: 500; }
+  .boss-job-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 10px;
+  }
+  .boss-tag {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: rgba(0,190,75,0.08);
+    color: #059669;
+    border: 1px solid rgba(0,190,75,0.1);
+  }
+  .boss-job-link {
+    display: block;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #00be4b;
+    font-weight: 500;
+  }
+  .boss-more-link {
+    display: inline-block;
+    padding: 10px 24px;
+    border-radius: 99px;
+    background: linear-gradient(135deg, #00be4b, #059669);
+    color: white;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  .boss-more-link:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px -4px rgba(0,190,75,0.4);
+  }
+
   /* Print */
   @media print {
     body { background: white; padding: 0; }
