@@ -80,13 +80,18 @@ export function Sidebar({
     const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
 
     const groups: Record<string, Conversation[]> = {
+      pinned: [],
       today: [],
       yesterday: [],
       week: [],
       older: [],
     };
 
-    filteredConversations.forEach((conv) => {
+    conversations.forEach((conv) => {
+      if (conv.isPinned) {
+        groups.pinned.push(conv);
+        return;
+      }
       const convDate = new Date(conv.updatedAt);
       if (convDate >= today) {
         groups.today.push(conv);
@@ -100,13 +105,14 @@ export function Sidebar({
     });
 
     const result: ConversationGroup[] = [];
+    if (groups.pinned.length > 0) result.push({ label: '📌 置顶', key: 'pinned', conversations: groups.pinned });
     if (groups.today.length > 0) result.push({ label: '今天', key: 'today', conversations: groups.today });
     if (groups.yesterday.length > 0) result.push({ label: '昨天', key: 'yesterday', conversations: groups.yesterday });
     if (groups.week.length > 0) result.push({ label: '过去7天', key: 'week', conversations: groups.week });
     if (groups.older.length > 0) result.push({ label: '更早', key: 'older', conversations: groups.older });
 
     return result;
-  }, [filteredConversations]);
+  }, [conversations]);
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
