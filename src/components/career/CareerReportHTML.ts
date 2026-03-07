@@ -753,6 +753,8 @@ export function generateCareerReportHTML(data: CareerReportData): string {
 
   ${resourcesHTML}
 
+  ${bossJobsHTML}
+
   <div class="report-footer">
     <p>本报告由 AI 职业规划助手生成，仅供参考</p>
     <p style="margin-top:4px;">华中农业大学 · 校园AI辅导员</p>
