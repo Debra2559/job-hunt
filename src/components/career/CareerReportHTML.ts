@@ -150,6 +150,42 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     </div>
   ` : '';
 
+  // Boss直聘 job listings section
+  const bossJobsHTML = data.jobListings?.length ? `
+    <div class="section boss-section">
+      <h3 class="section-title">
+        <span class="section-icon" style="background:linear-gradient(135deg,rgba(0,190,75,0.12),rgba(0,150,60,0.08));color:#00be4b;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="7" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </span>
+        热招岗位 · BOSS直聘
+        <span style="font-size:12px;font-weight:400;color:#94a3b8;margin-left:auto;">实时数据</span>
+      </h3>
+      <div class="boss-jobs-grid">
+        ${data.jobListings.map(job => `
+          <a href="${job.url}" target="_blank" rel="noopener noreferrer" class="boss-job-card">
+            <div class="boss-job-top">
+              <div class="boss-job-title">${job.title}</div>
+              ${job.salary ? `<span class="boss-job-salary">${job.salary}</span>` : ''}
+            </div>
+            <div class="boss-job-meta">
+              ${job.company ? `<span class="boss-job-company">${job.company}</span>` : ''}
+              ${job.location ? `<span class="boss-job-location">📍 ${job.location}</span>` : ''}
+            </div>
+            <div class="boss-job-tags">
+              ${job.tags.map(t => `<span class="boss-tag">${t}</span>`).join('')}
+            </div>
+            <span class="boss-job-link">查看详情 →</span>
+          </a>
+        `).join('')}
+      </div>
+      <div style="text-align:center;margin-top:16px;">
+        <a href="https://www.zhipin.com" target="_blank" rel="noopener noreferrer" class="boss-more-link">
+          前往BOSS直聘查看更多岗位 →
+        </a>
+      </div>
+    </div>
+  ` : '';
+
   return `<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
