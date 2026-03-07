@@ -738,7 +738,7 @@ export function generateCareerReportHTML(data: CareerReportData): string {
     </div>
   </div>
 
-  ${resourcesHTML}
+  
 
   ${bossJobsHTML}
 
