@@ -226,6 +226,15 @@ const Index = () => {
     }
   }, [renameConversation]);
 
+  const handlePinConversation = useCallback(async (id: string, pinned: boolean) => {
+    const success = await pinConversation(id, pinned);
+    if (success) {
+      toast.success(pinned ? '已置顶' : '已取消置顶');
+    } else {
+      toast.error('操作失败');
+    }
+  }, [pinConversation]);
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {

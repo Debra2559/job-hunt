@@ -323,6 +323,8 @@ export function useConversations(userId: string | undefined) {
     updateLocalMessage,
     deleteConversation,
     renameConversation,
+    pinConversation,
     setConversations,
+  };
   };
 }
