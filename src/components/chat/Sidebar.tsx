@@ -72,31 +72,7 @@ export function Sidebar({
     older: true,
   });
 
-  // Filter conversations by search and tags
-  const filteredConversations = useMemo(() => {
-    let filtered = conversations;
-
-    // Search filter
-    if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter((conv) => 
-        conv.title.toLowerCase().includes(query) ||
-        conv.messages.some((m) => m.content.toLowerCase().includes(query))
-      );
-    }
-
-    // Tag filter
-    if (selectedTagFilter && getConversationTags) {
-      filtered = filtered.filter((conv) => {
-        const convTags = getConversationTags(conv.id);
-        return convTags.some((t) => t.id === selectedTagFilter);
-      });
-    }
-
-    return filtered;
-  }, [conversations, searchQuery, selectedTagFilter, getConversationTags]);
-
-  // Group conversations by time
+  // Group conversations by pinned + time
   const groupedConversations = useMemo((): ConversationGroup[] => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
