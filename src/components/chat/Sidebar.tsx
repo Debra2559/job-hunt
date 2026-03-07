@@ -20,6 +20,7 @@ interface SidebarProps {
   onNewConversation: () => void;
   onDeleteConversation: (id: string) => void;
   onRenameConversation: (id: string, newTitle: string) => void;
+  onPinConversation?: (id: string, pinned: boolean) => void;
   showFavorites: boolean;
   onToggleFavorites: () => void;
   userId: string;
@@ -36,15 +37,6 @@ interface SidebarProps {
   }) => void;
   isNewConversation?: boolean;
   isAdmin?: boolean;
-  // Tag props
-  tags?: ConversationTag[];
-  getConversationTags?: (conversationId: string) => ConversationTag[];
-  onCreateTag?: (name: string, color: string) => Promise<ConversationTag | null>;
-  onUpdateTag?: (tagId: string, updates: Partial<{ name: string; color: string }>) => Promise<boolean>;
-  onDeleteTag?: (tagId: string) => Promise<boolean>;
-  onReorderTags?: (reorderedTags: ConversationTag[]) => Promise<boolean>;
-  onAssignTag?: (conversationId: string, tagId: string) => Promise<boolean>;
-  onRemoveTag?: (conversationId: string, tagId: string) => Promise<boolean>;
 }
 
 export function Sidebar({
