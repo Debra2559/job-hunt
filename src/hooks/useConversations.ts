@@ -326,5 +326,4 @@ export function useConversations(userId: string | undefined) {
     pinConversation,
     setConversations,
   };
-  };
 }
