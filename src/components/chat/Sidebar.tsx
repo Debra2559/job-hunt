@@ -1,15 +1,11 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bookmark, Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Search, Tag, Compass } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { ConversationTag } from '@/hooks/useConversationTags';
-import { TagManager } from './TagManager';
-import { ConversationTagSelector } from './ConversationTagSelector';
-import { Input } from '@/components/ui/input';
 
 interface ConversationGroup {
   label: string;
