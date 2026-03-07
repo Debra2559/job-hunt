@@ -268,36 +268,14 @@ export function Sidebar({
                           <button
                             onClick={() => onSelectConversation(conv.id)}
                             className={cn(
-                              "w-full px-3 py-2 rounded-xl flex flex-col gap-1 text-sm transition-all duration-200 text-left pr-20",
+                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
                               activeConversationId === conv.id
                                 ? "bg-primary/10 text-primary font-medium"
                                 : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
                             )}
                           >
-                            <div className="flex items-center gap-3">
-                              <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                              <span className="truncate">{conv.title}</span>
-                            </div>
-                            {/* Show assigned tags */}
-                            {getConversationTags && (() => {
-                              const convTags = getConversationTags(conv.id);
-                              if (convTags.length === 0) return null;
-                              return (
-                                <div className="flex gap-1 ml-7 flex-wrap">
-                                  {convTags.slice(0, 3).map((tag) => (
-                                    <span
-                                      key={tag.id}
-                                      className="px-1.5 py-0.5 rounded text-[10px] bg-muted/60 text-muted-foreground"
-                                    >
-                                      {tag.name}
-                                    </span>
-                                  ))}
-                                  {convTags.length > 3 && (
-                                    <span className="text-[10px] text-muted-foreground">+{convTags.length - 3}</span>
-                                  )}
-                                </div>
-                              );
-                            })()}
+                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{conv.title}</span>
                           </button>
                           
                           {/* Action buttons */}
