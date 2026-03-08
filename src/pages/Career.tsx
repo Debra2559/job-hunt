@@ -343,10 +343,10 @@ export default function Career() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleNewConversation}
+            onClick={handleClearHistory}
             disabled={isLoading}
             className="shrink-0 rounded-xl hover:bg-muted"
-            title="开始新对话"
+            title="清空对话历史"
           >
             <RotateCcw className="w-4 h-4 text-muted-foreground" />
           </Button>
