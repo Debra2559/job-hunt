@@ -279,9 +279,11 @@ export function Sidebar({
                                   }}
                                   className={cn(
                                     "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
-                                    activeConversationId === conv.id
-                                      ? "bg-primary/10 text-primary font-medium"
-                                      : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+                                    conv.groupId === 'career'
+                                      ? "border-l-[3px] border-l-primary bg-primary/5 hover:bg-primary/10 text-sidebar-foreground"
+                                      : activeConversationId === conv.id
+                                        ? "bg-primary/10 text-primary font-medium"
+                                        : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
                                   )}
                                 >
                                   {conv.groupId === 'career' ? (
