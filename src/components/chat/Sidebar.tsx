@@ -297,11 +297,6 @@ export function Sidebar({
                                   )}
                                 </button>
                               </TooltipTrigger>
-                              {conv.groupId === 'career' && (
-                                <TooltipContent side="right" className="text-xs">
-                                  <p>职业规划对话 · 点击继续规划</p>
-                                </TooltipContent>
-                              )}
                             </Tooltip>
                           </TooltipProvider>
                           
