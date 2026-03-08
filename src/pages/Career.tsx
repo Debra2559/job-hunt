@@ -178,7 +178,7 @@ function SourceCards({ sources }: { sources: WebSource[] }) {
 export default function Career() {
   const navigate = useNavigate();
   const { user, loading: authLoading } = useAuth();
-  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, startNewConversation } = useCareerConversation(user?.id);
+  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(user?.id);
   const [input, setInput] = useState('');
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
@@ -277,11 +277,12 @@ export default function Career() {
     }
   };
 
-  const handleNewConversation = async () => {
+  const handleClearHistory = async () => {
     setReports(new Map());
     setWebSources(new Map());
     setBossJobs([]);
-    await startNewConversation();
+    setActiveReport(null);
+    await clearHistory();
     setTimeout(() => autoGreet(), 100);
   };
 
@@ -342,10 +343,10 @@ export default function Career() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={handleNewConversation}
+            onClick={handleClearHistory}
             disabled={isLoading}
             className="shrink-0 rounded-xl hover:bg-muted"
-            title="开始新对话"
+            title="清空对话历史"
           >
             <RotateCcw className="w-4 h-4 text-muted-foreground" />
           </Button>

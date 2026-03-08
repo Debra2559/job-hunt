@@ -267,12 +267,18 @@ export function useCareerConversation(userId: string | undefined) {
     }
   }, [ensureConversation, saveMessage]);
 
-  // Start new conversation
-  const startNewConversation = useCallback(async () => {
+  // Clear history (delete messages but keep single conversation)
+  const clearHistory = useCallback(async () => {
+    if (conversationId) {
+      try {
+        await supabase.from('messages').delete().eq('conversation_id', conversationId);
+      } catch (e) {
+        console.error('Error clearing career messages:', e);
+      }
+    }
     setMessages([]);
-    setConversationId(null);
     hasGreeted.current = false;
-  }, []);
+  }, [conversationId]);
 
   return {
     messages,
@@ -281,6 +287,6 @@ export function useCareerConversation(userId: string | undefined) {
     sendMessage,
     autoGreet,
     hasGreeted,
-    startNewConversation,
+    clearHistory,
   };
 }
