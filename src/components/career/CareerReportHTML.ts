@@ -442,8 +442,14 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   }
   .job-detail { font-size: 13px; color: #475569; margin-top: 8px; line-height: 1.7; }
   .job-detail strong { color: #1e293b; display: inline-flex; align-items: center; }
+  .boss-search-btn {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+    padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 500;
+    color: #00a89d; background: rgba(0,190,171,0.08); border: 1px solid rgba(0,190,171,0.2);
+    text-decoration: none; transition: background 0.2s;
+  }
+  .boss-search-btn:hover { background: rgba(0,190,171,0.16); }
 
-  /* Trends */
   .trend-item {
     display: flex;
     align-items: flex-start;
