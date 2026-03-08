@@ -114,6 +114,10 @@ export function generateCareerReportHTML(data: CareerReportData): string {
       <div class="skill-tags">${job.skills.map(s => `<span class="skill-tag">${s}</span>`).join('')}</div>
       <p class="job-detail"><strong><span class="inline-icon" style="color:#8b5cf6;">${icons.lightbulb}</span> 推荐理由：</strong>${job.reasons.join('；')}</p>
       <p class="job-detail"><strong><span class="inline-icon" style="color:#ec4899;">${icons.route}</span> 成长路径：</strong>${job.path}</p>
+      <a href="https://www.zhipin.com/web/geek/job?query=${encodeURIComponent(job.title)}" target="_blank" rel="noopener noreferrer" class="boss-search-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        在Boss直聘搜索该岗位 →
+      </a>
     </div>
   `).join('');
 
@@ -438,8 +442,14 @@ export function generateCareerReportHTML(data: CareerReportData): string {
   }
   .job-detail { font-size: 13px; color: #475569; margin-top: 8px; line-height: 1.7; }
   .job-detail strong { color: #1e293b; display: inline-flex; align-items: center; }
+  .boss-search-btn {
+    display: inline-flex; align-items: center; gap: 6px; margin-top: 10px;
+    padding: 6px 14px; border-radius: 12px; font-size: 12px; font-weight: 500;
+    color: #00a89d; background: rgba(0,190,171,0.08); border: 1px solid rgba(0,190,171,0.2);
+    text-decoration: none; transition: background 0.2s;
+  }
+  .boss-search-btn:hover { background: rgba(0,190,171,0.16); }
 
-  /* Trends */
   .trend-item {
     display: flex;
     align-items: flex-start;

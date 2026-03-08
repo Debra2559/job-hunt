@@ -242,6 +242,15 @@ export function CareerReport({ data }: { data: CareerReportData }) {
                 <span className="font-medium text-foreground">🛤️ 成长路径：</span>
                 {job.path}
               </div>
+              <a
+                href={`https://www.zhipin.com/web/geek/job?query=${encodeURIComponent(job.title)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 mt-1 px-3 py-1.5 rounded-xl text-xs font-medium bg-[#00beab]/10 text-[#00a89d] border border-[#00beab]/20 hover:bg-[#00beab]/20 transition-colors"
+              >
+                <Briefcase className="w-3 h-3" />
+                在Boss直聘搜索该岗位 →
+              </a>
             </div>
           </div>
         ))}
