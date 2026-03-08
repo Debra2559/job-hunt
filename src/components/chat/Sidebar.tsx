@@ -73,7 +73,18 @@ export function Sidebar({
     older: true,
   });
 
-  // Group conversations by pinned + time
+  // Separate career conversations from regular ones
+  const { careerConversations, regularConversations } = useMemo(() => {
+    const career: Conversation[] = [];
+    const regular: Conversation[] = [];
+    conversations.forEach(conv => {
+      if (conv.groupId === 'career') career.push(conv);
+      else regular.push(conv);
+    });
+    return { careerConversations: career, regularConversations: regular };
+  }, [conversations]);
+
+  // Group regular conversations by pinned + time
   const groupedConversations = useMemo((): ConversationGroup[] => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -88,7 +99,7 @@ export function Sidebar({
       older: [],
     };
 
-    conversations.forEach((conv) => {
+    regularConversations.forEach((conv) => {
       if (conv.isPinned) {
         groups.pinned.push(conv);
         return;
