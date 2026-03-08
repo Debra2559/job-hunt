@@ -214,20 +214,6 @@ export function Sidebar({
             <span>职业规划</span>
             <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
           </button>
-          {careerConversations.length > 0 && (
-            <div className="mt-1 ml-3 pl-3 border-l-2 border-primary/15 space-y-0.5">
-              {careerConversations.map((conv) => (
-                <button
-                  key={conv.id}
-                  onClick={() => navigate('/career')}
-                  className="w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-xs transition-all duration-200 hover:bg-primary/5 text-muted-foreground hover:text-foreground"
-                >
-                  <Compass className="w-3 h-3 text-primary/60 flex-shrink-0" />
-                  <span className="truncate">{conv.title}</span>
-                </button>
-              ))}
-            </div>
-          )}
         </div>
         
         {/* No results */}

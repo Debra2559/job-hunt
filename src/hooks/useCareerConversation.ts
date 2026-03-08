@@ -287,6 +287,6 @@ export function useCareerConversation(userId: string | undefined) {
     sendMessage,
     autoGreet,
     hasGreeted,
-    startNewConversation,
+    clearHistory,
   };
 }

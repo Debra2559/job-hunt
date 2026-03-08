@@ -277,11 +277,12 @@ export default function Career() {
     }
   };
 
-  const handleNewConversation = async () => {
+  const handleClearHistory = async () => {
     setReports(new Map());
     setWebSources(new Map());
     setBossJobs([]);
-    await startNewConversation();
+    setActiveReport(null);
+    await clearHistory();
     setTimeout(() => autoGreet(), 100);
   };
 
