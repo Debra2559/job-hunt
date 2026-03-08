@@ -266,18 +266,42 @@ export function Sidebar({
                         </div>
                       ) : (
                         <>
-                          <button
-                            onClick={() => onSelectConversation(conv.id)}
-                            className={cn(
-                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
-                              activeConversationId === conv.id
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
-                            )}
-                          >
-                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">{conv.title}</span>
-                          </button>
+                          <TooltipProvider delayDuration={300}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button
+                                  onClick={() => {
+                                    if (conv.groupId === 'career') {
+                                      navigate('/career');
+                                    } else {
+                                      onSelectConversation(conv.id);
+                                    }
+                                  }}
+                                  className={cn(
+                                    "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
+                                    activeConversationId === conv.id
+                                      ? "bg-primary/10 text-primary font-medium"
+                                      : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+                                  )}
+                                >
+                                  {conv.groupId === 'career' ? (
+                                    <Compass className="w-4 h-4 flex-shrink-0 text-primary" />
+                                  ) : (
+                                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                                  )}
+                                  <span className="truncate">{conv.title}</span>
+                                  {conv.groupId === 'career' && (
+                                    <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">规划</span>
+                                  )}
+                                </button>
+                              </TooltipTrigger>
+                              {conv.groupId === 'career' && (
+                                <TooltipContent side="right" className="text-xs">
+                                  <p>职业规划对话 · 点击继续规划</p>
+                                </TooltipContent>
+                              )}
+                            </Tooltip>
+                          </TooltipProvider>
                           
                           {/* Action buttons */}
                           <div
