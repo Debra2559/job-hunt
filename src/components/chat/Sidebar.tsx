@@ -6,7 +6,6 @@ import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ConversationGroup {
   label: string;
@@ -73,7 +72,18 @@ export function Sidebar({
     older: true,
   });
 
-  // Group conversations by pinned + time
+  // Separate career conversations from regular ones
+  const { careerConversations, regularConversations } = useMemo(() => {
+    const career: Conversation[] = [];
+    const regular: Conversation[] = [];
+    conversations.forEach(conv => {
+      if (conv.groupId === 'career') career.push(conv);
+      else regular.push(conv);
+    });
+    return { careerConversations: career, regularConversations: regular };
+  }, [conversations]);
+
+  // Group regular conversations by pinned + time
   const groupedConversations = useMemo((): ConversationGroup[] => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -88,7 +98,7 @@ export function Sidebar({
       older: [],
     };
 
-    conversations.forEach((conv) => {
+    regularConversations.forEach((conv) => {
       if (conv.isPinned) {
         groups.pinned.push(conv);
         return;
@@ -194,15 +204,31 @@ export function Sidebar({
           </div>
         )}
 
-        {/* Career Planning Entry */}
-        <button
-          onClick={() => navigate('/career')}
-          className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground mb-2"
-        >
-          <Compass className="w-4 h-4 text-primary" />
-          <span>职业规划</span>
-          <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
-        </button>
+        {/* Career Planning Section */}
+        <div className="mb-3">
+          <button
+            onClick={() => navigate('/career')}
+            className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground"
+          >
+            <Compass className="w-4 h-4 text-primary" />
+            <span>职业规划</span>
+            <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
+          </button>
+          {careerConversations.length > 0 && (
+            <div className="mt-1 ml-3 pl-3 border-l-2 border-primary/15 space-y-0.5">
+              {careerConversations.map((conv) => (
+                <button
+                  key={conv.id}
+                  onClick={() => navigate('/career')}
+                  className="w-full px-2.5 py-1.5 rounded-lg flex items-center gap-2 text-xs transition-all duration-200 hover:bg-primary/5 text-muted-foreground hover:text-foreground"
+                >
+                  <Compass className="w-3 h-3 text-primary/60 flex-shrink-0" />
+                  <span className="truncate">{conv.title}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
         
         {/* No results */}
         {conversations.length === 0 && (
@@ -266,39 +292,18 @@ export function Sidebar({
                         </div>
                       ) : (
                         <>
-                          <TooltipProvider delayDuration={300}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button
-                                  onClick={() => {
-                                    if (conv.groupId === 'career') {
-                                      navigate('/career');
-                                    } else {
-                                      onSelectConversation(conv.id);
-                                    }
-                                  }}
-                                  className={cn(
-                                    "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
-                                    conv.groupId === 'career'
-                                      ? "border-l-[3px] border-l-primary bg-primary/5 hover:bg-primary/10 text-sidebar-foreground"
-                                      : activeConversationId === conv.id
-                                        ? "bg-primary/10 text-primary font-medium"
-                                        : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
-                                  )}
-                                >
-                                  {conv.groupId === 'career' ? (
-                                    <Compass className="w-4 h-4 flex-shrink-0 text-primary" />
-                                  ) : (
-                                    <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                                  )}
-                                  <span className="truncate">{conv.title}</span>
-                                  {conv.groupId === 'career' && (
-                                    <span className="shrink-0 text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">规划</span>
-                                  )}
-                                </button>
-                              </TooltipTrigger>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <button
+                            onClick={() => onSelectConversation(conv.id)}
+                            className={cn(
+                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
+                              activeConversationId === conv.id
+                                ? "bg-primary/10 text-primary font-medium"
+                                : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+                            )}
+                          >
+                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+                            <span className="truncate">{conv.title}</span>
+                          </button>
                           
                           {/* Action buttons */}
                           <div
