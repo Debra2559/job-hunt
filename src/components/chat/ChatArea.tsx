@@ -108,16 +108,14 @@ export function ChatArea({
                 {/* Avatar popping out of card */}
                 <div className="absolute left-1/2 -translate-x-1/2 -top-14 sm:-top-16 z-10">
                   {/* Soft glow */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/25 via-accent/30 to-secondary/20 blur-xl scale-150" />
-                  {/* Avatar */}
-                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 p-[3px] shadow-lg shadow-primary/10">
-                    <div className="w-full h-full rounded-full overflow-hidden bg-background">
-                      <img 
-                        src={aiTeacherAvatar} 
-                        alt="AI辅导员" 
-                        className="w-full h-full object-cover scale-110"
-                      />
-                    </div>
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
+                  {/* Avatar - no border ring, just the image floating */}
+                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 drop-shadow-lg">
+                    <img 
+                      src={aiTeacherAvatar} 
+                      alt="AI辅导员" 
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
 
