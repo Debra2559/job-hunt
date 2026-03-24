@@ -102,28 +102,35 @@ export function ChatArea({
       <div ref={containerRef} className="flex-1 overflow-y-auto scroll-smooth">
         {showWelcome ? (
           <div className="h-full flex flex-col items-center justify-center px-4 pt-14 lg:pt-0">
-            <div className="text-center mb-8 sm:mb-10 animate-fade-in max-w-md">
-              {/* AI Teacher Avatar with soft blend */}
-              <div className="relative mx-auto mb-5 sm:mb-6 w-20 h-20 sm:w-24 sm:h-24">
-                {/* Soft glow background */}
-                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/30 to-secondary/20 blur-xl scale-125" />
-                {/* Avatar container */}
-                <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gradient-to-br from-background to-muted/50 p-0.5">
-                  <div className="w-full h-full rounded-full overflow-hidden bg-background">
-                    <img 
-                      src={aiTeacherAvatar} 
-                      alt="AI辅导员" 
-                      className="w-full h-full object-cover scale-110"
-                    />
+          <div className="animate-fade-in max-w-sm w-full">
+              {/* Card with avatar overflowing from top */}
+              <div className="relative mt-16 sm:mt-20">
+                {/* Avatar popping out of card */}
+                <div className="absolute left-1/2 -translate-x-1/2 -top-14 sm:-top-16 z-10">
+                  {/* Soft glow */}
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/25 via-accent/30 to-secondary/20 blur-xl scale-150" />
+                  {/* Avatar */}
+                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 p-[3px] shadow-lg shadow-primary/10">
+                    <div className="w-full h-full rounded-full overflow-hidden bg-background">
+                      <img 
+                        src={aiTeacherAvatar} 
+                        alt="AI辅导员" 
+                        className="w-full h-full object-cover scale-110"
+                      />
+                    </div>
                   </div>
                 </div>
+
+                {/* Card body */}
+                <div className="bg-card/80 backdrop-blur-sm border border-border/60 rounded-3xl pt-14 sm:pt-16 pb-6 sm:pb-8 px-6 sm:px-8 shadow-elegant text-center">
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-2 sm:mb-3">
+                    Hi，{userName || '同学'}~
+                  </h1>
+                  <p className="text-muted-foreground text-base sm:text-lg">
+                    我是你的校园AI辅导员，有什么可以帮助你的吗？
+                  </p>
+                </div>
               </div>
-              <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-2 sm:mb-3">
-                Hi，{userName || '同学'}~
-              </h1>
-              <p className="text-muted-foreground text-base sm:text-lg px-4">
-                我是你的校园AI辅导员，有什么可以帮助你的吗？
-              </p>
             </div>
           </div>
         ) : (
