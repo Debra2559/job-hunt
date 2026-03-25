@@ -153,7 +153,7 @@ export function ChatArea({
 
       {/* Quick Tags above input - only show when no messages */}
       {showWelcome && (
-        <div className="max-w-3xl mx-auto w-full px-4 mb-3">
+        <div className="max-w-3xl mx-auto w-full px-4 mb-1">
           <QuickTags onTagClick={handleTagClick} variant="horizontal" />
         </div>
       )}
