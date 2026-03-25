@@ -64,8 +64,18 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   
   const hasSources = message.sources && message.sources.length > 0;
   const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
+
+  // Parse suggested queries from message content
+  const suggestionsMatch = !isUser ? message.content.match(/<<SUGGESTIONS>>(.*?)<{0,2}\/SUGGESTIONS>{0,2}>{0,2}\s*$/s) : null;
+  const suggestedQueries = suggestionsMatch
+    ? suggestionsMatch[1].split('||').map(q => q.trim()).filter(Boolean)
+    : [];
+  const displayContent = suggestionsMatch
+    ? message.content.replace(/<<SUGGESTIONS>>.*?<{0,2}\/SUGGESTIONS>{0,2}>{0,2}\s*$/s, '').trim()
+    : message.content;
+
   // Don't render empty messages
-  if (!message.content || message.content.trim() === '') {
+  if (!displayContent || displayContent.trim() === '') {
     return null;
   }
 
