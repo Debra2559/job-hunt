@@ -63,6 +63,40 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
     return null;
   }
 
+  // Render citation markers like [1], [2] as styled badges
+  const renderCitations = (children: React.ReactNode): React.ReactNode => {
+    if (!hasSources) return children;
+    
+    return React.Children.map(children, (child) => {
+      if (typeof child !== 'string') return child;
+      
+      // Split text by citation patterns like [1], [2][3], etc.
+      const parts = child.split(/(\[\d+\])/g);
+      if (parts.length === 1) return child;
+      
+      return parts.map((part, i) => {
+        const match = part.match(/^\[(\d+)\]$/);
+        if (match) {
+          const num = parseInt(match[1]);
+          const source = message.sources?.find(s => s.index === num);
+          if (source) {
+            return (
+              <button
+                key={i}
+                onClick={() => setShowSources(true)}
+                className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold rounded bg-primary/15 text-primary hover:bg-primary/25 transition-colors cursor-pointer align-super ml-0.5 mr-0.5 leading-none"
+                title={source.fileName}
+              >
+                {num}
+              </button>
+            );
+          }
+        }
+        return part;
+      });
+    });
+  };
+
   const handlePlayTTS = () => {
     // Check if browser supports speech synthesis
     if (!('speechSynthesis' in window)) {
