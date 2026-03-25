@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin, FolderPlus, Folder, FolderOpen, MoreHorizontal } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin, FolderPlus, Folder, FolderOpen, MoreHorizontal, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
@@ -406,6 +406,18 @@ export function Sidebar({
             <Compass className="w-4 h-4 text-primary" />
             <span>职业规划</span>
             <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
+          </button>
+
+          {/* Favorites Section */}
+          <button
+            onClick={onToggleFavorites}
+            className={cn(
+              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground",
+              showFavorites && "bg-primary/10 text-primary font-medium"
+            )}
+          >
+            <Bookmark className="w-4 h-4 text-primary" />
+            <span>我的收藏</span>
           </button>
 
           {/* No results */}
