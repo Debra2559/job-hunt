@@ -319,7 +319,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
           )}
         >
           {isUser ? (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{displayContent}</p>
           ) : (
             <div className="prose prose-sm max-w-none text-sm leading-relaxed break-words">
               <ReactMarkdown 
@@ -334,7 +334,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   ),
                 }}
               >
-                {message.content}
+                {displayContent}
               </ReactMarkdown>
               {isCurrentlyStreaming && (
                 <span className="inline-block w-2 h-4 ml-0.5 bg-primary/80 animate-pulse rounded-sm" />
