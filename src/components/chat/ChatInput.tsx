@@ -150,7 +150,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="请输入你的问题..."
-              className="min-h-[44px] max-h-36 resize-none pr-14 py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+              className="min-h-[36px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-2 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
               disabled={isTyping}
             />
             
@@ -165,7 +165,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
             />
             
             {/* Bottom toolbar inside input */}
-            <div className="flex items-center justify-between px-4 pb-3">
+            <div className="flex items-center justify-between px-3 sm:px-4 pb-2 sm:pb-3">
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
