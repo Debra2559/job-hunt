@@ -105,16 +105,16 @@ export function ChatArea({
           <div className="animate-fade-in max-w-sm w-full">
               {/* Card with avatar overflowing from top */}
               <div className="relative mt-16 sm:mt-20">
-                {/* Avatar popping out of card */}
+                {/* Avatar above card */}
                 <div className="absolute left-1/2 -translate-x-1/2 -top-14 sm:-top-16 z-10">
                   {/* Soft glow */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
                   {/* Avatar - rounded with shadow */}
                   <div className="relative w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden bg-card shadow-lg ring-4 ring-background">
                     <img 
                       src={aiTeacherAvatar} 
                       alt="AI辅导员" 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                   </div>
                 </div>
