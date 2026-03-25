@@ -28,18 +28,13 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
-    const [placeholderFading, setPlaceholderFading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Rotate placeholder with fade animation
+    // Rotate placeholder
     useEffect(() => {
       const timer = setInterval(() => {
-        setPlaceholderFading(true);
-        setTimeout(() => {
-          setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
-          setPlaceholderFading(false);
-        }, 300);
+        setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
       }, 4000);
       return () => clearInterval(timer);
     }, []);
@@ -154,13 +149,15 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               {/* Custom animated placeholder */}
               {!input && (
                 <div 
-                  className={cn(
-                    "absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 transition-opacity duration-300 flex items-center gap-2",
-                    placeholderFading ? "opacity-0" : "opacity-100"
-                  )}
+                  className="absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 flex items-center gap-2 overflow-hidden h-5"
                   onClick={() => textareaRef.current?.focus()}
                 >
-                  <span>{currentPlaceholder}</span>
+                  <span
+                    key={placeholderIndex}
+                    className="inline-block animate-placeholder-scroll-up"
+                  >
+                    {currentPlaceholder}
+                  </span>
                   <span className="text-xs text-muted-foreground/30 hidden sm:inline">按 Tab 填充</span>
                 </div>
               )}
