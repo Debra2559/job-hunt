@@ -150,15 +150,29 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               </div>
             )}
 
-            <Textarea
-              ref={textareaRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={`${currentPlaceholder}    按 Tab 填充`}
-              className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
-              disabled={isTyping}
-            />
+            <div className="relative">
+              {/* Custom animated placeholder */}
+              {!input && (
+                <div 
+                  className={cn(
+                    "absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 transition-opacity duration-300 flex items-center gap-2",
+                    placeholderFading ? "opacity-0" : "opacity-100"
+                  )}
+                  onClick={() => textareaRef.current?.focus()}
+                >
+                  <span>{currentPlaceholder}</span>
+                  <span className="text-xs text-muted-foreground/30 hidden sm:inline">按 Tab 填充</span>
+                </div>
+              )}
+              <Textarea
+                ref={textareaRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+                disabled={isTyping}
+              />
+            </div>
             
             {/* Hidden file input */}
             <input
