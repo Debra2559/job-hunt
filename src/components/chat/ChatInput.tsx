@@ -1,5 +1,5 @@
 import { useState, useRef, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
-import { Send, Plus, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { quickTags } from '@/data/campusData';
@@ -189,7 +189,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                   className="p-2 rounded-full hover:bg-secondary/80 transition-colors duration-200"
                   title="添加文件"
                 >
-                  <Plus className="w-4 h-4 text-muted-foreground" />
+                  <Paperclip className="w-4 h-4 text-muted-foreground" />
                 </button>
 
                 <VoiceInput 
