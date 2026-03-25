@@ -258,7 +258,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                 feedback_type: type,
                 content: content,
                 user_display_name: profileData?.display_name || '匿名用户',
-                message_content: message.content,
+                message_content: displayContent,
                 admin_emails: adminEmails,
               },
             });
