@@ -38,6 +38,39 @@ export type Database = {
         }
         Relationships: []
       }
+      conversation_folders: {
+        Row: {
+          color: string | null
+          created_at: string
+          icon: string | null
+          id: string
+          name: string
+          sort_order: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          icon?: string | null
+          id?: string
+          name?: string
+          sort_order?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_tag_assignments: {
         Row: {
           conversation_id: string
@@ -110,6 +143,7 @@ export type Database = {
       conversations: {
         Row: {
           created_at: string
+          folder_id: string | null
           group_id: string
           id: string
           is_pinned: boolean
@@ -119,6 +153,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          folder_id?: string | null
           group_id?: string
           id?: string
           is_pinned?: boolean
@@ -128,6 +163,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          folder_id?: string | null
           group_id?: string
           id?: string
           is_pinned?: boolean
@@ -135,7 +171,15 @@ export type Database = {
           updated_at?: string
           user_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "conversations_folder_id_fkey"
+            columns: ["folder_id"]
+            isOneToOne: false
+            referencedRelation: "conversation_folders"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       feedbacks: {
         Row: {

@@ -10,6 +10,7 @@ import { streamChat } from '@/lib/chatApi';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 import { useConversations } from '@/hooks/useConversations';
+import { useConversationFolders } from '@/hooks/useConversationFolders';
 import { useUserRole } from '@/hooks/useUserRole';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -35,8 +36,16 @@ const Index = () => {
     deleteConversation,
     renameConversation,
     pinConversation,
+    setConversations,
   } = useConversations(user?.id);
   const { isAdmin, isSuperAdmin } = useUserRole(user?.id);
+  const {
+    folders,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+    moveConversationToFolder,
+  } = useConversationFolders(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -244,6 +253,22 @@ const Index = () => {
     }
   }, [pinConversation]);
 
+  const handleMoveToFolder = useCallback(async (conversationId: string, folderId: string | null): Promise<boolean> => {
+    const success = await moveConversationToFolder(conversationId, folderId);
+    if (success) {
+      setConversations((prev: any) =>
+        prev.map((conv: any) =>
+          conv.id === conversationId ? { ...conv, folderId } : conv
+        )
+      );
+      toast.success(folderId ? '已移动到分组' : '已移出分组');
+      return true;
+    } else {
+      toast.error('移动失败');
+      return false;
+    }
+  }, [moveConversationToFolder, setConversations]);
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
@@ -326,6 +351,11 @@ const Index = () => {
           onProfileUpdated={handleProfileUpdated}
           isNewConversation={activeConversationId === null && !showFavorites}
           isAdmin={isAdmin || isSuperAdmin}
+          folders={folders}
+          onCreateFolder={createFolder}
+          onRenameFolder={renameFolder}
+          onDeleteFolder={deleteFolder}
+          onMoveToFolder={handleMoveToFolder}
         />
       </div>
 
