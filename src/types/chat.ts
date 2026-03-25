@@ -3,6 +3,7 @@ export interface KnowledgeSource {
   similarity: number;
   tags?: string[];
   index?: number;
+  snippet?: string;
 }
 
 export interface Message {

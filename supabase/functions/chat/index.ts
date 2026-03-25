@@ -324,7 +324,8 @@ async function getKnowledgeContext(
         fileName: r.file_name,
         similarity: r.similarity,
         tags: r.tags || [],
-        index: index + 1, // 1-based citation index
+        index: index + 1,
+        snippet: r.content_text.substring(0, 200).replace(/\n/g, ' '),
       }));
 
       const contents = keywordResults.map((r, index) => {
