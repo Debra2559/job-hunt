@@ -190,25 +190,27 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                 >
                   <Paperclip className="w-4 h-4 text-muted-foreground" />
                 </button>
+              </div>
 
+              <div className="flex items-center gap-2">
                 <VoiceInput 
                   onTranscript={handleVoiceTranscript}
                   disabled={isTyping}
                 />
-              </div>
 
-              <button
-                onClick={handleSend}
-                disabled={(!input.trim() && uploadedFiles.length === 0) || isTyping}
-                className={cn(
-                  "p-2.5 rounded-xl transition-all duration-200",
-                  (input.trim() || uploadedFiles.length > 0) && !isTyping
-                    ? "gradient-primary text-white shadow-glow hover:scale-105 active:scale-95"
-                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                )}
-              >
-                <Send className="w-4 h-4" />
-              </button>
+                <button
+                  onClick={handleSend}
+                  disabled={(!input.trim() && uploadedFiles.length === 0) || isTyping}
+                  className={cn(
+                    "p-2.5 rounded-xl transition-all duration-200",
+                    (input.trim() || uploadedFiles.length > 0) && !isTyping
+                      ? "gradient-primary text-white shadow-glow hover:scale-105 active:scale-95"
+                      : "bg-muted text-muted-foreground cursor-not-allowed"
+                  )}
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
 
