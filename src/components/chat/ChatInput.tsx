@@ -28,18 +28,13 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
-    const [placeholderFading, setPlaceholderFading] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Rotate placeholder with fade animation
+    // Rotate placeholder
     useEffect(() => {
       const timer = setInterval(() => {
-        setPlaceholderFading(true);
-        setTimeout(() => {
-          setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
-          setPlaceholderFading(false);
-        }, 300);
+        setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
       }, 4000);
       return () => clearInterval(timer);
     }, []);
