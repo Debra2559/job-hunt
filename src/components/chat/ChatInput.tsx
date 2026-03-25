@@ -165,7 +165,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
             />
             
             {/* Bottom toolbar inside input */}
-            <div className="flex items-center justify-between px-3 sm:px-4 pb-2 sm:pb-3">
+            <div className="flex items-center justify-between px-4 pb-3">
               <div className="flex items-center gap-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
