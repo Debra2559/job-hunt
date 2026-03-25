@@ -253,18 +253,19 @@ const Index = () => {
     }
   }, [pinConversation]);
 
-  const handleMoveToFolder = useCallback(async (conversationId: string, folderId: string | null) => {
+  const handleMoveToFolder = useCallback(async (conversationId: string, folderId: string | null): Promise<boolean> => {
     const success = await moveConversationToFolder(conversationId, folderId);
     if (success) {
-      // Update local state
       setConversations((prev: any) =>
         prev.map((conv: any) =>
           conv.id === conversationId ? { ...conv, folderId } : conv
         )
       );
       toast.success(folderId ? '已移动到分组' : '已移出分组');
+      return true;
     } else {
       toast.error('移动失败');
+      return false;
     }
   }, [moveConversationToFolder, setConversations]);
 
