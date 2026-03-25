@@ -35,7 +35,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     useEffect(() => {
       const timer = setInterval(() => {
         setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
-      }, 4000);
+      }, 8000);
       return () => clearInterval(timer);
     }, []);
 
