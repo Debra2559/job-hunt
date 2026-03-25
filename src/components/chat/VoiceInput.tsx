@@ -1,151 +1,138 @@
-import { useState, useCallback, useRef } from 'react';
-import { useScribe, CommitStrategy } from '@elevenlabs/react';
-import { Mic, Loader2 } from 'lucide-react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import { Mic, MicOff } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
 
 interface VoiceInputProps {
   onTranscript: (text: string) => void;
   disabled?: boolean;
 }
 
-const LONG_PRESS_DURATION = 500;
+// Check for browser SpeechRecognition support
+const SpeechRecognition =
+  (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
-  const [isConnecting, setIsConnecting] = useState(false);
-  const longPressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const isLongPressRef = useRef(false);
+  const [isListening, setIsListening] = useState(false);
+  const recognitionRef = useRef<any>(null);
+  const hasResultRef = useRef(false);
 
-  const scribe = useScribe({
-    modelId: 'scribe_v2_realtime',
-    commitStrategy: CommitStrategy.VAD,
-    languageCode: 'cmn',
-    onPartialTranscript: (data) => {
-      console.log('Partial transcript:', data.text);
-    },
-    onCommittedTranscript: (data) => {
-      console.log('Committed transcript:', data.text);
-      if (data.text) {
-        onTranscript(data.text);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        try { recognitionRef.current.abort(); } catch {}
       }
-    },
-    onError: (error) => {
-      console.error('Scribe error:', error);
-      toast.error('语音识别出错');
-    },
-    onQuotaExceededError: () => {
-      toast.error('语音识别配额已用尽');
-    },
-  });
+    };
+  }, []);
 
-  const startRecording = useCallback(async () => {
-    if (scribe.isConnected) return;
-
-    setIsConnecting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('elevenlabs-scribe-token');
-
-      if (error || !data?.token) {
-        console.error('Failed to get scribe token:', error);
-        toast.error('无法启动语音识别，请稍后重试');
-        return;
-      }
-
-      await scribe.connect({
-        token: data.token,
-        microphone: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
-
-      toast.info('语音识别已启动，请开始说话...', { duration: 2000 });
-    } catch (error) {
-      console.error('Failed to start voice input:', error);
-      toast.error('启动语音识别失败');
-    } finally {
-      setIsConnecting(false);
+  const startRecording = useCallback(() => {
+    if (!SpeechRecognition) {
+      toast.error('您的浏览器不支持语音识别，请使用 Chrome 或 Safari');
+      return;
     }
-  }, [scribe]);
+
+    if (isListening) return;
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'zh-CN';
+      recognition.continuous = true;
+      recognition.interimResults = false;
+      recognition.maxAlternatives = 1;
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        hasResultRef.current = false;
+        toast.info('正在录音，请说话...', { duration: 2000, id: 'voice-status' });
+      };
+
+      recognition.onresult = (event: any) => {
+        const results = event.results;
+        let transcript = '';
+        for (let i = event.resultIndex; i < results.length; i++) {
+          if (results[i].isFinal) {
+            transcript += results[i][0].transcript;
+          }
+        }
+        if (transcript) {
+          hasResultRef.current = true;
+          onTranscript(transcript);
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        recognitionRef.current = null;
+
+        switch (event.error) {
+          case 'not-allowed':
+            toast.error('请允许麦克风权限后重试', { id: 'voice-status' });
+            break;
+          case 'no-speech':
+            toast('未检测到语音，请再试一次', { id: 'voice-status' });
+            break;
+          case 'network':
+            toast.error('网络错误，请检查网络连接', { id: 'voice-status' });
+            break;
+          case 'aborted':
+            // User cancelled, no need to show error
+            break;
+          default:
+            toast.error('语音识别出错，请重试', { id: 'voice-status' });
+        }
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        recognitionRef.current = null;
+        if (hasResultRef.current) {
+          toast.success('语音输入完成', { duration: 1500, id: 'voice-status' });
+        }
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (error) {
+      console.error('Failed to start speech recognition:', error);
+      toast.error('启动语音识别失败', { id: 'voice-status' });
+      setIsListening(false);
+    }
+  }, [isListening, onTranscript]);
 
   const stopRecording = useCallback(() => {
-    if (scribe.isConnected) {
-      scribe.disconnect();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
     }
-  }, [scribe]);
-
-  // Long press handlers for mobile
-  const handlePointerDown = useCallback(() => {
-    isLongPressRef.current = false;
-    longPressTimerRef.current = setTimeout(() => {
-      isLongPressRef.current = true;
-      startRecording();
-    }, LONG_PRESS_DURATION);
-  }, [startRecording]);
-
-  const handlePointerUp = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    if (isLongPressRef.current) {
-      stopRecording();
-      isLongPressRef.current = false;
-    }
-  }, [stopRecording]);
-
-  const handlePointerCancel = useCallback(() => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-    if (isLongPressRef.current) {
-      stopRecording();
-      isLongPressRef.current = false;
-    }
-  }, [stopRecording]);
+  }, []);
 
   const handleClick = useCallback(() => {
-    if (!isLongPressRef.current) {
-      if (scribe.isConnected) {
-        stopRecording();
-      } else {
-        startRecording();
-      }
+    if (isListening) {
+      stopRecording();
+    } else {
+      startRecording();
     }
-  }, [scribe.isConnected, startRecording, stopRecording]);
-
-  const isActive = scribe.isConnected;
+  }, [isListening, startRecording, stopRecording]);
 
   return (
     <button
       onClick={handleClick}
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerCancel}
-      onContextMenu={(e) => e.preventDefault()}
-      disabled={disabled || isConnecting}
+      disabled={disabled}
       className={cn(
-        "relative p-2.5 rounded-xl transition-all duration-300 select-none touch-none",
-        isActive
-          ? "text-white"
+        "relative p-2.5 rounded-xl transition-all duration-300 select-none",
+        isListening
+          ? "text-destructive"
           : "hover:bg-secondary/80 text-muted-foreground"
       )}
-      title={isActive ? "停止语音输入" : "语音输入（点击切换 / 长按说话）"}
+      title={isListening ? "停止录音" : "语音输入"}
     >
-      {isConnecting ? (
-        <Loader2 className="w-4 h-4 animate-spin" />
-      ) : isActive ? (
+      {isListening ? (
         <div className="relative flex items-center justify-center">
-          <span className="absolute inset-[-4px] rounded-xl bg-gradient-to-br from-destructive via-destructive to-primary animate-pulse" />
-          <span className="absolute inset-[-8px] rounded-xl bg-gradient-to-r from-destructive/40 to-primary/40 animate-ping" />
-          <div className="relative z-10 flex items-center justify-center gap-[2px] w-4 h-4">
-            <span className="w-[3px] h-2 bg-white rounded-full animate-soundwave" style={{ animationDelay: '0ms' }} />
-            <span className="w-[3px] h-3 bg-white rounded-full animate-soundwave" style={{ animationDelay: '150ms' }} />
-            <span className="w-[3px] h-2 bg-white rounded-full animate-soundwave" style={{ animationDelay: '300ms' }} />
-          </div>
+          <span className="absolute inset-[-6px] rounded-xl bg-destructive/15 animate-pulse" />
+          <MicOff className="w-4 h-4 relative z-10" />
         </div>
       ) : (
         <Mic className="w-4 h-4" />
