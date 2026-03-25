@@ -358,10 +358,11 @@ export default function Auth() {
         <div className="bg-card rounded-3xl shadow-lg border border-border/60 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-primary/20 mx-auto mb-4">
-              <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
+            <div className="relative w-24 h-24 mx-auto mb-3">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-accent/15 to-secondary/10 blur-2xl scale-[1.6]" />
+              <img src={aiTeacherAvatar} alt="AI辅导员" className="relative w-full h-full object-cover drop-shadow-md" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">皇家种地大学</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-1">皇家种地大学</h1>
             <p className="text-muted-foreground">
               {step === 'account' ? '创建账号' : '完善学生信息'}
             </p>
