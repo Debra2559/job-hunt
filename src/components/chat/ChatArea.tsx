@@ -104,23 +104,23 @@ export function ChatArea({
           <div className="h-full flex flex-col items-center justify-center px-4 pt-14 lg:pt-0">
           <div className="animate-fade-in max-w-sm w-full">
               {/* Card with avatar overflowing from top */}
-              <div className="relative mt-16 sm:mt-20">
-                {/* Avatar popping out of card */}
-                <div className="absolute left-1/2 -translate-x-1/2 -top-14 sm:-top-16 z-10">
+              <div className="relative mt-24 sm:mt-28">
+                {/* Avatar above card */}
+                <div className="absolute left-1/2 -translate-x-1/2 -top-20 sm:-top-24 z-10">
                   {/* Soft glow */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
-                  {/* Avatar - no border ring, just the image floating */}
-                  <div className="relative w-24 h-24 sm:w-28 sm:h-28 drop-shadow-lg">
+                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
+                  {/* Avatar */}
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-card shadow-lg ring-4 ring-background">
                     <img 
                       src={aiTeacherAvatar} 
                       alt="AI辅导员" 
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                     />
                   </div>
                 </div>
 
                 {/* Card body */}
-                <div className="bg-card/80 backdrop-blur-sm rounded-3xl pt-14 sm:pt-16 pb-6 sm:pb-8 px-6 sm:px-8 shadow-elegant text-center">
+                <div className="bg-card/80 backdrop-blur-sm rounded-3xl pt-12 sm:pt-14 pb-6 sm:pb-8 px-6 sm:px-8 shadow-elegant text-center">
                   <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-2 sm:mb-3">
                     Hi，{userName || '同学'}~
                   </h1>

@@ -364,12 +364,10 @@ export function Sidebar({
     <div className="w-[280px] sm:w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
       {/* Header with AI Teacher Avatar */}
       <div className="p-5 flex items-center gap-3">
-        <div className="relative w-11 h-11">
+        <div className="relative w-11 h-11 flex-shrink-0">
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/10 blur-md scale-125" />
-          <div className="relative w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-background to-muted/30 p-0.5">
-            <div className="w-full h-full rounded-full overflow-hidden bg-background">
-              <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover scale-110" />
-            </div>
+          <div className="relative w-11 h-11 rounded-full overflow-hidden bg-card shadow-sm ring-2 ring-primary/10">
+            <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
           </div>
         </div>
         <span className="font-bold text-lg text-sidebar-foreground">AI辅导员</span>
