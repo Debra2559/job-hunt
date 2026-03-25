@@ -156,9 +156,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                     key={placeholderIndex}
                     className="inline-block animate-placeholder-scroll-up"
                   >
-                    {currentPlaceholder}
+                    {currentPlaceholder} <span className="text-xs text-muted-foreground/30 hidden sm:inline">按 Tab 填充</span>
                   </span>
-                  <span className="text-xs text-muted-foreground/30 hidden sm:inline">按 Tab 填充</span>
                 </div>
               )}
               <Textarea
