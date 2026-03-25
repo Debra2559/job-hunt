@@ -4,6 +4,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { quickTags } from '@/data/campusData';
 import { VoiceInput } from './VoiceInput';
+import { useIsMobile } from '@/hooks/use-mobile';
 // Rotating placeholder suggestions from quickTags
 const placeholderSuggestions = quickTags.map(t => t.description);
 
