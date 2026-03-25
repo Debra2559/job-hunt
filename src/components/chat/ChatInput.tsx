@@ -1,8 +1,8 @@
-import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Send, Wrench, ChevronDown, Plus, X, FileText, Image as ImageIcon, Calendar, BarChart3, BookOpen } from 'lucide-react';
+import { useState, useRef, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
+import { Send, Plus, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { aiTools } from '@/data/campusData';
+import { quickTags } from '@/data/campusData';
 import { VoiceInput } from './VoiceInput';
 import {
   DropdownMenu,
