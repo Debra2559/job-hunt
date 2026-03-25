@@ -26,9 +26,11 @@ interface ChatInputProps {
 
 export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   function ChatInput({ onSendMessage, isTyping, onToolSelect }, ref) {
+    const isMobile = useIsMobile();
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
+    const [mobileExpanded, setMobileExpanded] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
