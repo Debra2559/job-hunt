@@ -125,6 +125,12 @@ export default {
           "0%, 100%": { height: "40%" },
           "50%": { height: "100%" },
         },
+        "placeholder-scroll-up": {
+          "0%": { opacity: "0", transform: "translateY(100%)" },
+          "15%": { opacity: "1", transform: "translateY(0)" },
+          "85%": { opacity: "1", transform: "translateY(0)" },
+          "100%": { opacity: "0", transform: "translateY(-100%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -135,6 +141,7 @@ export default {
         "pop-in": "pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "bounce-dot": "bounce-dot 1.2s infinite ease-in-out",
         "soundwave": "soundwave 0.6s ease-in-out infinite",
+        "placeholder-scroll-up": "placeholder-scroll-up 4s ease-in-out",
       },
     },
   },
