@@ -27,13 +27,23 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   function ChatInput({ onSendMessage, isTyping, onToolSelect }, ref) {
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+    const [placeholderIndex, setPlaceholderIndex] = useState(0);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Rotate placeholder every 4 seconds
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
+      }, 4000);
+      return () => clearInterval(timer);
+    }, []);
+
+    const currentPlaceholder = placeholderSuggestions[placeholderIndex];
 
     const handleVoiceTranscript = (text: string) => {
       setInput(prev => prev + text);
     };
-
 
     useImperativeHandle(ref, () => ({
       fillInput: (text: string) => {
@@ -51,7 +61,10 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Tab' && !input.trim() && !isTyping) {
+        e.preventDefault();
+        setInput(currentPlaceholder);
+      } else if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
