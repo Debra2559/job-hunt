@@ -234,15 +234,16 @@ export default function Auth() {
   // Login form
   if (isLogin) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-primary/10 flex items-center justify-center p-4">
+        <div className="min-h-screen bg-gradient-to-b from-background to-muted/30 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           {/* Header */}
-          <div className="text-center mb-8">
-            <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-primary/20 mx-auto mb-4">
-              <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
+          <div className="text-center mb-6">
+            <div className="relative w-24 h-24 mx-auto mb-3">
+              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-accent/15 to-secondary/10 blur-2xl scale-[1.6]" />
+              <img src={aiTeacherAvatar} alt="AI辅导员" className="relative w-full h-full object-cover drop-shadow-md" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">皇家种地大学</h1>
-            <p className="text-muted-foreground">登录以同步你的对话记录</p>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-1">皇家种地大学</h1>
+            <p className="text-muted-foreground text-sm">登录以同步你的对话记录</p>
           </div>
 
           {/* Form Card */}
