@@ -176,8 +176,21 @@ const Index = () => {
         },
       });
     },
-    [activeConversationId, conversations, user, createConversation, addMessage, updateLocalMessage, isTyping]
+    [activeConversationId, conversations, user, createConversation, addMessage, updateLocalMessage, isTyping, navigate]
   );
+
+  // Auto-send pending message after login
+  const pendingSentRef = useRef(false);
+  useEffect(() => {
+    if (!user || authLoading || convsLoading || profileLoading || pendingSentRef.current) return;
+    const pending = sessionStorage.getItem('pendingMessage');
+    if (pending) {
+      pendingSentRef.current = true;
+      sessionStorage.removeItem('pendingMessage');
+      // Small delay to ensure state is ready
+      setTimeout(() => handleSendMessage(pending), 300);
+    }
+  }, [user, authLoading, convsLoading, profileLoading, handleSendMessage]);
 
   const handleToggleFavorite = useCallback(
     (messageId: string) => {
