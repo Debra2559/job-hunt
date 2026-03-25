@@ -85,7 +85,14 @@ const Index = () => {
 
   const handleSendMessage = useCallback(
     async (content: string, files?: File[]) => {
-      if (!user || isTyping) return;
+      if (isTyping) return;
+      
+      // If not logged in, save pending message and redirect to auth
+      if (!user) {
+        sessionStorage.setItem('pendingMessage', content);
+        navigate('/auth', { state: { from: '/' } });
+        return;
+      }
       
       // If files are attached, add file info to the message content
       let messageContent = content;
