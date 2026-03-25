@@ -167,33 +167,6 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
             {/* Bottom toolbar inside input */}
             <div className="flex items-center justify-between px-4 pb-3">
               <div className="flex items-center gap-2">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-background text-muted-foreground hover:bg-secondary transition-all duration-200 border border-border/50">
-                      <Wrench className="w-3.5 h-3.5" />
-                      工具
-                      <ChevronDown className="w-3 h-3" />
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-52 bg-popover shadow-lg border border-border/60 rounded-xl p-1">
-                  {aiTools.map((tool) => (
-                      <DropdownMenuItem 
-                        key={tool.id} 
-                        className="flex items-start gap-3 rounded-lg px-3 py-2.5 cursor-pointer"
-                        onClick={() => onToolSelect?.(tool.id, tool.name)}
-                      >
-                        <div className="mt-0.5">
-                          {toolIcons[tool.id]}
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="font-medium text-sm">{tool.name}</span>
-                          <span className="text-xs text-muted-foreground">{tool.description}</span>
-                        </div>
-                      </DropdownMenuItem>
-                    ))}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
                 <button 
                   onClick={handleFileSelect}
                   className="p-2 rounded-full hover:bg-secondary/80 transition-colors duration-200"
