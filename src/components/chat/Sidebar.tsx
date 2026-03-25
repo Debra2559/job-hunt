@@ -1,11 +1,22 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin, FolderPlus, Folder, FolderOpen, MoreHorizontal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ConversationFolder } from '@/hooks/useConversationFolders';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface ConversationGroup {
   label: string;
@@ -37,6 +48,12 @@ interface SidebarProps {
   }) => void;
   isNewConversation?: boolean;
   isAdmin?: boolean;
+  // Folder props
+  folders?: ConversationFolder[];
+  onCreateFolder?: (name: string) => Promise<ConversationFolder | null>;
+  onRenameFolder?: (id: string, name: string) => Promise<boolean>;
+  onDeleteFolder?: (id: string) => Promise<boolean>;
+  onMoveToFolder?: (conversationId: string, folderId: string | null) => Promise<boolean>;
 }
 
 export function Sidebar({
@@ -58,12 +75,23 @@ export function Sidebar({
   onProfileUpdated,
   isNewConversation,
   isAdmin,
+  folders = [],
+  onCreateFolder,
+  onRenameFolder,
+  onDeleteFolder,
+  onMoveToFolder,
 }: SidebarProps) {
   const navigate = useNavigate();
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState('');
+  const [editingFolderId, setEditingFolderId] = useState<string | null>(null);
+  const [editFolderName, setEditFolderName] = useState('');
+  const [creatingFolder, setCreatingFolder] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const folderInputRef = useRef<HTMLInputElement>(null);
+  const newFolderInputRef = useRef<HTMLInputElement>(null);
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
     pinned: true,
     today: true,
@@ -71,9 +99,10 @@ export function Sidebar({
     week: true,
     older: true,
   });
+  const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
 
   // Separate career conversations from regular ones
-  const { careerConversations, regularConversations } = useMemo(() => {
+  const { regularConversations } = useMemo(() => {
     const career: Conversation[] = [];
     const regular: Conversation[] = [];
     conversations.forEach(conv => {
@@ -83,7 +112,24 @@ export function Sidebar({
     return { careerConversations: career, regularConversations: regular };
   }, [conversations]);
 
-  // Group regular conversations by pinned + time
+  // Conversations in folders vs ungrouped
+  const { folderedConversations, unfolderedConversations } = useMemo(() => {
+    const foldered: Record<string, Conversation[]> = {};
+    const unfoldered: Conversation[] = [];
+
+    regularConversations.forEach(conv => {
+      if (conv.folderId) {
+        if (!foldered[conv.folderId]) foldered[conv.folderId] = [];
+        foldered[conv.folderId].push(conv);
+      } else {
+        unfoldered.push(conv);
+      }
+    });
+
+    return { folderedConversations: foldered, unfolderedConversations: unfoldered };
+  }, [regularConversations]);
+
+  // Group unfoldered conversations by pinned + time
   const groupedConversations = useMemo((): ConversationGroup[] => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -98,7 +144,7 @@ export function Sidebar({
       older: [],
     };
 
-    regularConversations.forEach((conv) => {
+    unfolderedConversations.forEach((conv) => {
       if (conv.isPinned) {
         groups.pinned.push(conv);
         return;
@@ -123,10 +169,14 @@ export function Sidebar({
     if (groups.older.length > 0) result.push({ label: '更早', key: 'older', conversations: groups.older });
 
     return result;
-  }, [conversations]);
+  }, [unfolderedConversations]);
 
   const toggleGroup = (groupKey: string) => {
     setExpandedGroups((prev) => ({ ...prev, [groupKey]: !prev[groupKey] }));
+  };
+
+  const toggleFolder = (folderId: string) => {
+    setExpandedFolders((prev) => ({ ...prev, [folderId]: !prev[folderId] }));
   };
 
   useEffect(() => {
@@ -135,6 +185,19 @@ export function Sidebar({
       inputRef.current.select();
     }
   }, [editingId]);
+
+  useEffect(() => {
+    if (editingFolderId && folderInputRef.current) {
+      folderInputRef.current.focus();
+      folderInputRef.current.select();
+    }
+  }, [editingFolderId]);
+
+  useEffect(() => {
+    if (creatingFolder && newFolderInputRef.current) {
+      newFolderInputRef.current.focus();
+    }
+  }, [creatingFolder]);
 
   const handleStartEdit = (conv: Conversation) => {
     setEditingId(conv.id);
@@ -155,21 +218,140 @@ export function Sidebar({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      handleConfirmEdit();
-    } else if (e.key === 'Escape') {
-      handleCancelEdit();
-    }
+    if (e.key === 'Enter') handleConfirmEdit();
+    else if (e.key === 'Escape') handleCancelEdit();
   };
+
+  const handleCreateFolder = async () => {
+    if (newFolderName.trim() && onCreateFolder) {
+      await onCreateFolder(newFolderName.trim());
+    }
+    setCreatingFolder(false);
+    setNewFolderName('');
+  };
+
+  const handleConfirmFolderEdit = async () => {
+    if (editingFolderId && editFolderName.trim() && onRenameFolder) {
+      await onRenameFolder(editingFolderId, editFolderName.trim());
+    }
+    setEditingFolderId(null);
+    setEditFolderName('');
+  };
+
+  const renderConversationItem = useCallback((conv: Conversation) => (
+    <div
+      key={conv.id}
+      className="relative group"
+      onMouseEnter={() => setHoveredId(conv.id)}
+      onMouseLeave={() => setHoveredId(null)}
+    >
+      {editingId === conv.id ? (
+        <div className="flex items-center gap-1 px-2 py-1.5">
+          <input
+            ref={inputRef}
+            type="text"
+            value={editTitle}
+            onChange={(e) => setEditTitle(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleConfirmEdit}
+            className="flex-1 px-2 py-1.5 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+          />
+          <button onClick={handleConfirmEdit} className="p-1.5 rounded-lg text-primary hover:bg-primary/10">
+            <Check className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={handleCancelEdit} className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted">
+            <X className="w-3.5 h-3.5" />
+          </button>
+        </div>
+      ) : (
+        <>
+          <button
+            onClick={() => onSelectConversation(conv.id)}
+            className={cn(
+              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
+              activeConversationId === conv.id
+                ? "bg-primary/10 text-primary font-medium"
+                : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
+            )}
+          >
+            <MessageSquare className="w-4 h-4 flex-shrink-0" />
+            <span className="truncate">{conv.title}</span>
+          </button>
+
+          {/* Action buttons with folder move */}
+          <div
+            className={cn(
+              "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-all duration-200",
+              hoveredId === conv.id ? "opacity-100" : "opacity-0"
+            )}
+          >
+            {/* More menu with folder move */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10">
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                {onPinConversation && (
+                  <DropdownMenuItem onClick={() => onPinConversation(conv.id, !conv.isPinned)}>
+                    <Pin className="w-3.5 h-3.5 mr-2" />
+                    {conv.isPinned ? '取消置顶' : '置顶'}
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuItem onClick={() => handleStartEdit(conv)}>
+                  <Pencil className="w-3.5 h-3.5 mr-2" />
+                  重命名
+                </DropdownMenuItem>
+                {folders.length > 0 && onMoveToFolder && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>
+                      <Folder className="w-3.5 h-3.5 mr-2" />
+                      移动到分组
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {conv.folderId && (
+                        <DropdownMenuItem onClick={() => onMoveToFolder(conv.id, null)}>
+                          <X className="w-3.5 h-3.5 mr-2" />
+                          移出分组
+                        </DropdownMenuItem>
+                      )}
+                      {conv.folderId && folders.length > 0 && <DropdownMenuSeparator />}
+                      {folders.map((folder) => (
+                        <DropdownMenuItem
+                          key={folder.id}
+                          onClick={() => onMoveToFolder(conv.id, folder.id)}
+                          disabled={conv.folderId === folder.id}
+                        >
+                          <Folder className="w-3.5 h-3.5 mr-2" />
+                          {folder.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() => onDeleteConversation(conv.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  <Trash2 className="w-3.5 h-3.5 mr-2" />
+                  删除
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        </>
+      )}
+    </div>
+  ), [editingId, editTitle, hoveredId, activeConversationId, folders, onPinConversation, onMoveToFolder, onDeleteConversation, onSelectConversation]);
 
   return (
     <div className="w-[280px] sm:w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
       {/* Header with AI Teacher Avatar */}
       <div className="p-5 flex items-center gap-3">
         <div className="relative w-11 h-11">
-          {/* Soft glow background */}
           <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/10 blur-md scale-125" />
-          {/* Avatar container */}
           <div className="relative w-11 h-11 rounded-full overflow-hidden bg-gradient-to-br from-background to-muted/30 p-0.5">
             <div className="w-full h-full rounded-full overflow-hidden bg-background">
               <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover scale-110" />
@@ -182,9 +364,7 @@ export function Sidebar({
       {/* New Chat Button */}
       <div className="px-4 mb-4">
         <button
-          onClick={() => {
-            onNewConversation();
-          }}
+          onClick={() => onNewConversation()}
           className="group w-full px-4 py-3 rounded-xl gradient-primary text-white flex items-center justify-center gap-2 text-sm font-semibold shadow-glow hover:shadow-lg transition-all duration-300 hover:scale-[1.02] active:scale-[0.95]"
         >
           <Plus className="w-5 h-5 transition-transform duration-300 group-hover:rotate-90" />
@@ -196,9 +376,7 @@ export function Sidebar({
       <div className="flex-1 overflow-y-auto px-4">
         {/* Temporary new conversation placeholder */}
         {isNewConversation && (
-          <div
-            className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in mb-2"
-          >
+          <div className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in mb-2">
             <MessageSquare className="w-4 h-4 flex-shrink-0" />
             <span className="truncate text-muted-foreground italic">新对话</span>
           </div>
@@ -215,19 +393,140 @@ export function Sidebar({
             <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
           </button>
         </div>
-        
+
         {/* No results */}
-        {conversations.length === 0 && (
+        {conversations.length === 0 && folders.length === 0 && (
           <div className="text-center py-8 text-sm text-muted-foreground">
             暂无对话
           </div>
         )}
-        
-        {/* Grouped conversations */}
+
+        {/* User-defined Folders */}
+        {folders.length > 0 && (
+          <div className="space-y-1 mb-3">
+            {folders.map((folder) => {
+              const folderConvs = folderedConversations[folder.id] || [];
+              const isExpanded = expandedFolders[folder.id] ?? true;
+
+              return (
+                <Collapsible
+                  key={folder.id}
+                  open={isExpanded}
+                  onOpenChange={() => toggleFolder(folder.id)}
+                >
+                  <div className="group/folder flex items-center">
+                    <CollapsibleTrigger className="flex items-center gap-2 flex-1 px-1 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                      <ChevronDown
+                        className={cn(
+                          "w-3.5 h-3.5 transition-transform duration-200",
+                          !isExpanded && "-rotate-90"
+                        )}
+                      />
+                      {isExpanded ? (
+                        <FolderOpen className="w-3.5 h-3.5 text-primary" />
+                      ) : (
+                        <Folder className="w-3.5 h-3.5 text-primary" />
+                      )}
+                      {editingFolderId === folder.id ? (
+                        <input
+                          ref={folderInputRef}
+                          type="text"
+                          value={editFolderName}
+                          onChange={(e) => setEditFolderName(e.target.value)}
+                          onKeyDown={(e) => {
+                            e.stopPropagation();
+                            if (e.key === 'Enter') handleConfirmFolderEdit();
+                            else if (e.key === 'Escape') {
+                              setEditingFolderId(null);
+                              setEditFolderName('');
+                            }
+                          }}
+                          onBlur={handleConfirmFolderEdit}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 px-1 py-0.5 text-xs rounded bg-background border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                        />
+                      ) : (
+                        <>
+                          <span className="font-medium">{folder.name}</span>
+                          <span className="text-muted-foreground/60">({folderConvs.length})</span>
+                        </>
+                      )}
+                    </CollapsibleTrigger>
+                    {/* Folder actions */}
+                    <div className="opacity-0 group-hover/folder:opacity-100 transition-opacity flex items-center gap-0.5 mr-1">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setEditingFolderId(folder.id);
+                          setEditFolderName(folder.name);
+                        }}
+                        className="p-1 rounded text-muted-foreground hover:text-primary hover:bg-primary/10"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDeleteFolder?.(folder.id);
+                        }}
+                        className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
+                  <CollapsibleContent className="space-y-1 mt-1 ml-2">
+                    {folderConvs.length === 0 ? (
+                      <div className="text-xs text-muted-foreground/50 px-3 py-2">空分组</div>
+                    ) : (
+                      folderConvs.map((conv) => renderConversationItem(conv))
+                    )}
+                  </CollapsibleContent>
+                </Collapsible>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Create folder input */}
+        {creatingFolder && (
+          <div className="flex items-center gap-1 px-2 py-1.5 mb-2">
+            <Folder className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+            <input
+              ref={newFolderInputRef}
+              type="text"
+              value={newFolderName}
+              onChange={(e) => setNewFolderName(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') handleCreateFolder();
+                else if (e.key === 'Escape') {
+                  setCreatingFolder(false);
+                  setNewFolderName('');
+                }
+              }}
+              onBlur={handleCreateFolder}
+              placeholder="分组名称"
+              className="flex-1 px-2 py-1 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+          </div>
+        )}
+
+        {/* New Folder Button */}
+        {onCreateFolder && (
+          <button
+            onClick={() => setCreatingFolder(true)}
+            className="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-colors mb-3"
+          >
+            <FolderPlus className="w-3.5 h-3.5" />
+            <span>新建分组</span>
+          </button>
+        )}
+
+        {/* Ungrouped conversations by time */}
         <div className="space-y-3">
           {groupedConversations.map((group) => {
             const isExpanded = expandedGroups[group.key];
-            
+
             return (
               <Collapsible
                 key={group.key}
@@ -235,106 +534,17 @@ export function Sidebar({
                 onOpenChange={() => toggleGroup(group.key)}
               >
                 <CollapsibleTrigger className="flex items-center gap-2 w-full px-1 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
-                  <ChevronDown 
+                  <ChevronDown
                     className={cn(
                       "w-3.5 h-3.5 transition-transform duration-200",
                       !isExpanded && "-rotate-90"
-                    )} 
+                    )}
                   />
                   <span className="font-medium">{group.label}</span>
                   <span className="text-muted-foreground/60">({group.conversations.length})</span>
                 </CollapsibleTrigger>
                 <CollapsibleContent className="space-y-1 mt-1">
-                  {group.conversations.map((conv) => (
-                    <div
-                      key={conv.id}
-                      className="relative group"
-                      onMouseEnter={() => setHoveredId(conv.id)}
-                      onMouseLeave={() => setHoveredId(null)}
-                    >
-                      {editingId === conv.id ? (
-                        <div className="flex items-center gap-1 px-2 py-1.5">
-                          <input
-                            ref={inputRef}
-                            type="text"
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            onBlur={handleConfirmEdit}
-                            className="flex-1 px-2 py-1.5 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
-                          />
-                          <button
-                            onClick={handleConfirmEdit}
-                            className="p-1.5 rounded-lg text-primary hover:bg-primary/10"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                          </button>
-                          <button
-                            onClick={handleCancelEdit}
-                            className="p-1.5 rounded-lg text-muted-foreground hover:bg-muted"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                      ) : (
-                        <>
-                          <button
-                            onClick={() => onSelectConversation(conv.id)}
-                            className={cn(
-                              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 text-left pr-20",
-                              activeConversationId === conv.id
-                                ? "bg-primary/10 text-primary font-medium"
-                                : "hover:bg-sidebar-accent/70 text-sidebar-foreground"
-                            )}
-                          >
-                            <MessageSquare className="w-4 h-4 flex-shrink-0" />
-                            <span className="truncate">{conv.title}</span>
-                          </button>
-                          
-                          {/* Action buttons */}
-                          <div
-                            className={cn(
-                              "absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-0.5 transition-all duration-200",
-                              hoveredId === conv.id ? "opacity-100" : "opacity-0"
-                            )}
-                          >
-                            {onPinConversation && (
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  onPinConversation(conv.id, !conv.isPinned);
-                                }}
-                                className={cn(
-                                  "p-1.5 rounded-lg hover:bg-primary/10",
-                                  conv.isPinned ? "text-primary" : "text-muted-foreground hover:text-primary"
-                                )}
-                              >
-                                <Pin className="w-3.5 h-3.5" />
-                              </button>
-                            )}
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStartEdit(conv);
-                              }}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10"
-                            >
-                              <Pencil className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                onDeleteConversation(conv.id);
-                              }}
-                              className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
+                  {group.conversations.map((conv) => renderConversationItem(conv))}
                 </CollapsibleContent>
               </Collapsible>
             );
@@ -342,9 +552,7 @@ export function Sidebar({
         </div>
       </div>
 
-
-
-      {/* Admin Entry - Above User Profile */}
+      {/* Admin Entry */}
       {isAdmin && (
         <div className="px-4 mb-2">
           <button
@@ -358,7 +566,7 @@ export function Sidebar({
       )}
 
       {/* User Profile at Bottom Left */}
-      <UserProfile 
+      <UserProfile
         userId={userId}
         college={userCollege}
         grade={userGrade}
