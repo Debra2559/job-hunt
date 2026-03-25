@@ -319,20 +319,21 @@ async function getKnowledgeContext(
     const keywordResults = await keywordSearch(supabase, userQuery);
     
     if (keywordResults.length > 0) {
-      const sources = keywordResults.map(r => ({
+      const sources = keywordResults.map((r, index) => ({
         id: r.id,
         fileName: r.file_name,
-        similarity: r.similarity, // Use pre-calculated normalized similarity
+        similarity: r.similarity,
         tags: r.tags || [],
+        index: index + 1, // 1-based citation index
       }));
 
-      const contents = keywordResults.map(r => {
+      const contents = keywordResults.map((r, index) => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
         const scoreLabel = `[匹配度: ${Math.round(r.similarity * 100)}%]`;
         const truncated = r.content_text.length > 3000 
           ? r.content_text.substring(0, 3000) + '...' 
           : r.content_text;
-        return `【${r.file_name}】${tags} ${scoreLabel}\n${truncated}`;
+        return `【来源[${index + 1}]: ${r.file_name}】${tags} ${scoreLabel}\n${truncated}`;
       });
       
       console.log(`Returning ${sources.length} keyword matched sources with similarities:`, 
@@ -452,10 +453,12 @@ ${fileContext}`;
 
 **知识库使用规则：**
 1. 优先基于知识库内容回答校园相关问题
-2. **禁止引用文件名**，不要说"根据《xxx》"
-3. 如果知识库中有相关内容，直接回答要点
-4. **如果知识库没有相关信息且没有用户上传文件，说："抱歉，我没有找到相关信息，建议咨询学院老师或相关部门。"**
-5. **严禁编造知识库中没有的信息**${knowledgeContext}`;
+2. **必须在回答中使用行内引用标记**：当你使用了某个来源的内容时，在相关句子末尾添加对应的引用标记，格式为 [1]、[2] 等，对应知识库来源的编号
+3. 每个要点或段落后标注所引用的来源编号，可以同时引用多个来源如 [1][3]
+4. 如果知识库中有相关内容，直接回答要点并标注来源
+5. **如果知识库没有相关信息且没有用户上传文件，说："抱歉，我没有找到相关信息，建议咨询学院老师或相关部门。"**
+6. **严禁编造知识库中没有的信息**
+7. **不要在回答末尾列出参考来源列表**，系统会自动展示来源信息${knowledgeContext}`;
 
     console.log("Calling Lovable AI Gateway...");
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Bookmark, BookmarkCheck, ThumbsUp, ThumbsDown, FileText, ChevronDown, ChevronUp, X, Send, Volume2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -62,6 +62,40 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   if (!message.content || message.content.trim() === '') {
     return null;
   }
+
+  // Render citation markers like [1], [2] as styled badges
+  const renderCitations = (children: React.ReactNode): React.ReactNode => {
+    if (!hasSources) return children;
+    
+    return React.Children.map(children, (child) => {
+      if (typeof child !== 'string') return child;
+      
+      // Split text by citation patterns like [1], [2][3], etc.
+      const parts = child.split(/(\[\d+\])/g);
+      if (parts.length === 1) return child;
+      
+      return parts.map((part, i) => {
+        const match = part.match(/^\[(\d+)\]$/);
+        if (match) {
+          const num = parseInt(match[1]);
+          const source = message.sources?.find(s => s.index === num);
+          if (source) {
+            return (
+              <button
+                key={i}
+                onClick={() => setShowSources(true)}
+                className="inline-flex items-center justify-center w-4 h-4 text-[10px] font-bold rounded bg-primary/15 text-primary hover:bg-primary/25 transition-colors cursor-pointer align-super ml-0.5 mr-0.5 leading-none"
+                title={source.fileName}
+              >
+                {num}
+              </button>
+            );
+          }
+        }
+        return part;
+      });
+    });
+  };
 
   const handlePlayTTS = () => {
     // Check if browser supports speech synthesis
@@ -245,7 +279,18 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
           ) : (
             <div className="prose prose-sm max-w-none text-sm leading-relaxed break-words">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Render text with inline citation markers
+                  p: ({ children, ...props }) => (
+                    <p {...props}>{renderCitations(children)}</p>
+                  ),
+                  li: ({ children, ...props }) => (
+                    <li {...props}>{renderCitations(children)}</li>
+                  ),
+                }}
+              >
                 {message.content}
               </ReactMarkdown>
               {isCurrentlyStreaming && (
@@ -288,7 +333,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-xs font-bold text-primary">{source.index || index + 1}</span>
                       </div>
                       <span className="text-sm truncate text-foreground/80">{source.fileName}</span>
                     </div>
