@@ -252,6 +252,26 @@ const Index = () => {
     }
   }, [pinConversation]);
 
+  const handleMoveToFolder = useCallback(async (conversationId: string, folderId: string | null) => {
+    const success = await moveConversationToFolder(conversationId, folderId);
+    if (success) {
+      // Update local conversation state
+      const { data } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('id', conversationId)
+        .single();
+      if (data) {
+        // Trigger re-render by reloading
+        toast.success(folderId ? '已移动到分组' : '已移出分组');
+        // Refresh conversations to pick up folder_id change
+        window.location.reload();
+      }
+    } else {
+      toast.error('移动失败');
+    }
+  }, [moveConversationToFolder]);
+
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
