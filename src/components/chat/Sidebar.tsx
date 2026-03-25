@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin, FolderPlus, Folder, FolderOpen, MoreHorizontal } from 'lucide-react';
+import { Plus, MessageSquare, Trash2, Pencil, Check, X, Settings, ChevronDown, Compass, Pin, FolderPlus, Folder, FolderOpen, MoreHorizontal, Bookmark } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Conversation } from '@/types/chat';
 import { UserProfile } from './UserProfile';
