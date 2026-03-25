@@ -131,7 +131,7 @@ export function VoiceInput({ onTranscript, disabled }: VoiceInputProps) {
         "relative p-2.5 rounded-xl transition-all duration-300 select-none touch-none",
         isActive
           ? "text-white"
-          : "bg-muted hover:bg-secondary/80 text-muted-foreground"
+          : "hover:bg-secondary/80 text-muted-foreground"
       )}
       title={isActive ? "停止语音输入" : "语音输入（点击切换 / 长按说话）"}
     >
