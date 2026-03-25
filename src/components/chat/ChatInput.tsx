@@ -149,7 +149,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               {/* Custom animated placeholder */}
               {!input && (
                 <div 
-                  className="absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 flex items-center gap-2 overflow-hidden h-5"
+                  className="absolute left-4 sm:left-3 top-2.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 flex items-center gap-2 overflow-hidden h-5"
                   onClick={() => textareaRef.current?.focus()}
                 >
                   <span
