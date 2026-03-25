@@ -35,7 +35,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     useEffect(() => {
       const timer = setInterval(() => {
         setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
-      }, 4000);
+      }, 8000);
       return () => clearInterval(timer);
     }, []);
 
@@ -149,7 +149,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               {/* Custom animated placeholder */}
               {!input && (
                 <div 
-                  className="absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 flex items-center gap-2 overflow-hidden h-5"
+                  className="absolute left-4 sm:left-3 top-2.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 flex items-center gap-2 overflow-hidden h-5"
                   onClick={() => textareaRef.current?.focus()}
                 >
                   <span
@@ -166,7 +166,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+                className="min-h-[36px] sm:min-h-[44px] max-h-36 resize-none pr-14 pl-4 sm:pl-3 py-2.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isTyping}
               />
             </div>

@@ -141,7 +141,7 @@ export default {
         "pop-in": "pop-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)",
         "bounce-dot": "bounce-dot 1.2s infinite ease-in-out",
         "soundwave": "soundwave 0.6s ease-in-out infinite",
-        "placeholder-scroll-up": "placeholder-scroll-up 4s ease-in-out",
+        "placeholder-scroll-up": "placeholder-scroll-up 8s ease-in-out",
       },
     },
   },
