@@ -22,6 +22,7 @@ interface ChatMessageProps {
   onToggleFavorite: (id: string) => void;
   userId?: string;
   isStreaming?: boolean;
+  onSuggestedQuery?: (query: string) => void;
 }
 
 function formatTime(date: Date | undefined): string {
@@ -50,7 +51,7 @@ const NEGATIVE_TAGS = [
   { id: 'slow', label: '响应太慢' },
 ];
 
-export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = false }: ChatMessageProps) {
+export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -63,8 +64,18 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
   
   const hasSources = message.sources && message.sources.length > 0;
   const isCurrentlyStreaming = isStreaming && message.id.startsWith('temp-');
+
+  // Parse suggested queries from message content
+  const suggestionsMatch = !isUser ? message.content.match(/<<SUGGESTIONS>>(.*?)<{0,2}\/SUGGESTIONS>{0,2}>{0,2}\s*$/s) : null;
+  const suggestedQueries = suggestionsMatch
+    ? suggestionsMatch[1].split('||').map(q => q.trim()).filter(Boolean)
+    : [];
+  const displayContent = suggestionsMatch
+    ? message.content.replace(/<<SUGGESTIONS>>.*?<{0,2}\/SUGGESTIONS>{0,2}>{0,2}\s*$/s, '').trim()
+    : message.content;
+
   // Don't render empty messages
-  if (!message.content || message.content.trim() === '') {
+  if (!displayContent || displayContent.trim() === '') {
     return null;
   }
 
@@ -144,7 +155,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
     }
 
     // Create utterance with message content
-    const utterance = new SpeechSynthesisUtterance(message.content);
+    const utterance = new SpeechSynthesisUtterance(displayContent);
     utterance.lang = 'zh-CN'; // Chinese language
     utterance.rate = 1.0; // Normal speed
     utterance.pitch = 1.0; // Normal pitch
@@ -247,7 +258,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                 feedback_type: type,
                 content: content,
                 user_display_name: profileData?.display_name || '匿名用户',
-                message_content: message.content,
+                message_content: displayContent,
                 admin_emails: adminEmails,
               },
             });
@@ -308,7 +319,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
           )}
         >
           {isUser ? (
-            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+            <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{displayContent}</p>
           ) : (
             <div className="prose prose-sm max-w-none text-sm leading-relaxed break-words">
               <ReactMarkdown 
@@ -323,7 +334,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   ),
                 }}
               >
-                {message.content}
+                {displayContent}
               </ReactMarkdown>
               {isCurrentlyStreaming && (
                 <span className="inline-block w-2 h-4 ml-0.5 bg-primary/80 animate-pulse rounded-sm" />
@@ -385,8 +396,22 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
             )}
           </div>
         )}
-        
-        {/* Actions and Timestamp for AI messages */}
+
+        {/* Suggested Queries */}
+        {!isUser && suggestedQueries.length > 0 && !isCurrentlyStreaming && onSuggestedQuery && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {suggestedQueries.map((query, i) => (
+              <button
+                key={i}
+                onClick={() => onSuggestedQuery(query)}
+                className="text-xs px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
+              >
+                {query}
+              </button>
+            ))}
+          </div>
+        )}
+
         {!isUser && (
           <div className="flex items-center gap-2 px-1">
             <span className="text-[10px] text-muted-foreground/60">

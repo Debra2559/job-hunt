@@ -140,6 +140,7 @@ export function ChatArea({
                 onToggleFavorite={onToggleFavorite}
                 userId={userId}
                 isStreaming={isTyping && index === messages.length - 1}
+                onSuggestedQuery={onSendMessage}
               />
             ))}
             {/* Show thinking indicator when waiting for AI response */}
