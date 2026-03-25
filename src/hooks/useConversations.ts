@@ -47,6 +47,7 @@ export function useConversations(userId: string | undefined) {
             createdAt: new Date(conv.created_at),
             updatedAt: new Date(conv.updated_at),
             isPinned: conv.is_pinned,
+            folderId: (conv as any).folder_id || null,
           };
         })
       );

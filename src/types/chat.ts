@@ -21,6 +21,7 @@ export interface Conversation {
   createdAt: Date;
   updatedAt: Date;
   isPinned?: boolean;
+  folderId?: string | null;
 }
 
 export interface Group {
