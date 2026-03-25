@@ -155,7 +155,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
     }
 
     // Create utterance with message content
-    const utterance = new SpeechSynthesisUtterance(message.content);
+    const utterance = new SpeechSynthesisUtterance(displayContent);
     utterance.lang = 'zh-CN'; // Chinese language
     utterance.rate = 1.0; // Normal speed
     utterance.pitch = 1.0; // Normal pitch
