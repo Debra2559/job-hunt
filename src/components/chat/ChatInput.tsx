@@ -1,5 +1,5 @@
 import { useState, useRef, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
-import { Send, Paperclip, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, X, FileText, Image as ImageIcon, Camera, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { quickTags } from '@/data/campusData';
