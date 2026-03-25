@@ -319,20 +319,21 @@ async function getKnowledgeContext(
     const keywordResults = await keywordSearch(supabase, userQuery);
     
     if (keywordResults.length > 0) {
-      const sources = keywordResults.map(r => ({
+      const sources = keywordResults.map((r, index) => ({
         id: r.id,
         fileName: r.file_name,
-        similarity: r.similarity, // Use pre-calculated normalized similarity
+        similarity: r.similarity,
         tags: r.tags || [],
+        index: index + 1, // 1-based citation index
       }));
 
-      const contents = keywordResults.map(r => {
+      const contents = keywordResults.map((r, index) => {
         const tags = r.tags?.length > 0 ? `[标签: ${r.tags.join(', ')}]` : '';
         const scoreLabel = `[匹配度: ${Math.round(r.similarity * 100)}%]`;
         const truncated = r.content_text.length > 3000 
           ? r.content_text.substring(0, 3000) + '...' 
           : r.content_text;
-        return `【${r.file_name}】${tags} ${scoreLabel}\n${truncated}`;
+        return `【来源[${index + 1}]: ${r.file_name}】${tags} ${scoreLabel}\n${truncated}`;
       });
       
       console.log(`Returning ${sources.length} keyword matched sources with similarities:`, 
