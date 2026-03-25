@@ -245,7 +245,18 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
             <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
           ) : (
             <div className="prose prose-sm max-w-none text-sm leading-relaxed break-words">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  // Render text with inline citation markers
+                  p: ({ children, ...props }) => (
+                    <p {...props}>{renderCitations(children)}</p>
+                  ),
+                  li: ({ children, ...props }) => (
+                    <li {...props}>{renderCitations(children)}</li>
+                  ),
+                }}
+              >
                 {message.content}
               </ReactMarkdown>
               {isCurrentlyStreaming && (
