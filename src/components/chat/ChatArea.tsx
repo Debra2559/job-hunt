@@ -120,7 +120,7 @@ export function ChatArea({
                 </div>
 
                 {/* Card body */}
-                <div className="bg-card/80 backdrop-blur-sm border border-border/60 rounded-3xl pt-14 sm:pt-16 pb-6 sm:pb-8 px-6 sm:px-8 shadow-elegant text-center">
+                <div className="bg-card/80 backdrop-blur-sm rounded-3xl pt-14 sm:pt-16 pb-6 sm:pb-8 px-6 sm:px-8 shadow-elegant text-center">
                   <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-2 sm:mb-3">
                     Hi，{userName || '同学'}~
                   </h1>
