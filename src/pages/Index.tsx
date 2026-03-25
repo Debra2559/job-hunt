@@ -255,22 +255,17 @@ const Index = () => {
   const handleMoveToFolder = useCallback(async (conversationId: string, folderId: string | null) => {
     const success = await moveConversationToFolder(conversationId, folderId);
     if (success) {
-      // Update local conversation state
-      const { data } = await supabase
-        .from('conversations')
-        .select('*')
-        .eq('id', conversationId)
-        .single();
-      if (data) {
-        // Trigger re-render by reloading
-        toast.success(folderId ? '已移动到分组' : '已移出分组');
-        // Refresh conversations to pick up folder_id change
-        window.location.reload();
-      }
+      // Update local state
+      setConversations((prev: any) =>
+        prev.map((conv: any) =>
+          conv.id === conversationId ? { ...conv, folderId } : conv
+        )
+      );
+      toast.success(folderId ? '已移动到分组' : '已移出分组');
     } else {
       toast.error('移动失败');
     }
-  }, [moveConversationToFolder]);
+  }, [moveConversationToFolder, setConversations]);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
