@@ -388,36 +388,76 @@ export function Sidebar({
 
       {/* Conversations */}
       <div className="flex-1 overflow-y-auto px-4">
-        {/* Temporary new conversation placeholder */}
-        {isNewConversation && (
-          <div className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in mb-2">
-            <MessageSquare className="w-4 h-4 flex-shrink-0" />
-            <span className="truncate text-muted-foreground italic">新对话</span>
-          </div>
-        )}
+        {/* Conversations */}
+        <div className="space-y-1">
+          {/* Temporary new conversation placeholder */}
+          {isNewConversation && (
+            <div className="w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm bg-primary/10 text-primary font-medium animate-fade-in">
+              <MessageSquare className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate text-muted-foreground italic">新对话</span>
+            </div>
+          )}
 
-        {/* Career Planning Section */}
-        <div className="mb-3">
+          {/* Career Planning Section */}
           <button
             onClick={() => navigate('/career')}
-            className="w-full px-3 py-2.5 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground"
+            className="w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground"
           >
             <Compass className="w-4 h-4 text-primary" />
             <span>职业规划</span>
             <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
           </button>
+
+          {/* No results */}
+          {conversations.length === 0 && folders.length === 0 && (
+            <div className="text-center py-8 text-sm text-muted-foreground">
+              暂无对话
+            </div>
+          )}
+
+          {/* New Folder Button */}
+          {onCreateFolder && !creatingFolder && (
+            <button
+              onClick={() => setCreatingFolder(true)}
+              className="w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-colors"
+            >
+              <FolderPlus className="w-4 h-4" />
+              <span>新建分组</span>
+            </button>
+          )}
+
+          {/* Create folder input */}
+          {creatingFolder && (
+            <div className="flex items-center gap-2 px-3 py-2">
+              <Folder className="w-4 h-4 text-primary flex-shrink-0" />
+              <input
+                ref={newFolderInputRef}
+                type="text"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') handleCreateFolder();
+                  else if (e.key === 'Escape') {
+                    setCreatingFolder(false);
+                    setNewFolderName('');
+                  }
+                }}
+                onBlur={handleCreateFolder}
+                placeholder="分组名称"
+                className="flex-1 px-2 py-1 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
+              />
+            </div>
+          )}
         </div>
 
-        {/* No results */}
-        {conversations.length === 0 && folders.length === 0 && (
-          <div className="text-center py-8 text-sm text-muted-foreground">
-            暂无对话
-          </div>
+        {/* Divider */}
+        {(folders.length > 0 || groupedConversations.length > 0) && (
+          <div className="my-2 border-t border-sidebar-border/50" />
         )}
 
         {/* User-defined Folders */}
         {folders.length > 0 && (
-          <div className="space-y-1 mb-3">
+          <div className="space-y-1">
             {folders.map((folder) => {
               const folderConvs = folderedConversations[folder.id] || [];
               const isExpanded = expandedFolders[folder.id] ?? true;
@@ -449,7 +489,7 @@ export function Sidebar({
                       }
                     }}
                   >
-                    <CollapsibleTrigger className="flex items-center gap-2 flex-1 px-1 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
+                    <CollapsibleTrigger className="flex items-center gap-2 flex-1 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                       <ChevronDown
                         className={cn(
                           "w-3.5 h-3.5 transition-transform duration-200",
@@ -522,40 +562,6 @@ export function Sidebar({
               );
             })}
           </div>
-        )}
-
-        {/* Create folder input */}
-        {creatingFolder && (
-          <div className="flex items-center gap-1 px-2 py-1.5 mb-2">
-            <Folder className="w-3.5 h-3.5 text-primary flex-shrink-0" />
-            <input
-              ref={newFolderInputRef}
-              type="text"
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleCreateFolder();
-                else if (e.key === 'Escape') {
-                  setCreatingFolder(false);
-                  setNewFolderName('');
-                }
-              }}
-              onBlur={handleCreateFolder}
-              placeholder="分组名称"
-              className="flex-1 px-2 py-1 text-sm rounded-lg bg-background border border-border focus:outline-none focus:ring-2 focus:ring-primary/50"
-            />
-          </div>
-        )}
-
-        {/* New Folder Button */}
-        {onCreateFolder && (
-          <button
-            onClick={() => setCreatingFolder(true)}
-            className="w-full px-3 py-2 rounded-xl flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground hover:bg-sidebar-accent/70 transition-colors mb-3"
-          >
-            <FolderPlus className="w-3.5 h-3.5" />
-            <span>新建分组</span>
-          </button>
         )}
 
         {/* Ungrouped conversations by time */}
