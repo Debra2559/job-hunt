@@ -278,8 +278,8 @@ const Index = () => {
     setProfile((prev) => prev ? { ...prev, ...updatedProfile } : null);
   };
 
-  // Show loading while checking auth
-  if (authLoading || convsLoading || profileLoading) {
+  // Show loading only when user is logged in and data is loading
+  if (authLoading || (user && (convsLoading || profileLoading))) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -289,8 +289,6 @@ const Index = () => {
       </div>
     );
   }
-
-  // NOTE: route guarding is handled in App.tsx; Index assumes authenticated + verified.
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
