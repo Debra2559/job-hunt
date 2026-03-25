@@ -154,13 +154,15 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               {/* Custom animated placeholder */}
               {!input && (
                 <div 
-                  className={cn(
-                    "absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 transition-opacity duration-300 flex items-center gap-2",
-                    placeholderFading ? "opacity-0" : "opacity-100"
-                  )}
+                  className="absolute left-3 top-1.5 sm:top-3 pointer-events-none text-sm text-muted-foreground/40 flex items-center gap-2 overflow-hidden h-5"
                   onClick={() => textareaRef.current?.focus()}
                 >
-                  <span>{currentPlaceholder}</span>
+                  <span
+                    key={placeholderIndex}
+                    className="inline-block animate-placeholder-scroll-up"
+                  >
+                    {currentPlaceholder}
+                  </span>
                   <span className="text-xs text-muted-foreground/30 hidden sm:inline">按 Tab 填充</span>
                 </div>
               )}
