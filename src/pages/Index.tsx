@@ -350,6 +350,11 @@ const Index = () => {
           onProfileUpdated={handleProfileUpdated}
           isNewConversation={activeConversationId === null && !showFavorites}
           isAdmin={isAdmin || isSuperAdmin}
+          folders={folders}
+          onCreateFolder={createFolder}
+          onRenameFolder={renameFolder}
+          onDeleteFolder={deleteFolder}
+          onMoveToFolder={handleMoveToFolder}
         />
       </div>
 
