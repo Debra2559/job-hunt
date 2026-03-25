@@ -1,9 +1,10 @@
 import { useState, useRef, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
-import { Send, Paperclip, X, FileText, Image as ImageIcon } from 'lucide-react';
+import { Send, Paperclip, X, FileText, Image as ImageIcon, Camera, Plus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { quickTags } from '@/data/campusData';
 import { VoiceInput } from './VoiceInput';
+import { useIsMobile } from '@/hooks/use-mobile';
 // Rotating placeholder suggestions from quickTags
 const placeholderSuggestions = quickTags.map(t => t.description);
 
@@ -25,9 +26,11 @@ interface ChatInputProps {
 
 export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   function ChatInput({ onSendMessage, isTyping, onToolSelect }, ref) {
+    const isMobile = useIsMobile();
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
     const [placeholderIndex, setPlaceholderIndex] = useState(0);
+    const [mobileExpanded, setMobileExpanded] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -110,6 +113,91 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       return <FileText className="w-4 h-4" />;
     };
 
+    // Mobile compact input bar
+    if (isMobile && !mobileExpanded) {
+      return (
+        <div className="bg-background pt-2 pb-4 px-3">
+          {/* File previews */}
+          {uploadedFiles.length > 0 && (
+            <div className="flex flex-wrap gap-2 px-1 pb-2">
+              {uploadedFiles.map((uploadedFile, index) => (
+                <div
+                  key={index}
+                  className="relative flex items-center gap-1.5 px-2 py-1 rounded-lg bg-secondary/60 text-xs"
+                >
+                  {uploadedFile.preview ? (
+                    <img src={uploadedFile.preview} alt={uploadedFile.file.name} className="w-5 h-5 rounded object-cover" />
+                  ) : (
+                    getFileIcon(uploadedFile.file)
+                  )}
+                  <span className="max-w-[80px] truncate">{uploadedFile.file.name}</span>
+                  <button onClick={() => removeFile(index)} className="p-0.5">
+                    <X className="w-3 h-3 text-muted-foreground" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2">
+            {/* Camera / file button */}
+            <button
+              onClick={handleFileSelect}
+              className="p-2 rounded-full text-muted-foreground hover:bg-muted transition-colors flex-shrink-0"
+            >
+              <Camera className="w-5 h-5" />
+            </button>
+
+            {/* Pill-shaped input */}
+            <div
+              className="flex-1 flex items-center gap-1 bg-muted/60 rounded-full px-4 py-2.5 border border-border/40 cursor-text"
+              onClick={() => {
+                setMobileExpanded(true);
+                setTimeout(() => textareaRef.current?.focus(), 100);
+              }}
+            >
+              <span className="text-sm text-muted-foreground/50 truncate">
+                {input || '发消息或按住说话...'}
+              </span>
+            </div>
+
+            {/* Voice input */}
+            <VoiceInput onTranscript={handleVoiceTranscript} disabled={isTyping} />
+
+            {/* Plus / more button */}
+            <button
+              onClick={() => setMobileExpanded(true)}
+              className="p-2 rounded-full text-muted-foreground hover:bg-muted transition-colors flex-shrink-0"
+            >
+              <Plus className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Hidden file input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            multiple
+            accept="image/*,.pdf,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.txt,.md,.csv,.json"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+
+          {isTyping && (
+            <div className="mt-2 flex items-center justify-center gap-2 text-xs text-muted-foreground">
+              <div className="flex gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+              <span>AI辅导员正在思考...</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // Desktop layout (and mobile expanded)
     return (
       <div className="bg-gradient-to-t from-background via-background to-transparent pt-3 sm:pt-4 pb-4 sm:pb-6 px-3 sm:px-4">
         <div className="max-w-3xl mx-auto">
@@ -165,8 +253,14 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
+                onBlur={() => {
+                  if (isMobile && !input.trim() && uploadedFiles.length === 0) {
+                    setMobileExpanded(false);
+                  }
+                }}
                 className="min-h-[36px] sm:min-h-[44px] max-h-36 resize-none pr-14 pl-4 sm:pl-3 py-2.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
                 disabled={isTyping}
+                autoFocus={isMobile && mobileExpanded}
               />
             </div>
             
@@ -199,7 +293,10 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
                 />
 
                 <button
-                  onClick={handleSend}
+                  onClick={() => {
+                    handleSend();
+                    if (isMobile) setMobileExpanded(false);
+                  }}
                   disabled={(!input.trim() && uploadedFiles.length === 0) || isTyping}
                   className={cn(
                     "p-2.5 rounded-xl transition-all duration-200",
