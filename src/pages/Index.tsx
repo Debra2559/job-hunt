@@ -85,7 +85,14 @@ const Index = () => {
 
   const handleSendMessage = useCallback(
     async (content: string, files?: File[]) => {
-      if (!user || isTyping) return;
+      if (isTyping) return;
+      
+      // If not logged in, save pending message and redirect to auth
+      if (!user) {
+        sessionStorage.setItem('pendingMessage', content);
+        navigate('/auth', { state: { from: '/' } });
+        return;
+      }
       
       // If files are attached, add file info to the message content
       let messageContent = content;
@@ -169,8 +176,21 @@ const Index = () => {
         },
       });
     },
-    [activeConversationId, conversations, user, createConversation, addMessage, updateLocalMessage, isTyping]
+    [activeConversationId, conversations, user, createConversation, addMessage, updateLocalMessage, isTyping, navigate]
   );
+
+  // Auto-send pending message after login
+  const pendingSentRef = useRef(false);
+  useEffect(() => {
+    if (!user || authLoading || convsLoading || profileLoading || pendingSentRef.current) return;
+    const pending = sessionStorage.getItem('pendingMessage');
+    if (pending) {
+      pendingSentRef.current = true;
+      sessionStorage.removeItem('pendingMessage');
+      // Small delay to ensure state is ready
+      setTimeout(() => handleSendMessage(pending), 300);
+    }
+  }, [user, authLoading, convsLoading, profileLoading, handleSendMessage]);
 
   const handleToggleFavorite = useCallback(
     (messageId: string) => {
@@ -258,8 +278,8 @@ const Index = () => {
     setProfile((prev) => prev ? { ...prev, ...updatedProfile } : null);
   };
 
-  // Show loading while checking auth
-  if (authLoading || convsLoading || profileLoading) {
+  // Show loading only when user is logged in and data is loading
+  if (authLoading || (user && (convsLoading || profileLoading))) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
@@ -269,8 +289,6 @@ const Index = () => {
       </div>
     );
   }
-
-  // NOTE: route guarding is handled in App.tsx; Index assumes authenticated + verified.
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
