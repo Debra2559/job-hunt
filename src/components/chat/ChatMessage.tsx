@@ -565,12 +565,12 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
 
         {/* Suggested Queries */}
         {!isUser && suggestedQueries.length > 0 && !isCurrentlyStreaming && onSuggestedQuery && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
+          <div className="mt-2 flex flex-col gap-1.5">
             {suggestedQueries.map((query, i) => (
               <button
                 key={i}
                 onClick={() => onSuggestedQuery(query)}
-                className="text-xs px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
+                className="text-xs px-3 py-1.5 rounded-full border border-primary/20 bg-primary/5 text-primary hover:bg-primary/10 hover:border-primary/30 transition-all duration-200 text-left w-fit"
               >
                 {query}
               </button>
