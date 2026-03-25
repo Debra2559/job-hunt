@@ -22,6 +22,7 @@ interface ChatMessageProps {
   onToggleFavorite: (id: string) => void;
   userId?: string;
   isStreaming?: boolean;
+  onSuggestedQuery?: (query: string) => void;
 }
 
 function formatTime(date: Date | undefined): string {
