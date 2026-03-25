@@ -358,7 +358,7 @@ export function Sidebar({
         </>
       )}
     </div>
-  ), [editingId, editTitle, hoveredId, activeConversationId, folders, onPinConversation, onMoveToFolder, onDeleteConversation, onSelectConversation]);
+  ), [editingId, editTitle, hoveredId, activeConversationId, folders, onPinConversation, onMoveToFolder, onDeleteConversation, onSelectConversation, draggedConvId]);
 
   return (
     <div className="w-[280px] sm:w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
