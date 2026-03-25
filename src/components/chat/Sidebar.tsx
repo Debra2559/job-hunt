@@ -100,6 +100,9 @@ export function Sidebar({
     older: true,
   });
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const [draggedConvId, setDraggedConvId] = useState<string | null>(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
+  const [dragOverUnfolder, setDragOverUnfolder] = useState(false);
 
   // Separate career conversations from regular ones
   const { regularConversations } = useMemo(() => {
@@ -241,7 +244,18 @@ export function Sidebar({
   const renderConversationItem = useCallback((conv: Conversation) => (
     <div
       key={conv.id}
-      className="relative group"
+      className={cn("relative group", draggedConvId === conv.id && "opacity-40")}
+      draggable
+      onDragStart={(e) => {
+        setDraggedConvId(conv.id);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', conv.id);
+      }}
+      onDragEnd={() => {
+        setDraggedConvId(null);
+        setDragOverFolderId(null);
+        setDragOverUnfolder(false);
+      }}
       onMouseEnter={() => setHoveredId(conv.id)}
       onMouseLeave={() => setHoveredId(null)}
     >
@@ -344,7 +358,7 @@ export function Sidebar({
         </>
       )}
     </div>
-  ), [editingId, editTitle, hoveredId, activeConversationId, folders, onPinConversation, onMoveToFolder, onDeleteConversation, onSelectConversation]);
+  ), [editingId, editTitle, hoveredId, activeConversationId, folders, onPinConversation, onMoveToFolder, onDeleteConversation, onSelectConversation, draggedConvId]);
 
   return (
     <div className="w-[280px] sm:w-72 h-full bg-gradient-to-b from-sidebar to-sidebar/95 flex flex-col border-r border-sidebar-border">
@@ -414,7 +428,27 @@ export function Sidebar({
                   open={isExpanded}
                   onOpenChange={() => toggleFolder(folder.id)}
                 >
-                  <div className="group/folder flex items-center">
+                  <div
+                    className={cn(
+                      "group/folder flex items-center rounded-lg transition-colors duration-200",
+                      dragOverFolderId === folder.id && "bg-primary/15 ring-2 ring-primary/30"
+                    )}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      e.dataTransfer.dropEffect = 'move';
+                      setDragOverFolderId(folder.id);
+                    }}
+                    onDragLeave={() => setDragOverFolderId(null)}
+                    onDrop={async (e) => {
+                      e.preventDefault();
+                      const convId = e.dataTransfer.getData('text/plain');
+                      setDragOverFolderId(null);
+                      setDraggedConvId(null);
+                      if (convId && onMoveToFolder) {
+                        await onMoveToFolder(convId, folder.id);
+                      }
+                    }}
+                  >
                     <CollapsibleTrigger className="flex items-center gap-2 flex-1 px-1 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors">
                       <ChevronDown
                         className={cn(
@@ -477,7 +511,9 @@ export function Sidebar({
                   </div>
                   <CollapsibleContent className="space-y-1 mt-1 ml-2">
                     {folderConvs.length === 0 ? (
-                      <div className="text-xs text-muted-foreground/50 px-3 py-2">空分组</div>
+                      <div className="text-xs text-muted-foreground/50 px-3 py-2">
+                        {draggedConvId ? '拖拽到此处' : '空分组'}
+                      </div>
                     ) : (
                       folderConvs.map((conv) => renderConversationItem(conv))
                     )}
@@ -523,7 +559,27 @@ export function Sidebar({
         )}
 
         {/* Ungrouped conversations by time */}
-        <div className="space-y-3">
+        <div
+          className={cn(
+            "space-y-3 rounded-lg transition-colors duration-200",
+            dragOverUnfolder && "bg-muted/50 ring-2 ring-muted-foreground/20"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            setDragOverUnfolder(true);
+          }}
+          onDragLeave={() => setDragOverUnfolder(false)}
+          onDrop={async (e) => {
+            e.preventDefault();
+            const convId = e.dataTransfer.getData('text/plain');
+            setDragOverUnfolder(false);
+            setDraggedConvId(null);
+            if (convId && onMoveToFolder) {
+              await onMoveToFolder(convId, null);
+            }
+          }}
+        >
           {groupedConversations.map((group) => {
             const isExpanded = expandedGroups[group.key];
 
