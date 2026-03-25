@@ -247,7 +247,7 @@ export default function Auth() {
           </div>
 
           {/* Form Card */}
-          <div className="bg-card rounded-2xl shadow-lg border border-border p-6">
+          <div className="bg-card/80 backdrop-blur-sm rounded-3xl shadow-elegant border border-border/60 p-6">
             {/* Google Sign In Button */}
             <Button
               type="button"
