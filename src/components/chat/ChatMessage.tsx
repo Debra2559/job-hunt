@@ -333,7 +333,7 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
                   >
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
                       <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                        <FileText className="w-3.5 h-3.5 text-primary" />
+                        <span className="text-xs font-bold text-primary">{source.index || index + 1}</span>
                       </div>
                       <span className="text-sm truncate text-foreground/80">{source.fileName}</span>
                     </div>
