@@ -559,7 +559,27 @@ export function Sidebar({
         )}
 
         {/* Ungrouped conversations by time */}
-        <div className="space-y-3">
+        <div
+          className={cn(
+            "space-y-3 rounded-lg transition-colors duration-200",
+            dragOverUnfolder && "bg-muted/50 ring-2 ring-muted-foreground/20"
+          )}
+          onDragOver={(e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            setDragOverUnfolder(true);
+          }}
+          onDragLeave={() => setDragOverUnfolder(false)}
+          onDrop={async (e) => {
+            e.preventDefault();
+            const convId = e.dataTransfer.getData('text/plain');
+            setDragOverUnfolder(false);
+            setDraggedConvId(null);
+            if (convId && onMoveToFolder) {
+              await onMoveToFolder(convId, null);
+            }
+          }}
+        >
           {groupedConversations.map((group) => {
             const isExpanded = expandedGroups[group.key];
 
