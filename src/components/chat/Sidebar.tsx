@@ -408,6 +408,18 @@ export function Sidebar({
             <span className="ml-auto text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">NEW</span>
           </button>
 
+          {/* Favorites Section */}
+          <button
+            onClick={onToggleFavorites}
+            className={cn(
+              "w-full px-3 py-2 rounded-xl flex items-center gap-3 text-sm transition-all duration-200 hover:bg-sidebar-accent/70 text-sidebar-foreground",
+              showFavorites && "bg-primary/10 text-primary font-medium"
+            )}
+          >
+            <Bookmark className="w-4 h-4 text-primary" />
+            <span>我的收藏</span>
+          </button>
+
           {/* No results */}
           {conversations.length === 0 && folders.length === 0 && (
             <div className="text-center py-8 text-sm text-muted-foreground">
