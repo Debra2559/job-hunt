@@ -2,6 +2,7 @@ export interface KnowledgeSource {
   fileName: string;
   similarity: number;
   tags?: string[];
+  index?: number;
 }
 
 export interface Message {
