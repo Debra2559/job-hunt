@@ -38,6 +38,13 @@ const Index = () => {
     pinConversation,
   } = useConversations(user?.id);
   const { isAdmin, isSuperAdmin } = useUserRole(user?.id);
+  const {
+    folders,
+    createFolder,
+    renameFolder,
+    deleteFolder,
+    moveConversationToFolder,
+  } = useConversationFolders(user?.id);
 
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [showFavorites, setShowFavorites] = useState(false);
