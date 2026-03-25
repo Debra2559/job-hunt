@@ -150,8 +150,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="请输入你的问题..."
-              className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+              placeholder={`${currentPlaceholder}    按 Tab 填充`}
+              className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
               disabled={isTyping}
             />
             
