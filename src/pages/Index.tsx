@@ -36,6 +36,7 @@ const Index = () => {
     deleteConversation,
     renameConversation,
     pinConversation,
+    setConversations,
   } = useConversations(user?.id);
   const { isAdmin, isSuperAdmin } = useUserRole(user?.id);
   const {
