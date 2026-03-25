@@ -100,6 +100,9 @@ export function Sidebar({
     older: true,
   });
   const [expandedFolders, setExpandedFolders] = useState<Record<string, boolean>>({});
+  const [draggedConvId, setDraggedConvId] = useState<string | null>(null);
+  const [dragOverFolderId, setDragOverFolderId] = useState<string | null>(null);
+  const [dragOverUnfolder, setDragOverUnfolder] = useState(false);
 
   // Separate career conversations from regular ones
   const { regularConversations } = useMemo(() => {
