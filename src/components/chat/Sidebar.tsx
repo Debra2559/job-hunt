@@ -244,7 +244,18 @@ export function Sidebar({
   const renderConversationItem = useCallback((conv: Conversation) => (
     <div
       key={conv.id}
-      className="relative group"
+      className={cn("relative group", draggedConvId === conv.id && "opacity-40")}
+      draggable
+      onDragStart={(e) => {
+        setDraggedConvId(conv.id);
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', conv.id);
+      }}
+      onDragEnd={() => {
+        setDraggedConvId(null);
+        setDragOverFolderId(null);
+        setDragOverUnfolder(false);
+      }}
       onMouseEnter={() => setHoveredId(conv.id)}
       onMouseLeave={() => setHoveredId(null)}
     >
