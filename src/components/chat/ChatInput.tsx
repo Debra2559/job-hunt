@@ -4,20 +4,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
 import { quickTags } from '@/data/campusData';
 import { VoiceInput } from './VoiceInput';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
-// Map tool IDs to their icons
-const toolIcons: Record<string, React.ReactNode> = {
-  schedule: <Calendar className="w-4 h-4 text-primary" />,
-  grade: <BarChart3 className="w-4 h-4 text-primary" />,
-  library: <BookOpen className="w-4 h-4 text-primary" />,
-  repair: <Wrench className="w-4 h-4 text-primary" />,
-};
+// Rotating placeholder suggestions from quickTags
+const placeholderSuggestions = quickTags.map(t => t.description);
 
 
 export interface ChatInputRef {
