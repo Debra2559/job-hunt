@@ -1,23 +1,11 @@
-import { useState, useRef, useImperativeHandle, forwardRef } from 'react';
-import { Send, Wrench, ChevronDown, Plus, X, FileText, Image as ImageIcon, Calendar, BarChart3, BookOpen } from 'lucide-react';
+import { useState, useRef, useImperativeHandle, forwardRef, useEffect, useCallback } from 'react';
+import { Send, Plus, X, FileText, Image as ImageIcon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { cn } from '@/lib/utils';
-import { aiTools } from '@/data/campusData';
+import { quickTags } from '@/data/campusData';
 import { VoiceInput } from './VoiceInput';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-
-// Map tool IDs to their icons
-const toolIcons: Record<string, React.ReactNode> = {
-  schedule: <Calendar className="w-4 h-4 text-primary" />,
-  grade: <BarChart3 className="w-4 h-4 text-primary" />,
-  library: <BookOpen className="w-4 h-4 text-primary" />,
-  repair: <Wrench className="w-4 h-4 text-primary" />,
-};
+// Rotating placeholder suggestions from quickTags
+const placeholderSuggestions = quickTags.map(t => t.description);
 
 
 export interface ChatInputRef {
@@ -39,13 +27,23 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
   function ChatInput({ onSendMessage, isTyping, onToolSelect }, ref) {
     const [input, setInput] = useState('');
     const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+    const [placeholderIndex, setPlaceholderIndex] = useState(0);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    // Rotate placeholder every 4 seconds
+    useEffect(() => {
+      const timer = setInterval(() => {
+        setPlaceholderIndex(prev => (prev + 1) % placeholderSuggestions.length);
+      }, 4000);
+      return () => clearInterval(timer);
+    }, []);
+
+    const currentPlaceholder = placeholderSuggestions[placeholderIndex];
 
     const handleVoiceTranscript = (text: string) => {
       setInput(prev => prev + text);
     };
-
 
     useImperativeHandle(ref, () => ({
       fillInput: (text: string) => {
@@ -63,7 +61,10 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Tab' && !input.trim() && !isTyping) {
+        e.preventDefault();
+        setInput(currentPlaceholder);
+      } else if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         handleSend();
       }
@@ -149,8 +150,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="请输入你的问题..."
-              className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/60"
+              placeholder={`${currentPlaceholder}    按 Tab 填充`}
+              className="min-h-[28px] sm:min-h-[44px] max-h-36 resize-none pr-14 py-1.5 sm:py-3 rounded-2xl border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0 placeholder:text-muted-foreground/40"
               disabled={isTyping}
             />
             
