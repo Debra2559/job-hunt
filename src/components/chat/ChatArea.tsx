@@ -110,7 +110,7 @@ export function ChatArea({
                   {/* Soft glow */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
                   {/* Avatar */}
-                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden bg-card shadow-lg ring-4 ring-background">
+                  <div className="relative w-28 h-28 sm:w-32 sm:h-32 rounded-2xl overflow-hidden shadow-lg ring-4 ring-background">
                     <img 
                       src={aiTeacherAvatar} 
                       alt="AI辅导员" 
