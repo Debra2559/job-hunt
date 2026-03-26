@@ -104,13 +104,13 @@ export function ChatArea({
           <div className="h-full flex flex-col items-center justify-center px-4 pt-14 lg:pt-0">
           <div className="animate-fade-in max-w-sm w-full">
               {/* Card with avatar overflowing from top */}
-              <div className="relative mt-32 sm:mt-36">
+              <div className="relative mt-28 sm:mt-32">
                 {/* Avatar above card */}
-                <div className="absolute left-1/2 -translate-x-1/2 -top-28 sm:-top-32 z-10">
+                <div className="absolute left-1/2 -translate-x-1/2 -top-24 sm:-top-28 z-10">
                   {/* Soft glow */}
                   <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/20 via-accent/20 to-secondary/15 blur-2xl scale-[1.8]" />
                   {/* Avatar */}
-                  <div className="relative w-36 h-36 sm:w-44 sm:h-44 rounded-2xl overflow-hidden">
+                  <div className="relative w-32 h-32 sm:w-36 sm:h-36 rounded-2xl overflow-hidden">
                     <img 
                       src={aiTeacherAvatar} 
                       alt="AI辅导员" 
