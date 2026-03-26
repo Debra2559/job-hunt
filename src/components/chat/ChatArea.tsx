@@ -13,6 +13,7 @@ interface ChatAreaProps {
   isTyping: boolean;
   userName?: string;
   userId?: string;
+  userAvatarUrl?: string;
 }
 
 export function ChatArea({
