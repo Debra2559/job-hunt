@@ -141,6 +141,8 @@ export function ChatArea({
                 message={message}
                 onToggleFavorite={onToggleFavorite}
                 userId={userId}
+                userAvatarUrl={userAvatarUrl}
+                userName={userName}
                 isStreaming={isTyping && index === messages.length - 1}
                 onSuggestedQuery={onSendMessage}
               />
