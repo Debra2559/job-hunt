@@ -310,6 +310,17 @@ export function ChatMessage({ message, onToggleFavorite, userId, userAvatarUrl, 
           <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
         </div>
       )}
+      {isUser && (
+        <div className="order-last w-8 h-8 rounded-xl overflow-hidden shadow-sm ring-2 ring-accent/30 flex-shrink-0 flex items-center justify-center bg-accent/20">
+          {userAvatarUrl ? (
+            <img src={userAvatarUrl} alt={userName || '用户'} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-xs font-semibold text-foreground">
+              {(userName || '我').charAt(0).toUpperCase()}
+            </span>
+          )}
+        </div>
+      )}
       
       <div className="flex flex-col gap-1">
         <div
