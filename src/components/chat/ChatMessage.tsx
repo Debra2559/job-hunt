@@ -21,6 +21,8 @@ interface ChatMessageProps {
   message: Message;
   onToggleFavorite: (id: string) => void;
   userId?: string;
+  userAvatarUrl?: string;
+  userName?: string;
   isStreaming?: boolean;
   onSuggestedQuery?: (query: string) => void;
 }
@@ -51,7 +53,7 @@ const NEGATIVE_TAGS = [
   { id: 'slow', label: '响应太慢' },
 ];
 
-export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
+export function ChatMessage({ message, onToggleFavorite, userId, userAvatarUrl, userName, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -306,6 +308,17 @@ export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = f
       {!isUser && (
         <div className="w-9 h-9 rounded-xl overflow-hidden shadow-md ring-2 ring-primary/20 flex-shrink-0">
           <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
+        </div>
+      )}
+      {isUser && (
+        <div className="order-last w-8 h-8 rounded-xl overflow-hidden shadow-sm ring-2 ring-accent/30 flex-shrink-0 flex items-center justify-center bg-accent/20">
+          {userAvatarUrl ? (
+            <img src={userAvatarUrl} alt={userName || '用户'} className="w-full h-full object-cover" />
+          ) : (
+            <span className="text-xs font-semibold text-foreground">
+              {(userName || '我').charAt(0).toUpperCase()}
+            </span>
+          )}
         </div>
       )}
       

@@ -13,6 +13,7 @@ interface ChatAreaProps {
   isTyping: boolean;
   userName?: string;
   userId?: string;
+  userAvatarUrl?: string;
 }
 
 export function ChatArea({
@@ -22,6 +23,7 @@ export function ChatArea({
   isTyping,
   userName,
   userId,
+  userAvatarUrl,
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -139,6 +141,8 @@ export function ChatArea({
                 message={message}
                 onToggleFavorite={onToggleFavorite}
                 userId={userId}
+                userAvatarUrl={userAvatarUrl}
+                userName={userName}
                 isStreaming={isTyping && index === messages.length - 1}
                 onSuggestedQuery={onSendMessage}
               />

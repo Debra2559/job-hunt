@@ -384,6 +384,7 @@ const Index = () => {
           isTyping={isTyping}
           userName={profile?.display_name || undefined}
           userId={user?.id}
+          userAvatarUrl={profile?.avatar_url || undefined}
         />
       )}
     </div>
