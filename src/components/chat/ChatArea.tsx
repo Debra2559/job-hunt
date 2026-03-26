@@ -23,6 +23,7 @@ export function ChatArea({
   isTyping,
   userName,
   userId,
+  userAvatarUrl,
 }: ChatAreaProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
