@@ -53,7 +53,7 @@ const NEGATIVE_TAGS = [
   { id: 'slow', label: '响应太慢' },
 ];
 
-export function ChatMessage({ message, onToggleFavorite, userId, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
+export function ChatMessage({ message, onToggleFavorite, userId, userAvatarUrl, userName, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
