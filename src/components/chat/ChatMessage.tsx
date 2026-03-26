@@ -21,6 +21,8 @@ interface ChatMessageProps {
   message: Message;
   onToggleFavorite: (id: string) => void;
   userId?: string;
+  userAvatarUrl?: string;
+  userName?: string;
   isStreaming?: boolean;
   onSuggestedQuery?: (query: string) => void;
 }
