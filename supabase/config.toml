@@ -1,16 +1,1 @@
-project_id = "wicwacwizbcbhsvfwzah"
-
-[functions.chat]
-verify_jwt = false
-
-[functions.parse-document]
-verify_jwt = false
-
-[functions.semantic-search]
-verify_jwt = false
-
-[functions.send-feedback-notification]
-verify_jwt = false
-
-[functions.text-to-speech]
-verify_jwt = false
+project_id = "hhpulhpxqgkdsltgjhpu"
