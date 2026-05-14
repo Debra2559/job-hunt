@@ -120,7 +120,7 @@ export function ProfileEditor({
 
     const { data: { publicUrl } } = supabase.storage
       .from('avatars')
-      .getPublicUrl(filePath);
+      .getPublicUrl(safePath);
 
     return `${publicUrl}?t=${Date.now()}`;
   };
