@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { colleges, grades } from '@/data/campusData';
+import { PasswordStrength } from '@/components/auth/PasswordStrength';
 
 const emailSchema = z.string().email('请输入有效的邮箱地址');
 const passwordSchema = z.string().min(6, '密码至少需要6个字符');
@@ -400,12 +401,13 @@ export default function Auth() {
                 <Input
                   id="reg-password"
                   type="password"
-                  placeholder="至少6个字符"
+                  placeholder="至少6个字符，建议混合大小写、数字和符号"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 rounded-xl"
                   required
                 />
+                <PasswordStrength password={password} />
               </div>
 
               <Button
