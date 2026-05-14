@@ -93,11 +93,23 @@ export function ProfileEditor({
   };
 
   const uploadBlob = async (blob: Blob, filePath: string, upsert: boolean = false) => {
-    console.log('Uploading avatar to path:', filePath, 'blob size:', blob.size);
-    
+    const { data: sessionData } = await supabase.auth.getSession();
+    const authUid = sessionData.session?.user?.id;
+    console.log('[avatar] uploading', { filePath, propUserId: userId, authUid, hasSession: !!sessionData.session, blobSize: blob.size });
+
+    if (!authUid) {
+      throw new Error('未登录或会话已过期，请重新登录');
+    }
+    if (authUid !== userId) {
+      throw new Error(`身份不匹配 (auth=${authUid.slice(0,8)} vs prop=${userId.slice(0,8)})`);
+    }
+
+    // Always use auth.uid() as folder to satisfy RLS
+    const safePath = filePath.startsWith(`${authUid}/`) ? filePath : `${authUid}/${filePath.split('/').pop()}`;
+
     const { error: uploadError, data } = await supabase.storage
       .from('avatars')
-      .upload(filePath, blob, { upsert, contentType: 'image/jpeg' });
+      .upload(safePath, blob, { upsert, contentType: 'image/jpeg' });
 
     if (uploadError) {
       console.error('Upload error details:', uploadError);
