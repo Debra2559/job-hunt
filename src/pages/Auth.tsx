@@ -12,6 +12,7 @@ import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 import { colleges, grades } from '@/data/campusData';
+import { PasswordStrength } from '@/components/auth/PasswordStrength';
 
 const emailSchema = z.string().email('请输入有效的邮箱地址');
 const passwordSchema = z.string().min(6, '密码至少需要6个字符');
