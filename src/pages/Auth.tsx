@@ -401,12 +401,13 @@ export default function Auth() {
                 <Input
                   id="reg-password"
                   type="password"
-                  placeholder="至少6个字符"
+                  placeholder="至少6个字符，建议混合大小写、数字和符号"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="h-12 rounded-xl"
                   required
                 />
+                <PasswordStrength password={password} />
               </div>
 
               <Button
