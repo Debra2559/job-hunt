@@ -34,8 +34,30 @@ export function UserProfile({
   onSignOut,
   onProfileUpdated,
 }: UserProfileProps) {
+  const navigate = useNavigate();
   const name = displayName || '用户';
-  
+
+  if (!userId) {
+    return (
+      <div className="p-4 border-t border-sidebar-border/60">
+        <button
+          onClick={() => navigate('/auth')}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-sidebar-accent/70 transition-all duration-200 group"
+        >
+          <Avatar className="w-9 h-9 ring-2 ring-primary/20">
+            <AvatarFallback className="gradient-primary text-white">
+              <LogIn className="w-4 h-4" />
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 text-left min-w-0">
+            <div className="text-sm font-medium text-sidebar-foreground">登录 / 注册</div>
+            <div className="text-xs text-muted-foreground">点击进入登录页</div>
+          </div>
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="p-4 border-t border-sidebar-border/60">
       <DropdownMenu>
