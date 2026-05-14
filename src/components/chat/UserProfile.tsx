@@ -1,4 +1,5 @@
-import { LogOut, ChevronUp, Settings } from 'lucide-react';
+import { LogOut, ChevronUp, Settings, LogIn } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
