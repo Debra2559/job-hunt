@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText } from 'lucide-react';
+import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText, GraduationCap, Briefcase, Plane, Compass, Target, Lightbulb, Sparkles, Rocket, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
