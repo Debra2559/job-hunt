@@ -132,7 +132,7 @@ export function StudentVerification({ userId, onVerified }: StudentVerificationP
             <div className="w-20 h-20 rounded-2xl overflow-hidden shadow-lg ring-4 ring-primary/20 mx-auto mb-4">
               <img src={aiTeacherAvatar} alt="AI辅导员" className="w-full h-full object-cover" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">皇家种地大学</h1>
+            <h1 className="text-2xl font-bold text-foreground mb-2">华中农业大学</h1>
             <p className="text-muted-foreground">学生身份认证</p>
           </div>
 

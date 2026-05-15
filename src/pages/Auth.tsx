@@ -245,7 +245,7 @@ export default function Auth() {
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-accent/15 to-secondary/10 blur-2xl scale-[1.6]" />
               <img src={aiTeacherAvatar} alt="AI辅导员" className="relative w-full h-full object-cover drop-shadow-md" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-1">皇家种地大学</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-1">华中农业大学</h1>
             <p className="text-muted-foreground text-sm">登录以同步你的对话记录</p>
           </div>
 
@@ -374,7 +374,7 @@ export default function Auth() {
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-primary/15 via-accent/15 to-secondary/10 blur-2xl scale-[1.6]" />
               <img src={aiTeacherAvatar} alt="AI辅导员" className="relative w-full h-full object-cover drop-shadow-md" />
             </div>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-1">皇家种地大学</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-foreground to-muted-foreground bg-clip-text text-transparent mb-1">华中农业大学</h1>
             <p className="text-muted-foreground">
               {step === 'account' ? '创建账号' : '完善学生信息'}
             </p>
