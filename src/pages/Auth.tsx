@@ -409,15 +409,26 @@ export default function Auth() {
                   <Lock className="w-4 h-4 text-muted-foreground" />
                   密码
                 </Label>
-                <Input
-                  id="reg-password"
-                  type="password"
-                  placeholder="至少6个字符，建议混合大小写、数字和符号"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="h-12 rounded-xl"
-                  required
-                />
+                <div className="relative">
+                  <Input
+                    id="reg-password"
+                    type={showRegPassword ? 'text' : 'password'}
+                    placeholder="至少6个字符，建议混合大小写、数字和符号"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="h-12 rounded-xl pr-11"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label={showRegPassword ? '隐藏密码' : '显示密码'}
+                    tabIndex={-1}
+                  >
+                    {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 <PasswordStrength password={password} />
               </div>
 
