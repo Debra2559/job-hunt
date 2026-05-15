@@ -58,12 +58,29 @@ function parseOptions(content: string): ParsedOption[] {
   return options;
 }
 
+const OPTION_PALETTE = [
+  { iconBg: 'bg-blue-50', iconText: 'text-blue-600', selectedBorder: 'border-blue-500', selectedDot: 'bg-blue-500 border-blue-500', hoverIconBg: 'group-hover:bg-blue-100' },
+  { iconBg: 'bg-amber-50', iconText: 'text-amber-600', selectedBorder: 'border-amber-500', selectedDot: 'bg-amber-500 border-amber-500', hoverIconBg: 'group-hover:bg-amber-100' },
+  { iconBg: 'bg-indigo-50', iconText: 'text-indigo-600', selectedBorder: 'border-indigo-500', selectedDot: 'bg-indigo-500 border-indigo-500', hoverIconBg: 'group-hover:bg-indigo-100' },
+  { iconBg: 'bg-rose-50', iconText: 'text-rose-600', selectedBorder: 'border-rose-500', selectedDot: 'bg-rose-500 border-rose-500', hoverIconBg: 'group-hover:bg-rose-100' },
+  { iconBg: 'bg-emerald-50', iconText: 'text-emerald-600', selectedBorder: 'border-emerald-500', selectedDot: 'bg-emerald-500 border-emerald-500', hoverIconBg: 'group-hover:bg-emerald-100' },
+  { iconBg: 'bg-violet-50', iconText: 'text-violet-600', selectedBorder: 'border-violet-500', selectedDot: 'bg-violet-500 border-violet-500', hoverIconBg: 'group-hover:bg-violet-100' },
+];
+
+function pickIcon(label: string, index: number) {
+  const l = label;
+  if (/(保研|考研|深造|读研|博士|硕士|升学)/.test(l)) return GraduationCap;
+  if (/(就业|工作|求职|入职|找工作)/.test(l)) return Briefcase;
+  if (/(留学|海外|出国|境外)/.test(l)) return Plane;
+  if (/(还没|不确定|看一步|未定|犹豫|迷茫)/.test(l)) return Compass;
+  const cycle = [Target, Lightbulb, Sparkles, Rocket, Compass, Briefcase];
+  return cycle[index % cycle.length];
+}
+
 function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[]; onSelect: (label: string) => void; disabled: boolean }) {
   const [selected, setSelected] = useState<Set<number>>(new Set());
-  
-  if (options.length === 0) return null;
 
-  const optionIcons = ['🎯', '💡', '🌟', '🚀', '✨', '🔮', '📌', '🎨'];
+  if (options.length === 0) return null;
 
   const handleClick = (index: number) => {
     if (disabled) return;
@@ -83,50 +100,50 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
   };
 
   return (
-    <div className="mt-3 animate-fade-in space-y-2.5">
-      <p className="text-xs text-muted-foreground font-medium px-1">点击选择（可多选）</p>
-      <div className="space-y-2">
+    <div className="mt-3 animate-fade-in space-y-3">
+      <div className="flex items-center gap-2 px-1">
+        <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">点击选择 · 可多选</span>
+      </div>
+      <div className="space-y-2.5">
         {options.map((opt, i) => {
           const isSelected = selected.has(i);
+          const palette = OPTION_PALETTE[i % OPTION_PALETTE.length];
+          const Icon = pickIcon(opt.label, i);
+          // Split label into main + parenthetical for nicer typography
+          const m = opt.label.match(/^(.+?)[（(](.+?)[)）]\s*$/);
+          const mainText = m ? m[1].trim() : opt.label;
+          const subText = m ? m[2].trim() : '';
+
           return (
             <button
               key={i}
               onClick={() => handleClick(i)}
               disabled={disabled}
               className={cn(
-                "group w-full text-left px-4 py-3.5 rounded-2xl border-2 transition-all duration-300 flex items-center gap-3",
-                "disabled:opacity-50 disabled:cursor-not-allowed",
-                "active:scale-[0.98]",
+                'group relative w-full flex items-center p-3.5 bg-card rounded-2xl border-2 shadow-sm transition-all duration-200 text-left',
+                'disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99]',
                 isSelected
-                  ? "border-primary bg-primary/8 shadow-[0_0_0_1px_hsl(var(--primary)/0.15),0_4px_12px_-2px_hsl(var(--primary)/0.12)]"
-                  : "border-transparent bg-card shadow-sm hover:shadow-md hover:border-primary/20 hover:bg-accent/40"
+                  ? cn(palette.selectedBorder, 'shadow-md')
+                  : 'border-transparent hover:border-border hover:shadow-md'
               )}
             >
-              <div className={cn(
-                "shrink-0 w-10 h-10 rounded-xl flex items-center justify-center text-lg transition-all duration-300",
-                isSelected
-                  ? "bg-primary/15 scale-110"
-                  : "bg-muted/60 group-hover:bg-primary/10 group-hover:scale-105"
-              )}>
-                {optionIcons[i % optionIcons.length]}
+              <div className={cn('shrink-0 w-11 h-11 rounded-xl flex items-center justify-center transition-colors', palette.iconBg, palette.iconText, palette.hoverIconBg)}>
+                <Icon className="w-5 h-5" strokeWidth={2} />
               </div>
-              <span className={cn(
-                "flex-1 text-sm font-medium transition-colors",
-                isSelected ? "text-primary" : "text-foreground"
-              )}>
-                {opt.label}
-              </span>
-              <div className={cn(
-                "shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300",
-                isSelected
-                  ? "border-primary bg-primary scale-100"
-                  : "border-muted-foreground/25 scale-90 group-hover:border-primary/40 group-hover:scale-100"
-              )}>
-                {isSelected && (
-                  <svg className="w-3.5 h-3.5 text-primary-foreground" viewBox="0 0 14 14" fill="none">
-                    <path d="M11.5 4L5.5 10L2.5 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                )}
+              <div className="ml-3.5 flex-1 min-w-0">
+                <p className="text-sm font-semibold text-foreground leading-snug">
+                  {mainText}
+                  {subText && <span className="text-muted-foreground font-normal ml-1.5 text-xs">（{subText}）</span>}
+                </p>
+              </div>
+              <div className="shrink-0 ml-3">
+                <div className={cn(
+                  'w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all duration-200',
+                  isSelected ? cn(palette.selectedDot, 'scale-100') : 'border-muted-foreground/25 bg-background scale-90 group-hover:border-muted-foreground/50'
+                )}>
+                  {isSelected && <Check className="w-3 h-3 text-white" strokeWidth={4} />}
+                </div>
               </div>
             </button>
           );
@@ -137,10 +154,10 @@ function OptionButtons({ options, onSelect, disabled }: { options: ParsedOption[
           onClick={handleSubmit}
           disabled={disabled}
           className={cn(
-            "w-full py-3 rounded-2xl text-sm font-semibold transition-all duration-300",
-            "bg-primary text-primary-foreground hover:bg-primary/90",
-            "shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]",
-            "active:scale-[0.98] animate-fade-in"
+            'w-full py-3 rounded-2xl text-sm font-semibold transition-all duration-300',
+            'bg-primary text-primary-foreground hover:bg-primary/90',
+            'shadow-[0_4px_14px_-3px_hsl(var(--primary)/0.4)]',
+            'active:scale-[0.98] animate-fade-in'
           )}
         >
           确认选择（{selected.size}项）→
