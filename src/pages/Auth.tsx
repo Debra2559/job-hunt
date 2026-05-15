@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
-import { GraduationCap, Mail, Lock, User, Building, Calendar, IdCard, ArrowLeft, ArrowRight } from 'lucide-react';
+import { GraduationCap, Mail, Lock, User, Building, Calendar, IdCard, ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 import { supabase } from '@/integrations/supabase/client';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
