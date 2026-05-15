@@ -46,6 +46,8 @@ export default function Auth() {
   // Account fields
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegPassword, setShowRegPassword] = useState(false);
   
   // Profile fields
   const [displayName, setDisplayName] = useState('');
