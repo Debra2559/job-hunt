@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Career from "./pages/Career";
+import ERDiagram from "./pages/ERDiagram";
 import NotFound from "./pages/NotFound";
 import { AuthRoute, ProtectedRoute } from "@/components/auth/RouteGuards";
 
@@ -37,6 +38,7 @@ const App = () => (
             }
           />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/er-diagram" element={<ERDiagram />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
