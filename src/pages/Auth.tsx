@@ -341,16 +341,9 @@ export default function Auth() {
             </form>
 
             <div className="mt-6 text-center">
-              <button
-                type="button"
-                onClick={() => {
-                  setIsLogin(false);
-                  setStep('account');
-                }}
-                className="text-sm text-primary hover:underline"
-              >
-                没有账号？点击注册
-              </button>
+              <p className="text-xs text-muted-foreground">
+                注册功能暂未开放，如需账号请联系管理员
+              </p>
             </div>
           </div>
 
