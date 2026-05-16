@@ -22,7 +22,7 @@ interface ChartDataPoint {
   satisfactionRate: number;
 }
 
-type TimeRange = '7d' | '30d' | '12w';
+type TimeRange = '7d' | '30d' | '6m';
 
 export function FeedbackTrendChart() {
   const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
