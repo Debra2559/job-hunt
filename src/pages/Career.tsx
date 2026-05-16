@@ -21,14 +21,22 @@ function parseOptions(content: string): ParsedOption[] {
   const options: ParsedOption[] = [];
   const lines = content.split('\n');
   
+  // Heuristic: skip lines that look like a question/prompt rather than an option
+  const looksLikeQuestion = (text: string) =>
+    text.length > 35 ||
+    /[?？]/.test(text) ||
+    /[:：]\s*$/.test(text) ||
+    /[:：].*[\u4e00-\u9fa5]/.test(text) ||
+    /(想法是|打算|请选择|你目前|你的)/.test(text);
+
   for (const line of lines) {
     const trimmed = line.trim();
     let match = trimmed.match(/^([A-Z])[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
     if (!match) {
       match = trimmed.match(/^\d+[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
       if (match) {
-        const text = match[1].replace(/\*{1,2}/g, '').trim();
-        if (text.length > 40 || text.includes('？') || text.includes('?')) continue;
+        const text = match[1].replace(/\*{1,2}/g, '').trim().replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+        if (looksLikeQuestion(text)) continue;
         if (text.length > 2 && text.length <= 35) {
           options.push({ label: text });
         }
@@ -36,7 +44,8 @@ function parseOptions(content: string): ParsedOption[] {
       }
     }
     if (match && match.length >= 3) {
-      const text = match[2].replace(/\*{1,2}/g, '').trim();
+      const text = match[2].replace(/\*{1,2}/g, '').trim().replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu, '').trim();
+      if (looksLikeQuestion(text)) continue;
       if (text.length > 2 && text.length <= 40) {
         options.push({ label: text, emoji: undefined });
       }
