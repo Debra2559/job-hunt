@@ -54,7 +54,7 @@ const NEGATIVE_TAGS = [
   { id: 'slow', label: '响应太慢' },
 ];
 
-export function ChatMessage({ message, previousUserContent, onToggleFavorite, userId, userAvatarUrl, userName, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
+function ChatMessageComponent({ message, previousUserContent, onToggleFavorite, userId, userAvatarUrl, userName, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -619,3 +619,20 @@ export function ChatMessage({ message, previousUserContent, onToggleFavorite, us
     </div>
   );
 }
+
+export const ChatMessage = React.memo(ChatMessageComponent, (prev, next) => {
+  // Re-render only when meaningful props change
+  return (
+    prev.message === next.message &&
+    prev.message.content === next.message.content &&
+    prev.message.isFavorite === next.message.isFavorite &&
+    prev.message.sources === next.message.sources &&
+    prev.isStreaming === next.isStreaming &&
+    prev.userAvatarUrl === next.userAvatarUrl &&
+    prev.userName === next.userName &&
+    prev.userId === next.userId &&
+    prev.previousUserContent === next.previousUserContent &&
+    prev.onToggleFavorite === next.onToggleFavorite &&
+    prev.onSuggestedQuery === next.onSuggestedQuery
+  );
+});
