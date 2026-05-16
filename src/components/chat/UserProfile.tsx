@@ -36,6 +36,7 @@ export function UserProfile({
   onProfileUpdated,
 }: UserProfileProps) {
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole(userId);
   const name = displayName || '用户';
 
   if (!userId) {
