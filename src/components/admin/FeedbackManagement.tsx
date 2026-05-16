@@ -297,13 +297,13 @@ export function FeedbackManagement() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="whitespace-nowrap">
                         {renderStatusBadge(feedback.status)}
                       </TableCell>
-                      <TableCell className="font-medium text-sm">
+                      <TableCell className="font-medium text-sm whitespace-nowrap">
                         {feedback.user_display_name}
                       </TableCell>
-                      <TableCell className="max-w-[150px]">
+                      <TableCell className="min-w-[140px]">
                         {feedback.tags && feedback.tags.length > 0 ? (
                           <div className="flex flex-wrap gap-1">
                             {feedback.tags.map((tag) => (
