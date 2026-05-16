@@ -167,7 +167,15 @@ export function FeedbackManagement() {
     ? ((positiveCount / feedbacks.length) * 100).toFixed(1) 
     : '0';
 
-  const filteredFeedbacks = feedbacks.filter(f => {
+  const rangeDays = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '6m' ? 180 : null;
+  const rangeStart = rangeDays !== null ? Date.now() - rangeDays * 24 * 60 * 60 * 1000 : null;
+
+  const inRange = (f: FeedbackWithMessage) =>
+    rangeStart === null ? true : new Date(f.created_at).getTime() >= rangeStart;
+
+  const scopedFeedbacks = feedbacks.filter(inRange);
+
+  const filteredFeedbacks = scopedFeedbacks.filter(f => {
     if (activeTab === 'all') return true;
     if (activeTab === 'negative') return f.feedback_type === 'negative';
     if (activeTab === 'pending') return f.feedback_type === 'negative' && f.status === 'pending';
