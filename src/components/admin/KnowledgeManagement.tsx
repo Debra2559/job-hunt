@@ -1159,14 +1159,14 @@ export const KnowledgeManagement = () => {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead>文件名</TableHead>
-                  <TableHead>分类</TableHead>
-                  <TableHead>标签</TableHead>
-                  <TableHead>大小</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>嵌入</TableHead>
-                  <TableHead>上传时间</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead className="whitespace-nowrap">文件名</TableHead>
+                  <TableHead className="whitespace-nowrap">分类</TableHead>
+                  <TableHead className="whitespace-nowrap">标签</TableHead>
+                  <TableHead className="whitespace-nowrap">大小</TableHead>
+                  <TableHead className="whitespace-nowrap">状态</TableHead>
+                  <TableHead className="whitespace-nowrap">嵌入</TableHead>
+                  <TableHead className="whitespace-nowrap">上传时间</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -1241,9 +1241,9 @@ export const KnowledgeManagement = () => {
                         getTagColor={getTagColor}
                       />
                     </TableCell>
-                    <TableCell>{formatFileSize(file.file_size)}</TableCell>
-                    <TableCell>{getStatusBadge(file.status)}</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">{formatFileSize(file.file_size)}</TableCell>
+                    <TableCell className="whitespace-nowrap">{getStatusBadge(file.status)}</TableCell>
+                    <TableCell className="whitespace-nowrap">
                       {file.embedding ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : file.content_text ? (
@@ -1252,9 +1252,9 @@ export const KnowledgeManagement = () => {
                         <span className="text-muted-foreground text-xs">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                       {new Date(file.created_at).toLocaleString('zh-CN', {
-                        month: 'short',
+                        month: 'numeric',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
