@@ -1159,14 +1159,14 @@ export const KnowledgeManagement = () => {
                       )}
                     </Button>
                   </TableHead>
-                  <TableHead>文件名</TableHead>
-                  <TableHead>分类</TableHead>
-                  <TableHead>标签</TableHead>
-                  <TableHead>大小</TableHead>
-                  <TableHead>状态</TableHead>
-                  <TableHead>嵌入</TableHead>
-                  <TableHead>上传时间</TableHead>
-                  <TableHead className="text-right">操作</TableHead>
+                  <TableHead className="whitespace-nowrap">文件名</TableHead>
+                  <TableHead className="whitespace-nowrap">分类</TableHead>
+                  <TableHead className="whitespace-nowrap">标签</TableHead>
+                  <TableHead className="whitespace-nowrap">大小</TableHead>
+                  <TableHead className="whitespace-nowrap">状态</TableHead>
+                  <TableHead className="whitespace-nowrap">嵌入</TableHead>
+                  <TableHead className="whitespace-nowrap">上传时间</TableHead>
+                  <TableHead className="text-right whitespace-nowrap">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
