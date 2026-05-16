@@ -36,7 +36,7 @@ export function FeedbackTrendChart() {
   const loadFeedbacks = async () => {
     setLoading(true);
     try {
-      const daysToFetch = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 84;
+      const daysToFetch = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 180;
       const startDate = subDays(new Date(), daysToFetch);
 
       const { data, error } = await supabase
