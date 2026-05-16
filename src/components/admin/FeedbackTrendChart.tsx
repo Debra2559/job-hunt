@@ -170,7 +170,7 @@ export function FeedbackTrendChart() {
             <TabsList>
               <TabsTrigger value="7d" className="text-xs">7天</TabsTrigger>
               <TabsTrigger value="30d" className="text-xs">30天</TabsTrigger>
-              <TabsTrigger value="12w" className="text-xs">12周</TabsTrigger>
+              <TabsTrigger value="6m" className="text-xs">6个月</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
