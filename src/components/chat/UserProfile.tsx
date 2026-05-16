@@ -1,5 +1,6 @@
-import { LogOut, ChevronUp, Settings, LogIn } from 'lucide-react';
+import { LogOut, ChevronUp, Settings, LogIn, Shield } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { useUserRole } from '@/hooks/useUserRole';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
   DropdownMenu,
@@ -35,6 +36,7 @@ export function UserProfile({
   onProfileUpdated,
 }: UserProfileProps) {
   const navigate = useNavigate();
+  const { isAdmin } = useUserRole(userId);
   const name = displayName || '用户';
 
   if (!userId) {
@@ -96,6 +98,15 @@ export function UserProfile({
               编辑资料
             </DropdownMenuItem>
           </ProfileEditor>
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/admin')} className="rounded-lg px-3 py-2.5 cursor-pointer">
+                <Shield className="w-4 h-4 mr-2" />
+                后台管理
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onSignOut} className="text-destructive rounded-lg px-3 py-2.5 cursor-pointer hover:bg-destructive/10">
             <LogOut className="w-4 h-4 mr-2" />
