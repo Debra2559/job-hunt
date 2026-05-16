@@ -1241,9 +1241,9 @@ export const KnowledgeManagement = () => {
                         getTagColor={getTagColor}
                       />
                     </TableCell>
-                    <TableCell>{formatFileSize(file.file_size)}</TableCell>
-                    <TableCell>{getStatusBadge(file.status)}</TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap">{formatFileSize(file.file_size)}</TableCell>
+                    <TableCell className="whitespace-nowrap">{getStatusBadge(file.status)}</TableCell>
+                    <TableCell className="whitespace-nowrap">
                       {file.embedding ? (
                         <CheckCircle2 className="w-4 h-4 text-green-500" />
                       ) : file.content_text ? (
@@ -1252,9 +1252,9 @@ export const KnowledgeManagement = () => {
                         <span className="text-muted-foreground text-xs">-</span>
                       )}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="whitespace-nowrap text-xs text-muted-foreground">
                       {new Date(file.created_at).toLocaleString('zh-CN', {
-                        month: 'short',
+                        month: 'numeric',
                         day: 'numeric',
                         hour: '2-digit',
                         minute: '2-digit',
