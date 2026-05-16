@@ -40,7 +40,9 @@ export function useUserRole(userId: string | undefined) {
       const isSuperAdmin = role === 'super_admin';
       const isAdmin = role === 'admin' || role === 'super_admin';
       
-      console.log('User role loaded:', { userId, role, isAdmin, isSuperAdmin });
+      if (import.meta.env.DEV) {
+        console.log('User role loaded:', { userId, role, isAdmin, isSuperAdmin });
+      }
       
       setState({
         role,

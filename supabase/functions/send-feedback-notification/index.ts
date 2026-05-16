@@ -1,4 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { requireUser } from "../_shared/auth.ts";
+
+const escapeHtml = (s: string | null | undefined): string => {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
@@ -21,6 +32,9 @@ const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
+
+  const auth = await requireUser(req, corsHeaders);
+  if (!auth.ok) return auth.response!;
 
   try {
     const {
@@ -74,23 +88,23 @@ const handler = async (req: Request): Promise<Response> => {
           <div class="content">
             <div class="section">
               <div class="label">反馈用户</div>
-              <div class="value">${user_display_name || "匿名用户"}</div>
+              <div class="value">${escapeHtml(user_display_name) || "匿名用户"}</div>
             </div>
             ${content ? `
             <div class="section">
               <div class="label">用户反馈内容</div>
-              <div class="value">${content}</div>
+              <div class="value">${escapeHtml(content)}</div>
             </div>
             ` : ""}
             ${message_content ? `
             <div class="section">
               <div class="label">相关AI回复</div>
-              <div class="value" style="max-height: 200px; overflow-y: auto;">${message_content.slice(0, 500)}${message_content.length > 500 ? "..." : ""}</div>
+              <div class="value" style="max-height: 200px; overflow-y: auto;">${escapeHtml(message_content.slice(0, 500))}${message_content.length > 500 ? "..." : ""}</div>
             </div>
             ` : ""}
             <div class="section">
               <div class="label">反馈ID</div>
-              <div class="value" style="font-family: monospace; font-size: 12px;">${feedback_id}</div>
+              <div class="value" style="font-family: monospace; font-size: 12px;">${escapeHtml(feedback_id)}</div>
             </div>
           </div>
           <div class="footer">
