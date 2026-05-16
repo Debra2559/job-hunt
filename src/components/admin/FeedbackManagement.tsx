@@ -362,7 +362,7 @@ export function FeedbackManagement() {
                           <span className="text-muted-foreground text-sm">-</span>
                         )}
                       </TableCell>
-                      <TableCell className="text-muted-foreground text-sm">
+                      <TableCell className="text-muted-foreground text-sm whitespace-nowrap">
                         {format(new Date(feedback.created_at), 'MM-dd HH:mm')}
                       </TableCell>
                       <TableCell>
