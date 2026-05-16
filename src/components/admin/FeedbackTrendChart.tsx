@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TrendingUp, Calendar } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Legend } from 'recharts';
-import { format, subDays, startOfDay, eachDayOfInterval, startOfWeek, eachWeekOfInterval, subWeeks } from 'date-fns';
+import { format, subDays, startOfDay, eachDayOfInterval, startOfWeek, eachWeekOfInterval, subWeeks, subMonths } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 
 interface FeedbackData {
@@ -22,7 +22,7 @@ interface ChartDataPoint {
   satisfactionRate: number;
 }
 
-type TimeRange = '7d' | '30d' | '12w';
+type TimeRange = '7d' | '30d' | '6m';
 
 export function FeedbackTrendChart() {
   const [feedbacks, setFeedbacks] = useState<FeedbackData[]>([]);
@@ -36,7 +36,7 @@ export function FeedbackTrendChart() {
   const loadFeedbacks = async () => {
     setLoading(true);
     try {
-      const daysToFetch = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 84;
+      const daysToFetch = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 180;
       const startDate = subDays(new Date(), daysToFetch);
 
       const { data, error } = await supabase
@@ -57,10 +57,10 @@ export function FeedbackTrendChart() {
   const getChartData = (): ChartDataPoint[] => {
     const now = new Date();
 
-    if (timeRange === '12w') {
-      // Weekly data
+    if (timeRange === '6m') {
+      // Weekly data for 6 months (~26 weeks)
       const weeks = eachWeekOfInterval({
-        start: subWeeks(now, 11),
+        start: subWeeks(now, 25),
         end: now,
       }, { weekStartsOn: 1 });
 
@@ -170,7 +170,7 @@ export function FeedbackTrendChart() {
             <TabsList>
               <TabsTrigger value="7d" className="text-xs">7天</TabsTrigger>
               <TabsTrigger value="30d" className="text-xs">30天</TabsTrigger>
-              <TabsTrigger value="12w" className="text-xs">12周</TabsTrigger>
+              <TabsTrigger value="6m" className="text-xs">6个月</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>

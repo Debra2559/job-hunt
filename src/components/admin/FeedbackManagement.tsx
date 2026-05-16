@@ -64,6 +64,7 @@ export function FeedbackManagement() {
   const [newStatus, setNewStatus] = useState<StatusType>('pending');
   const [updating, setUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '6m' | 'all'>('all');
 
   useEffect(() => {
     loadFeedbacks();
@@ -159,14 +160,17 @@ export function FeedbackManagement() {
     }
   };
 
-  const positiveCount = feedbacks.filter(f => f.feedback_type === 'positive').length;
-  const negativeCount = feedbacks.filter(f => f.feedback_type === 'negative').length;
-  const pendingCount = feedbacks.filter(f => f.feedback_type === 'negative' && f.status === 'pending').length;
-  const satisfactionRate = feedbacks.length > 0 
-    ? ((positiveCount / feedbacks.length) * 100).toFixed(1) 
+  const scopedAll = timeRange === 'all'
+    ? feedbacks
+    : feedbacks.filter(f => new Date(f.created_at).getTime() >= Date.now() - (timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 180) * 86400000);
+  const positiveCount = scopedAll.filter(f => f.feedback_type === 'positive').length;
+  const negativeCount = scopedAll.filter(f => f.feedback_type === 'negative').length;
+  const pendingCount = scopedAll.filter(f => f.feedback_type === 'negative' && f.status === 'pending').length;
+  const satisfactionRate = scopedAll.length > 0
+    ? ((positiveCount / scopedAll.length) * 100).toFixed(1)
     : '0';
 
-  const filteredFeedbacks = feedbacks.filter(f => {
+  const filteredFeedbacks = scopedAll.filter(f => {
     if (activeTab === 'all') return true;
     if (activeTab === 'negative') return f.feedback_type === 'negative';
     if (activeTab === 'pending') return f.feedback_type === 'negative' && f.status === 'pending';
@@ -234,14 +238,24 @@ export function FeedbackManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-          <TabsList>
-            <TabsTrigger value="all">全部 ({feedbacks.length})</TabsTrigger>
-            <TabsTrigger value="negative">差评 ({negativeCount})</TabsTrigger>
-            <TabsTrigger value="pending">待处理 ({pendingCount})</TabsTrigger>
-            <TabsTrigger value="resolved">已解决 ({feedbacks.filter(f => f.status === 'resolved').length})</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="all">全部 ({scopedAll.length})</TabsTrigger>
+              <TabsTrigger value="negative">差评 ({negativeCount})</TabsTrigger>
+              <TabsTrigger value="pending">待处理 ({pendingCount})</TabsTrigger>
+              <TabsTrigger value="resolved">已解决 ({scopedAll.filter(f => f.status === 'resolved').length})</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
+            <TabsList>
+              <TabsTrigger value="7d" className="text-xs">7天</TabsTrigger>
+              <TabsTrigger value="30d" className="text-xs">30天</TabsTrigger>
+              <TabsTrigger value="6m" className="text-xs">6个月</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-8">
