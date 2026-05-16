@@ -619,3 +619,20 @@ function ChatMessageComponent({ message, previousUserContent, onToggleFavorite, 
     </div>
   );
 }
+
+export const ChatMessage = React.memo(ChatMessageComponent, (prev, next) => {
+  // Re-render only when meaningful props change
+  return (
+    prev.message === next.message &&
+    prev.message.content === next.message.content &&
+    prev.message.isFavorite === next.message.isFavorite &&
+    prev.message.sources === next.message.sources &&
+    prev.isStreaming === next.isStreaming &&
+    prev.userAvatarUrl === next.userAvatarUrl &&
+    prev.userName === next.userName &&
+    prev.userId === next.userId &&
+    prev.previousUserContent === next.previousUserContent &&
+    prev.onToggleFavorite === next.onToggleFavorite &&
+    prev.onSuggestedQuery === next.onSuggestedQuery
+  );
+});
