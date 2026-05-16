@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
 import { UserManagement } from '@/components/admin/UserManagement';
@@ -11,11 +11,27 @@ import { KnowledgeManagement } from '@/components/admin/KnowledgeManagement';
 import { NotificationSettings } from '@/components/admin/NotificationSettings';
 import { AdminSidebar } from '@/components/admin/AdminSidebar';
 
+const VALID_TABS = ['users', 'data', 'feedback', 'knowledge', 'notifications', 'roles'];
+
 const Admin = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, isSuperAdmin, loading: roleLoading } = useUserRole(user?.id);
-  const [activeTab, setActiveTab] = useState('users');
+  const initialTab = searchParams.get('tab');
+  const [activeTab, setActiveTab] = useState(
+    initialTab && VALID_TABS.includes(initialTab) ? initialTab : 'users'
+  );
+
+  // Keep URL ?tab= in sync so deep links from admin emails open the right tab
+  useEffect(() => {
+    const current = searchParams.get('tab');
+    if (current !== activeTab) {
+      const next = new URLSearchParams(searchParams);
+      next.set('tab', activeTab);
+      setSearchParams(next, { replace: true });
+    }
+  }, [activeTab, searchParams, setSearchParams]);
 
   useEffect(() => {
     if (!authLoading && !user) {

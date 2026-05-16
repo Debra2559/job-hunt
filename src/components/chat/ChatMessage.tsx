@@ -19,6 +19,7 @@ import {
 
 interface ChatMessageProps {
   message: Message;
+  previousUserContent?: string;
   onToggleFavorite: (id: string) => void;
   userId?: string;
   userAvatarUrl?: string;
@@ -53,7 +54,7 @@ const NEGATIVE_TAGS = [
   { id: 'slow', label: '响应太慢' },
 ];
 
-export function ChatMessage({ message, onToggleFavorite, userId, userAvatarUrl, userName, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
+export function ChatMessage({ message, previousUserContent, onToggleFavorite, userId, userAvatarUrl, userName, isStreaming = false, onSuggestedQuery }: ChatMessageProps) {
   const isUser = message.role === 'user';
   const [feedbackType, setFeedbackType] = useState<'positive' | 'negative' | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -254,13 +255,25 @@ export function ChatMessage({ message, onToggleFavorite, userId, userAvatarUrl, 
           const adminEmails = settingsValue?.emails || [];
           
           if (adminEmails.length > 0) {
+            // Translate tag IDs to Chinese labels for the email
+            const tagLabels = tags
+              .map((id) => NEGATIVE_TAGS.find((t) => t.id === id)?.label || id);
+
             await supabase.functions.invoke('send-feedback-notification', {
               body: {
                 feedback_id: feedbackData.id,
                 feedback_type: type,
                 content: content,
                 user_display_name: profileData?.display_name || '匿名用户',
+                user_question: previousUserContent || null,
                 message_content: displayContent,
+                tag_labels: tagLabels,
+                sources: (message.sources || []).map((s) => ({
+                  fileName: s.fileName,
+                  similarity: s.similarity,
+                  snippet: s.snippet || null,
+                })),
+                app_origin: window.location.origin,
                 admin_emails: adminEmails,
               },
             });
