@@ -64,6 +64,7 @@ export function FeedbackManagement() {
   const [newStatus, setNewStatus] = useState<StatusType>('pending');
   const [updating, setUpdating] = useState(false);
   const [activeTab, setActiveTab] = useState('all');
+  const [timeRange, setTimeRange] = useState<'7d' | '30d' | '6m' | 'all'>('all');
 
   useEffect(() => {
     loadFeedbacks();
