@@ -98,6 +98,15 @@ export function UserProfile({
               编辑资料
             </DropdownMenuItem>
           </ProfileEditor>
+          {isAdmin && (
+            <>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => navigate('/admin')} className="rounded-lg px-3 py-2.5 cursor-pointer">
+                <Shield className="w-4 h-4 mr-2" />
+                后台管理
+              </DropdownMenuItem>
+            </>
+          )}
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={onSignOut} className="text-destructive rounded-lg px-3 py-2.5 cursor-pointer hover:bg-destructive/10">
             <LogOut className="w-4 h-4 mr-2" />
