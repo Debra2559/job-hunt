@@ -135,18 +135,25 @@ export function ChatArea({
           </div>
         ) : (
           <div className="max-w-3xl mx-auto py-6 sm:py-8 px-3 sm:px-6 space-y-4 sm:space-y-6 pt-16 lg:pt-8">
-            {messages.map((message, index) => (
-              <ChatMessage
-                key={message.id}
-                message={message}
-                onToggleFavorite={onToggleFavorite}
-                userId={userId}
-                userAvatarUrl={userAvatarUrl}
-                userName={userName}
-                isStreaming={isTyping && index === messages.length - 1}
-                onSuggestedQuery={onSendMessage}
-              />
-            ))}
+            {messages.map((message, index) => {
+              const previousUserContent =
+                message.role === 'assistant'
+                  ? [...messages.slice(0, index)].reverse().find((m) => m.role === 'user')?.content
+                  : undefined;
+              return (
+                <ChatMessage
+                  key={message.id}
+                  message={message}
+                  previousUserContent={previousUserContent}
+                  onToggleFavorite={onToggleFavorite}
+                  userId={userId}
+                  userAvatarUrl={userAvatarUrl}
+                  userName={userName}
+                  isStreaming={isTyping && index === messages.length - 1}
+                  onSuggestedQuery={onSendMessage}
+                />
+              );
+            })}
             {/* Show thinking indicator when waiting for AI response */}
             {isTyping && messages.length > 0 && messages[messages.length - 1].role === 'user' && (
               <ThinkingIndicator />
