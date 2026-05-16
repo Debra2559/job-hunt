@@ -1,4 +1,15 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { requireUser } from "../_shared/auth.ts";
+
+const escapeHtml = (s: string | null | undefined): string => {
+  if (s == null) return "";
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+};
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
