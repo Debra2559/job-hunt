@@ -81,3 +81,22 @@ describe('parseOptions', () => {
     expect(r.map(o => o.label)).toEqual(['保研/考研（深造科研路）', '直接就业（早日步入社会）']);
   });
 });
+
+describe('parseOptions debug', () => {
+  it('reports filter reasons for prompt-like lines', () => {
+    const content = [
+      '1. 关于毕业后的初步打算，你目前的想法是：',
+      '2. 你的专业是什么？',
+      '3. 保研',
+    ].join('\n');
+    const r = parseOptions(content, { collectDebug: true });
+    expect(r.map(o => o.label)).toEqual(['保研']);
+    const reasons = (r.debug || []).map(d => d.reason);
+    expect(reasons).toEqual(expect.arrayContaining(['ends-with-colon', 'has-question-mark']));
+  });
+
+  it('flags numbered lines that fail to match as no-pattern-match is not triggered for normal prose', () => {
+    const r = parseOptions('请告诉我你的想法。', { collectDebug: true });
+    expect(r.debug).toEqual([]);
+  });
+});
