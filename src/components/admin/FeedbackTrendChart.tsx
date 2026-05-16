@@ -57,10 +57,10 @@ export function FeedbackTrendChart() {
   const getChartData = (): ChartDataPoint[] => {
     const now = new Date();
 
-    if (timeRange === '12w') {
-      // Weekly data
+    if (timeRange === '6m') {
+      // Weekly data for 6 months (~26 weeks)
       const weeks = eachWeekOfInterval({
-        start: subWeeks(now, 11),
+        start: subWeeks(now, 25),
         end: now,
       }, { weekStartsOn: 1 });
 
