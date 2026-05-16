@@ -85,21 +85,92 @@ async function extractTextFromPptx(arrayBuffer: ArrayBuffer): Promise<string> {
   }
 }
 
-// Extract text from PDF using pdf-parse
+// OCR fallback for scanned PDFs using Lovable AI (Gemini multimodal)
+async function ocrPdfWithAI(arrayBuffer: ArrayBuffer): Promise<string> {
+  const apiKey = Deno.env.get("LOVABLE_API_KEY");
+  if (!apiKey) {
+    console.warn("LOVABLE_API_KEY missing, skip OCR");
+    return "";
+  }
+  const sizeMB = arrayBuffer.byteLength / 1024 / 1024;
+  if (sizeMB > 18) {
+    console.warn(`PDF too large for OCR: ${sizeMB.toFixed(1)}MB`);
+    return `[PDF过大(${sizeMB.toFixed(1)}MB)，OCR已跳过，请压缩后重试]`;
+  }
+
+  // Base64 encode
+  const bytes = new Uint8Array(arrayBuffer);
+  let binary = "";
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  const base64 = btoa(binary);
+  const dataUrl = `data:application/pdf;base64,${base64}`;
+
+  console.log("Calling Lovable AI for OCR on scanned PDF...");
+  const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-pro",
+      messages: [
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: "请对这份PDF文档进行OCR文字识别，按页面顺序输出全部可读文字。保留原有的段落、标题、列表与表格结构（表格用Markdown表示）。每页之间用 \n\n---\n\n 分隔，并在每页开头加 [第N页] 标记。只输出识别到的文字内容，不要添加解释。",
+            },
+            { type: "image_url", image_url: { url: dataUrl } },
+          ],
+        },
+      ],
+    }),
+  });
+
+  if (!resp.ok) {
+    const errText = await resp.text();
+    console.error(`OCR request failed: ${resp.status} ${errText}`);
+    if (resp.status === 429) return "[OCR调用频率超限，请稍后重试]";
+    if (resp.status === 402) return "[Lovable AI 额度不足，请充值后重试]";
+    return "";
+  }
+  const data = await resp.json();
+  const text = data?.choices?.[0]?.message?.content || "";
+  console.log(`OCR extracted ${text.length} characters`);
+  return text;
+}
+
+// Extract text from PDF using pdf-parse, fallback to OCR for scanned PDFs
 async function extractTextFromPdf(arrayBuffer: ArrayBuffer): Promise<string> {
+  let text = "";
   try {
-    // Use pdf.js-extract for PDF parsing in Deno
     const pdfParse = await import("https://esm.sh/pdf-parse@1.1.1");
-    
     const uint8Array = new Uint8Array(arrayBuffer);
     const result = await pdfParse.default(uint8Array);
-    
-    return result.text || '';
+    text = (result.text || "").trim();
   } catch (e) {
-    console.error("Error extracting text from PDF:", e);
-    // Fallback: return a message indicating PDF parsing failed
-    return `[PDF文档 - 无法自动提取文本内容，可能需要人工整理]`;
+    console.error("pdf-parse error:", e);
   }
+
+  // If extracted text is too short, treat as scanned PDF and run OCR
+  if (text.length < 100) {
+    console.log(`Only ${text.length} chars from pdf-parse, falling back to AI OCR`);
+    try {
+      const ocrText = await ocrPdfWithAI(arrayBuffer);
+      if (ocrText && ocrText.length > text.length) {
+        return `[OCR识别结果]\n\n${ocrText}`;
+      }
+    } catch (e) {
+      console.error("OCR fallback error:", e);
+    }
+    if (!text) return "[PDF文档 - 无法自动提取文本内容，OCR也未能识别]";
+  }
+  return text;
 }
 
 serve(async (req) => {
