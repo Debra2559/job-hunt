@@ -611,11 +611,6 @@ function ChatMessageComponent({ message, previousUserContent, onToggleFavorite, 
         )}
       </div>
 
-      {isUser && (
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center flex-shrink-0 shadow-sm">
-          <span className="text-primary-foreground text-sm font-semibold">我</span>
-        </div>
-      )}
     </div>
   );
 }
