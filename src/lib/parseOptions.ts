@@ -27,7 +27,7 @@ export function parseOptions(content: string): ParsedOption[] {
       if (match) {
         const text = stripEmoji(match[1].replace(/\*{1,2}/g, '').trim());
         if (looksLikeQuestion(text)) continue;
-        if (text.length > 2 && text.length <= 35) {
+        if (text.length >= 2 && text.length <= 35) {
           options.push({ label: text });
         }
         continue;
@@ -36,7 +36,7 @@ export function parseOptions(content: string): ParsedOption[] {
     if (match && match.length >= 3) {
       const text = stripEmoji(match[2].replace(/\*{1,2}/g, '').trim());
       if (looksLikeQuestion(text)) continue;
-      if (text.length > 2 && text.length <= 40) {
+      if (text.length >= 2 && text.length <= 40) {
         options.push({ label: text });
       }
     }
