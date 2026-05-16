@@ -238,14 +238,24 @@ export function FeedbackManagement() {
         </div>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-4">
-          <TabsList>
-            <TabsTrigger value="all">全部 ({feedbacks.length})</TabsTrigger>
-            <TabsTrigger value="negative">差评 ({negativeCount})</TabsTrigger>
-            <TabsTrigger value="pending">待处理 ({pendingCount})</TabsTrigger>
-            <TabsTrigger value="resolved">已解决 ({feedbacks.filter(f => f.status === 'resolved').length})</TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList>
+              <TabsTrigger value="all">全部 ({scopedAll.length})</TabsTrigger>
+              <TabsTrigger value="negative">差评 ({negativeCount})</TabsTrigger>
+              <TabsTrigger value="pending">待处理 ({pendingCount})</TabsTrigger>
+              <TabsTrigger value="resolved">已解决 ({scopedAll.filter(f => f.status === 'resolved').length})</TabsTrigger>
+            </TabsList>
+          </Tabs>
+          <Tabs value={timeRange} onValueChange={(v) => setTimeRange(v as typeof timeRange)}>
+            <TabsList>
+              <TabsTrigger value="7d" className="text-xs">7天</TabsTrigger>
+              <TabsTrigger value="30d" className="text-xs">30天</TabsTrigger>
+              <TabsTrigger value="6m" className="text-xs">6个月</TabsTrigger>
+              <TabsTrigger value="all" className="text-xs">全部</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-8">
