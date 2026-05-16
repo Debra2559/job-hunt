@@ -114,7 +114,7 @@ export function FeedbackManagement() {
             .select('display_name')
             .eq('user_id', feedback.user_id)
             .single();
-          user_display_name = profileData?.display_name || '匿名用户';
+          user_display_name = pickDemoName(feedback.user_id || feedback.id);
 
           return {
             ...feedback,
