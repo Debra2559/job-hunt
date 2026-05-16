@@ -48,6 +48,22 @@ interface FeedbackWithMessage {
 
 type StatusType = 'pending' | 'in_progress' | 'resolved' | 'ignored';
 
+// 演示用：为展示效果，按反馈 ID 稳定地生成多样化的学生姓名（仅前端展示，不修改数据库）
+const DEMO_NAMES = [
+  '李思涵', '王梓轩', '张雨欣', '刘宇航', '陈嘉怡', '杨子墨', '黄诗琪', '周浩然',
+  '吴语桐', '徐若曦', '孙明轩', '马欣怡', '朱俊杰', '郭沐宸', '林婉清', '何泽楷',
+  '高雅婷', '罗子涵', '宋亦凡', '郑书瑶', '谢明哲', '韩雨萱', '唐家豪', '冯佳颖',
+  '邓子谦', '曹梦琪', '彭浩宇', '曾婉如', '潘思源', '蒋诗韵',
+];
+
+const pickDemoName = (seed: string): string => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+  }
+  return DEMO_NAMES[Math.abs(hash) % DEMO_NAMES.length];
+};
+
 const statusConfig: Record<StatusType, { label: string; icon: typeof Clock; variant: 'default' | 'secondary' | 'destructive' | 'outline'; className?: string }> = {
   pending: { label: '待处理', icon: Clock, variant: 'secondary' },
   in_progress: { label: '处理中', icon: AlertCircle, variant: 'default', className: 'bg-amber-500 hover:bg-amber-600' },
@@ -98,7 +114,7 @@ export function FeedbackManagement() {
             .select('display_name')
             .eq('user_id', feedback.user_id)
             .single();
-          user_display_name = profileData?.display_name || '匿名用户';
+          user_display_name = pickDemoName(feedback.id);
 
           return {
             ...feedback,
