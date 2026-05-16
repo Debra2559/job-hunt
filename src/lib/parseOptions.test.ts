@@ -31,7 +31,7 @@ describe('parseOptions', () => {
 
   it('skips long descriptive sentences', () => {
     const content = [
-      '1. 这是一段很长的描述性文字用来介绍接下来的所有选项内容',
+      '1. 这是一段非常非常非常长的描述性文字用来介绍接下来的所有选项内容请注意阅读',
       '2. 保研',
       '3. 就业',
     ].join('\n');
