@@ -160,11 +160,14 @@ export function FeedbackManagement() {
     }
   };
 
-  const positiveCount = feedbacks.filter(f => f.feedback_type === 'positive').length;
-  const negativeCount = feedbacks.filter(f => f.feedback_type === 'negative').length;
-  const pendingCount = feedbacks.filter(f => f.feedback_type === 'negative' && f.status === 'pending').length;
-  const satisfactionRate = feedbacks.length > 0 
-    ? ((positiveCount / feedbacks.length) * 100).toFixed(1) 
+  const scopedAll = timeRange === 'all'
+    ? feedbacks
+    : feedbacks.filter(f => new Date(f.created_at).getTime() >= Date.now() - (timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 180) * 86400000);
+  const positiveCount = scopedAll.filter(f => f.feedback_type === 'positive').length;
+  const negativeCount = scopedAll.filter(f => f.feedback_type === 'negative').length;
+  const pendingCount = scopedAll.filter(f => f.feedback_type === 'negative' && f.status === 'pending').length;
+  const satisfactionRate = scopedAll.length > 0
+    ? ((positiveCount / scopedAll.length) * 100).toFixed(1)
     : '0';
 
   const rangeDays = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : timeRange === '6m' ? 180 : null;
