@@ -79,7 +79,7 @@ export function ChatArea({
       });
     }
   }, [isTyping, smoothScrollToBottom]);
-  const showWelcome = messages.length === 0;
+  const showWelcome = messages.length === 0 && !isTyping;
 
   const handleTagClick = useCallback((text: string) => {
     chatInputRef.current?.fillInput(text);
