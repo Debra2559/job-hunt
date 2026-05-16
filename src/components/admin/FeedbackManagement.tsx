@@ -266,14 +266,14 @@ export function FeedbackManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-20">类型</TableHead>
-                  <TableHead className="w-24">状态</TableHead>
-                  <TableHead>用户</TableHead>
-                  <TableHead className="max-w-[150px]">标签</TableHead>
-                  <TableHead className="max-w-xs">反馈内容</TableHead>
-                  <TableHead className="max-w-xs">相关消息</TableHead>
-                  <TableHead className="w-36">时间</TableHead>
-                  <TableHead className="w-24">操作</TableHead>
+                  <TableHead className="whitespace-nowrap">类型</TableHead>
+                  <TableHead className="whitespace-nowrap">状态</TableHead>
+                  <TableHead className="whitespace-nowrap">用户</TableHead>
+                  <TableHead className="whitespace-nowrap">标签</TableHead>
+                  <TableHead className="min-w-[200px]">反馈内容</TableHead>
+                  <TableHead className="min-w-[200px]">相关消息</TableHead>
+                  <TableHead className="whitespace-nowrap">时间</TableHead>
+                  <TableHead className="whitespace-nowrap">操作</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
