@@ -1,21 +1,19 @@
-<h1 align="center">校园 AI 辅导员 (Campus AI Counselor)</h1>
+<h1 align="center">校园 AI 辅导员</h1>
+
+<p align="center">
+  <b>专属高校学生的 24h 智能辅导员 —— 一句话问出答案，永远基于学校真实资料。</b>
+</p>
 
 <p align="center">
   <a href="https://ai-counselor.top">
-    <img src="https://img.shields.io/badge/🌐%20在线体验-ai--counselor.top-10b981?style=for-the-badge&labelColor=064e3b&logoColor=white" alt="在线体验 ai-counselor.top" height="56" />
+    <img src="https://img.shields.io/badge/🚀%20%E7%82%B9%E6%AD%A4%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8C-ai--counselor.top-10b981?style=for-the-badge&labelColor=064e3b&logoColor=white" alt="点此在线体验 ai-counselor.top" height="64" />
   </a>
+  <br/>
+  <sub>🟢 已上线 · 免注册即可试用 · 支持 PC / 手机 / PWA 安装</sub>
 </p>
 
 <p align="center">
-  <b>👉 立即访问：<a href="https://ai-counselor.top">https://ai-counselor.top</a></b>
-</p>
-
-<p align="center">
-  <img src="public/pwa-icon-512.png" alt="校园 AI 辅导员" width="140" />
-</p>
-
-<p align="center">
-  <i>面向高校学生的智能辅导员助手 —— 基于检索增强生成（RAG）的对话式校园生活与职业规划平台。</i>
+  <img src="public/pwa-icon-512.png" alt="校园 AI 辅导员" width="120" />
 </p>
 
 <p align="center">
