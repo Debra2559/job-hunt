@@ -1,16 +1,28 @@
-# 校园 AI 辅导员 (Campus AI Counselor)
+<h1 align="center">校园 AI 辅导员 (Campus AI Counselor)</h1>
 
-> 面向高校学生的智能辅导员助手 —— 基于检索增强生成（RAG）的对话式校园生活与职业规划平台。
+<p align="center">
+  <a href="https://ai-counselor.top">
+    <img src="https://img.shields.io/badge/🌐%20在线体验-ai--counselor.top-10b981?style=for-the-badge&labelColor=064e3b&logoColor=white" alt="在线体验 ai-counselor.top" height="56" />
+  </a>
+</p>
+
+<p align="center">
+  <b>👉 立即访问：<a href="https://ai-counselor.top">https://ai-counselor.top</a></b>
+</p>
 
 <p align="center">
   <img src="public/pwa-icon-512.png" alt="校园 AI 辅导员" width="140" />
 </p>
 
 <p align="center">
-  <a href="https://ai-counselor.top">🌐 在线体验</a> ·
+  <i>面向高校学生的智能辅导员助手 —— 基于检索增强生成（RAG）的对话式校园生活与职业规划平台。</i>
+</p>
+
+<p align="center">
   <a href="#-功能特性">功能特性</a> ·
   <a href="#-技术栈">技术栈</a> ·
-  <a href="#-快速开始">快速开始</a>
+  <a href="#-快速开始">快速开始</a> ·
+  <a href="#-部署到自有域名">部署指南</a>
 </p>
 
 ---
@@ -147,6 +159,88 @@ supabase/functions/
 * 所有数据表均启用 **Row Level Security**
 * 角色存储于独立的 `user_roles` 表，通过 `has_role()` SECURITY DEFINER 函数判定，杜绝提权
 * **注册入口已关闭**，账号由管理员统一分发
+
+---
+
+## 🚢 部署到自有域名
+
+下面以 **本地开发 → 构建产物 → 上线 → 绑定 `ai-counselor.top` → HTTPS** 为主线给出完整流程。本项目为纯前端 SPA（Vite + React），后端与数据库由 **Lovable Cloud（托管 Supabase）** 提供，无需自行运维服务器。
+
+### 步骤 1：本地运行
+
+```bash
+git clone <your-repo-url>
+cd campus-ai-counselor
+npm install
+npm run dev          # 默认 http://localhost:8080
+```
+
+### 步骤 2：配置环境变量
+
+`.env` 文件由 Lovable Cloud 自动生成并注入，**请勿手动修改或提交到仓库**。它包含：
+
+| 变量 | 用途 | 公开性 |
+|---|---|---|
+| `VITE_SUPABASE_URL` | 后端 API 地址 | 公开（前端使用） |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | Anon Key，受 RLS 保护 | 公开（前端使用） |
+| `VITE_SUPABASE_PROJECT_ID` | 项目标识 | 公开 |
+
+> **服务端密钥**（如 `RESEND_API_KEY`、`OPENAI_API_KEY`）**只**配置在 Edge Functions 的 Secrets 中，**绝不写入前端 `.env`**。本仓库前端代码不会读取任何敏感密钥。
+
+如果要在本地连接到自己的 Supabase 实例（非 Lovable Cloud 用户），新建 `.env.local`：
+
+```bash
+VITE_SUPABASE_URL=https://<your-project>.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGc...
+VITE_SUPABASE_PROJECT_ID=<your-project>
+```
+
+### 步骤 3：构建生产产物
+
+```bash
+npm run build        # 生成 dist/
+npm run preview      # 本地预览生产构建
+```
+
+### 步骤 4：发布到 Lovable（推荐）
+
+1. 在 Lovable 编辑器右上角点击 **Publish → Publish**。
+2. 发布后自动获得形如 `https://<slug>.lovable.app` 的临时域名。
+3. 后续前端改动需要再次点击 **Update** 才会上线；Edge Functions / 数据库迁移则**自动**部署，无需手动操作。
+
+> 若选择自部署到 Vercel / Netlify / Cloudflare Pages / Nginx，把 `dist/` 作为静态站点上传即可，记得在 host 上开启 **SPA fallback**（所有未匹配路径回退到 `index.html`），否则刷新会 404。
+
+### 步骤 5：绑定 `ai-counselor.top` 域名
+
+在 **Project Settings → Domains** 点击 **Connect Domain**，输入 `ai-counselor.top`，按提示去你的域名注册商（阿里云 / Cloudflare / Namesilo 等）添加以下 DNS 记录：
+
+| 类型 | 主机记录 | 记录值 | 说明 |
+|---|---|---|---|
+| **A** | `@` | `185.158.133.1` | 根域名 |
+| **A** | `www` | `185.158.133.1` | www 子域 |
+| **TXT** | `_lovable` | `lovable_verify=XXXX`（控制台中给出） | 所有权验证 |
+
+> Cloudflare 用户：在 Connect Domain 弹窗展开 **Advanced**，勾选 **"Domain uses Cloudflare or a similar proxy"**，会改用 CNAME 校验，兼容橙色云朵代理模式。
+
+### 步骤 6：等待 DNS 生效 + 自动签发 HTTPS
+
+* DNS 通常 **5 分钟 – 2 小时** 生效，最长 72 小时；用 [dnschecker.org](https://dnschecker.org) 验证。
+* 验证通过后 Lovable 会通过 Let's Encrypt **自动签发并续期** SSL 证书，无需人工操作。
+* 状态从 `Verifying → Setting up → Active` 即表示 HTTPS 已就绪。
+* 若设置过 CAA 记录，请确保允许 `letsencrypt.org`，否则签发会失败。
+
+### 步骤 7：设置主域名 & 强制 HTTPS
+
+* 在 Domains 面板把 `ai-counselor.top` 标记为 **Primary**，`www.ai-counselor.top` 会自动 301 跳转到主域名。
+* Lovable 默认强制 HTTP → HTTPS 重定向，**无需额外配置**。
+
+### 验证清单
+
+- [ ] `https://ai-counselor.top` 可访问，浏览器地址栏显示锁形图标
+- [ ] `http://ai-counselor.top` 自动跳转到 https
+- [ ] `www.ai-counselor.top` 跳转到主域名
+- [ ] 登录、聊天、知识库检索、反馈邮件均正常
+- [ ] 后台 `/admin` 在未登录时跳转到 `/auth`
 
 ## 📄 License
 
