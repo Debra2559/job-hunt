@@ -1,16 +1,28 @@
-# 校园 AI 辅导员 (Campus AI Counselor)
+<h1 align="center">校园 AI 辅导员 (Campus AI Counselor)</h1>
 
-> 面向高校学生的智能辅导员助手 —— 基于检索增强生成（RAG）的对话式校园生活与职业规划平台。
+<p align="center">
+  <a href="https://ai-counselor.top">
+    <img src="https://img.shields.io/badge/🌐%20在线体验-ai--counselor.top-10b981?style=for-the-badge&labelColor=064e3b&logoColor=white" alt="在线体验 ai-counselor.top" height="56" />
+  </a>
+</p>
+
+<p align="center">
+  <b>👉 立即访问：<a href="https://ai-counselor.top">https://ai-counselor.top</a></b>
+</p>
 
 <p align="center">
   <img src="public/pwa-icon-512.png" alt="校园 AI 辅导员" width="140" />
 </p>
 
 <p align="center">
-  <a href="https://ai-counselor.top">🌐 在线体验</a> ·
+  <i>面向高校学生的智能辅导员助手 —— 基于检索增强生成（RAG）的对话式校园生活与职业规划平台。</i>
+</p>
+
+<p align="center">
   <a href="#-功能特性">功能特性</a> ·
   <a href="#-技术栈">技术栈</a> ·
-  <a href="#-快速开始">快速开始</a>
+  <a href="#-快速开始">快速开始</a> ·
+  <a href="#-部署到自有域名">部署指南</a>
 </p>
 
 ---
