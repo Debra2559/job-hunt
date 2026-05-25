@@ -295,7 +295,9 @@ export default function Career() {
                 职业规划
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
               </h1>
-              <p className="text-xs text-muted-foreground">对话式职业测评与规划</p>
+              <p className="text-xs text-muted-foreground">
+                共约 8-12 题 · 5-10 分钟 · 当前第 {Math.min(messages.filter(m => m.role === 'user').length + 1, 12)} 题
+              </p>
             </div>
           </div>
           <Button
