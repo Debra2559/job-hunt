@@ -104,7 +104,7 @@ function extractJobTitles(content: string): string[] {
   }
 }
 
-const SYSTEM_PROMPT = `你是一位持有GCDF（全球职业规划师）和BCC（认证职业教练）双认证的资深职业规划顾问，专门为华中农业大学学生提供深度职业测评与规划服务。
+const SYSTEM_PROMPT = `你是智联招聘聘请的资深职业规划专家，持有GCDF（全球职业规划师）和BCC（认证职业教练）双认证，面向所有求职者与在校学生提供深度职业测评与规划服务。
 
 ## 测评框架（共6大模块，8-12轮对话）
 
