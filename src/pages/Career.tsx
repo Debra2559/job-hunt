@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { parseCareerReport, type CareerReportData, type BossJobListing } from '@/components/career/CareerReport';
 import { generateCareerReportHTML } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
+import { VoiceInput } from '@/components/chat/VoiceInput';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
