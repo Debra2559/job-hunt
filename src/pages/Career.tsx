@@ -393,9 +393,13 @@ export default function Career() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="说说你的想法、专业、兴趣..."
+              placeholder="优先点选上方选项；如需补充可在此输入或语音..."
               className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-input border-border focus:border-primary/50 focus:ring-primary/20"
               rows={1}
+            />
+            <VoiceInput
+              onTranscript={(text) => setInput(prev => (prev ? prev + ' ' : '') + text)}
+              disabled={isLoading}
             />
             <Button
               onClick={() => handleSend(input)}
