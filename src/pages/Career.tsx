@@ -286,9 +286,13 @@ export default function Career() {
       )}>
         {/* Header */}
         <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
+          <a href="/" className="shrink-0 w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center transition-colors" title="返回闯关地图">
+            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+          </a>
           <div className="flex items-center gap-3 flex-1">
             <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
               <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
+            </div>
             </div>
             <div>
               <h1 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
