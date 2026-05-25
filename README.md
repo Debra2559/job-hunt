@@ -1,7 +1,7 @@
-<h1 align="center">校园 AI 辅导员</h1>
+<h1 align="center">AI 职业规划助手</h1>
 
 <p align="center">
-  <b>专属高校学生的 24h 智能辅导员 —— 一句话问出答案，永远基于学校真实资料。</b>
+  <b>智联招聘 × 扣子 黑客松参赛作品 —— 基于 GCDF / BCC 方法论的 AI 求职与职业规划 Agent。</b>
 </p>
 
 <p align="center">
@@ -13,233 +13,73 @@
 </p>
 
 <p align="center">
-  <img src="public/pwa-icon-512.png" alt="校园 AI 辅导员" width="120" />
-</p>
-
-<p align="center">
-  <a href="#-功能特性">功能特性</a> ·
-  <a href="#-技术栈">技术栈</a> ·
-  <a href="#-快速开始">快速开始</a> ·
-  <a href="#-部署到自有域名">部署指南</a>
+  <img src="public/pwa-icon-512.png" alt="AI 职业规划助手" width="120" />
 </p>
 
 ---
 
-## 📖 项目简介
+## 🏆 关于本作品
 
-**校园 AI 辅导员** 是一个为在校大学生打造的智能问答与职业规划平台。它以"知识库严格 grounding + 双通道语义检索"为核心，覆盖**学业咨询、心理疏导、请假流程、奖助学金、宿舍生活、职业规划**等高频校园场景，并配备完整的后台管理与反馈闭环。
+本项目是参加 **智联招聘 × 扣子（Coze）联合举办的 AI 黑客松** 的参赛作品，赛道聚焦 **AI × 求职**。
 
-* **严格事实回答**：所有回复均基于管理员上传的知识库，找不到则直接告知"暂无相关信息"，杜绝幻觉
-* **行内引用 [n]**：每条回答的引用来源可悬浮查看，可追溯
-* **职业规划 Agent**：基于 GCDF / BCC 方法论的 8-12 轮深度对话，自动生成 SVG 雷达图报告
-* **PWA 支持**：可"添加到主屏幕"，离线可用，移动端体验接近原生 App
+我们希望用一个会"聊"、会"听"、会"出报告"的 AI 求职顾问，帮助求职者：
 
-## 🖼️ 应用截图
+* 🎯 **想清楚自己**：8-12 轮深度对话，挖掘兴趣、能力、价值观
+* 📊 **看清楚自己**：自动生成 SVG 能力雷达图与个性化职业建议
+* 🚀 **找到下一步**：一键跳转 **智联招聘 / BOSS 直聘** 等平台精准搜索匹配岗位
 
-### 主聊天界面
-<p align="center">
-  <img src="docs/screenshots/home.png" alt="主聊天界面" width="900" />
-</p>
+## ✨ 核心功能
 
-> 玻璃拟态卡片 + 3D Pixar 风格教师形象 · 5 个快速入口标签 · 支持语音输入 / 文件上传 / Tab 补全
-
-### 登录页
-<p align="center">
-  <img src="docs/screenshots/auth.png" alt="登录页" width="900" />
-</p>
-
-> 支持 Google OAuth 与邮箱密码登录 · Lazy Login（先聊天，发送时再登录） · 学生身份验证
-
-## ✨ 功能特性
-
-### 学生端
 | 模块 | 说明 |
 |---|---|
-| 💬 智能对话 | SSE 流式输出 · 行内引用 · 2-3 条追问建议 · 历史会话按时间分组 |
-| 🗂️ 会话管理 | 拖拽分组、置顶、收藏、重命名、Tab 切换占位词 |
-| 🎓 职业规划 | 8-12 轮 GCDF/BCC 深度对话 · 自动生成 SVG 能力雷达图 · 一键跳转 BOSS 直聘 |
-| 👤 个人中心 | 自定义头像（1:1 裁剪）· 院校 / 年级数据选择 · 学生身份认证 |
-| 🎙️ 语音输入 | 基于 Web Speech API，移动端胶囊式输入框聚焦自动展开 |
-| 📱 PWA | 自定义校园 AI 教师图标，可安装到桌面 |
+| 🎓 职业规划 Agent | 基于 **GCDF（全球职业规划师）/ BCC（生涯教练）** 方法论的 8-12 轮深度对话 |
+| 📈 能力雷达图 | 对话结束后自动生成 SVG 雷达图，可视化展示候选人多维能力 |
+| 📝 个性化报告 | 输出岗位推荐、发展路径、技能补齐建议的结构化报告 |
+| 🔗 求职平台直达 | 一键根据画像跳转智联招聘 / BOSS 直聘搜索匹配岗位 |
+| 💬 SSE 流式对话 | 边想边答，移动端胶囊式输入框 + 语音输入（Web Speech API） |
+| 📱 PWA 支持 | 可"添加到主屏幕"，移动端体验接近原生 App |
 
-### 管理端
-| 模块 | 说明 |
-|---|---|
-| 📊 数据看板 | Recharts 可视化 · 多维度时间筛选 · 用户增长 / 反馈趋势 |
-| 📚 知识库 | 上传 PDF / Office 文件 · 在线预览 · 调用统计 |
-| 👍 反馈管理 | 正负反馈标签化 · Resend 邮件实时通知管理员 |
-| 🔐 角色管理 | Super Admin / Admin 分级，基于 RLS 的安全策略 |
-| 🔍 语义检索 | 后台直接搜索向量库，验证召回效果 |
+## 🤖 技术亮点
 
-## 🤖 AI 检索架构
-
-采用**双通道 RAG 召回**，兼顾精确匹配与语义理解：
-
-```
-用户提问
-   │
-   ├── 通道 A：TF-IDF（结合 jieba 中文分词）—— 关键词 / 实体精准命中
-   │
-   └── 通道 B：pgvector 余弦相似度（OpenAI text-embedding-3-small）—— 语义相近召回
-            │
-            ▼
-       结果融合 + 重排 + Top-K
-            │
-            ▼
-   LLM 严格 grounding 回答 + 行内引用 [n] + 追问建议
-```
-
-* **严格回答策略**：检索为空时直接回复"暂无相关信息"，不编造
-* **引用即可追溯**：每个 `[n]` 对应一个具体的文件片段，鼠标悬浮即可查看出处
+* **方法论驱动**：Agent 的 system prompt 与对话编排严格基于 GCDF / BCC 职业咨询框架，而非泛泛闲聊
+* **严格 grounding**：所有专业建议均基于知识库检索，避免幻觉
+* **结构化输出**：长对话自动归纳为可视化报告（SVG 雷达图 + 文本建议）
+* **零门槛体验**：免注册即可使用，对话记录本地持久化
 
 ## 🛠 技术栈
 
 | 层 | 技术 |
 |---|---|
 | 前端 | React 18 · Vite 5 · TypeScript 5 · Tailwind CSS 3 · shadcn/ui · Framer Motion |
-| 后端 | Lovable Cloud (Supabase) · PostgreSQL · pgvector · Row Level Security |
-| 鉴权 | Supabase Auth（Email + Google OAuth） |
-| 文件 | Supabase Storage · 在线 PDF / Office 预览 |
-| AI | OpenAI GPT / Lovable AI Gateway · text-embedding-3-small · SSE 流式 |
-| 邮件 | Resend（反馈通知） |
+| 后端 | Lovable Cloud (Supabase) · PostgreSQL · Edge Functions |
+| AI | Lovable AI Gateway（Gemini / GPT 系列） · SSE 流式输出 |
+| 可视化 | 手写 SVG 雷达图 |
 | 部署 | Lovable · 自定义域名 `ai-counselor.top` |
 
 ## 🚀 快速开始
 
 ```bash
-# 1. 克隆仓库
 git clone <your-repo-url>
-cd campus-ai-counselor
-
-# 2. 安装依赖
+cd ai-career-agent
 npm install
-
-# 3. 启动开发服务器
-npm run dev
+npm run dev   # http://localhost:8080
 ```
 
-> 后端（数据库 / 鉴权 / Edge Functions）通过 Lovable Cloud 自动开通，无需手动配置 Supabase 实例。
-
-### 环境变量
-
-`.env` 由 Lovable Cloud 自动注入，无需手动维护：
-
-```
-VITE_SUPABASE_URL=...
-VITE_SUPABASE_PUBLISHABLE_KEY=...
-VITE_SUPABASE_PROJECT_ID=...
-```
+> 后端（数据库 / Edge Functions）通过 Lovable Cloud 自动开通，无需手动配置。
 
 ## 📂 项目结构
 
 ```
 src/
-├── components/
-│   ├── chat/         # 聊天主界面、侧边栏、消息气泡、语音输入
-│   ├── admin/        # 后台管理（用户、知识库、反馈、角色）
-│   ├── career/       # 职业规划报告与雷达图
-│   └── auth/         # 登录注册、学生认证
-├── hooks/            # useAuth · useConversations · useUserRole ...
-├── pages/            # Index · Auth · Admin · Career
-├── lib/              # chatApi (SSE) · utils
+├── components/career/   # 职业规划报告与雷达图
+├── hooks/useCareerConversation.ts   # 对话状态管理
+├── pages/Career.tsx     # 主页面
 └── integrations/supabase/   # 自动生成，请勿手动修改
 
 supabase/functions/
-├── chat/                 # 主聊天 Edge Function（RAG + SSE）
-├── career-agent/         # 职业规划 Agent
-├── semantic-search/      # pgvector 语义检索
-├── parse-document/       # PDF / Office 文件解析入库
-└── send-feedback-notification/  # 反馈邮件通知
+└── career-agent/        # 职业规划 Agent（GCDF/BCC 编排 + SSE）
 ```
-
-## 🔒 安全
-
-* 所有数据表均启用 **Row Level Security**
-* 角色存储于独立的 `user_roles` 表，通过 `has_role()` SECURITY DEFINER 函数判定，杜绝提权
-* **注册入口已关闭**，账号由管理员统一分发
-
----
-
-## 🚢 部署到自有域名
-
-下面以 **本地开发 → 构建产物 → 上线 → 绑定 `ai-counselor.top` → HTTPS** 为主线给出完整流程。本项目为纯前端 SPA（Vite + React），后端与数据库由 **Lovable Cloud（托管 Supabase）** 提供，无需自行运维服务器。
-
-### 步骤 1：本地运行
-
-```bash
-git clone <your-repo-url>
-cd campus-ai-counselor
-npm install
-npm run dev          # 默认 http://localhost:8080
-```
-
-### 步骤 2：配置环境变量
-
-`.env` 文件由 Lovable Cloud 自动生成并注入，**请勿手动修改或提交到仓库**。它包含：
-
-| 变量 | 用途 | 公开性 |
-|---|---|---|
-| `VITE_SUPABASE_URL` | 后端 API 地址 | 公开（前端使用） |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | Anon Key，受 RLS 保护 | 公开（前端使用） |
-| `VITE_SUPABASE_PROJECT_ID` | 项目标识 | 公开 |
-
-> **服务端密钥**（如 `RESEND_API_KEY`、`OPENAI_API_KEY`）**只**配置在 Edge Functions 的 Secrets 中，**绝不写入前端 `.env`**。本仓库前端代码不会读取任何敏感密钥。
-
-如果要在本地连接到自己的 Supabase 实例（非 Lovable Cloud 用户），新建 `.env.local`：
-
-```bash
-VITE_SUPABASE_URL=https://<your-project>.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=eyJhbGc...
-VITE_SUPABASE_PROJECT_ID=<your-project>
-```
-
-### 步骤 3：构建生产产物
-
-```bash
-npm run build        # 生成 dist/
-npm run preview      # 本地预览生产构建
-```
-
-### 步骤 4：发布到 Lovable（推荐）
-
-1. 在 Lovable 编辑器右上角点击 **Publish → Publish**。
-2. 发布后自动获得形如 `https://<slug>.lovable.app` 的临时域名。
-3. 后续前端改动需要再次点击 **Update** 才会上线；Edge Functions / 数据库迁移则**自动**部署，无需手动操作。
-
-> 若选择自部署到 Vercel / Netlify / Cloudflare Pages / Nginx，把 `dist/` 作为静态站点上传即可，记得在 host 上开启 **SPA fallback**（所有未匹配路径回退到 `index.html`），否则刷新会 404。
-
-### 步骤 5：绑定 `ai-counselor.top` 域名
-
-在 **Project Settings → Domains** 点击 **Connect Domain**，输入 `ai-counselor.top`，按提示去你的域名注册商（阿里云 / Cloudflare / Namesilo 等）添加以下 DNS 记录：
-
-| 类型 | 主机记录 | 记录值 | 说明 |
-|---|---|---|---|
-| **A** | `@` | `185.158.133.1` | 根域名 |
-| **A** | `www` | `185.158.133.1` | www 子域 |
-| **TXT** | `_lovable` | `lovable_verify=XXXX`（控制台中给出） | 所有权验证 |
-
-> Cloudflare 用户：在 Connect Domain 弹窗展开 **Advanced**，勾选 **"Domain uses Cloudflare or a similar proxy"**，会改用 CNAME 校验，兼容橙色云朵代理模式。
-
-### 步骤 6：等待 DNS 生效 + 自动签发 HTTPS
-
-* DNS 通常 **5 分钟 – 2 小时** 生效，最长 72 小时；用 [dnschecker.org](https://dnschecker.org) 验证。
-* 验证通过后 Lovable 会通过 Let's Encrypt **自动签发并续期** SSL 证书，无需人工操作。
-* 状态从 `Verifying → Setting up → Active` 即表示 HTTPS 已就绪。
-* 若设置过 CAA 记录，请确保允许 `letsencrypt.org`，否则签发会失败。
-
-### 步骤 7：设置主域名 & 强制 HTTPS
-
-* 在 Domains 面板把 `ai-counselor.top` 标记为 **Primary**，`www.ai-counselor.top` 会自动 301 跳转到主域名。
-* Lovable 默认强制 HTTP → HTTPS 重定向，**无需额外配置**。
-
-### 验证清单
-
-- [ ] `https://ai-counselor.top` 可访问，浏览器地址栏显示锁形图标
-- [ ] `http://ai-counselor.top` 自动跳转到 https
-- [ ] `www.ai-counselor.top` 跳转到主域名
-- [ ] 登录、聊天、知识库检索、反馈邮件均正常
-- [ ] 后台 `/admin` 在未登录时跳转到 `/auth`
 
 ## 📄 License
 
-MIT © Campus AI Counselor
+MIT © AI Career Agent · 智联 × 扣子 黑客松参赛作品
