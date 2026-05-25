@@ -2,12 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Auth from "./pages/Auth";
-import Admin from "./pages/Admin";
 import Career from "./pages/Career";
-import ERDiagram from "./pages/ERDiagram";
 import NotFound from "./pages/NotFound";
 import { AuthRoute, ProtectedRoute } from "@/components/auth/RouteGuards";
 
@@ -20,7 +17,7 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
+          <Route path="/" element={<Navigate to="/career" replace />} />
           <Route
             path="/auth"
             element={
@@ -37,8 +34,6 @@ const App = () => (
               </ProtectedRoute>
             }
           />
-          <Route path="/admin" element={<Admin />} />
-          <Route path="/er-diagram" element={<ERDiagram />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
