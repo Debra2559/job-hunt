@@ -8,6 +8,7 @@ import remarkGfm from 'remark-gfm';
 import { parseCareerReport, type CareerReportData, type BossJobListing } from '@/components/career/CareerReport';
 import { generateCareerReportHTML } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
+import { VoiceInput } from '@/components/chat/VoiceInput';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
@@ -294,7 +295,9 @@ export default function Career() {
                 职业规划
                 <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
               </h1>
-              <p className="text-xs text-muted-foreground">对话式职业测评与规划</p>
+              <p className="text-xs text-muted-foreground">
+                共约 8-12 题 · 5-10 分钟 · 当前第 {Math.min(messages.filter(m => m.role === 'user').length + 1, 12)} 题
+              </p>
             </div>
           </div>
           <Button
@@ -390,9 +393,13 @@ export default function Career() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="说说你的想法、专业、兴趣..."
+              placeholder="优先点选上方选项；如需补充可在此输入或语音..."
               className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-input border-border focus:border-primary/50 focus:ring-primary/20"
               rows={1}
+            />
+            <VoiceInput
+              onTranscript={(text) => setInput(prev => (prev ? prev + ' ' : '') + text)}
+              disabled={isLoading}
             />
             <Button
               onClick={() => handleSend(input)}
