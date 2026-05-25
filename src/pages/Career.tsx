@@ -293,7 +293,6 @@ export default function Career() {
             <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
               <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
             </div>
-            </div>
             <div>
               <h1 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
                 职业规划
