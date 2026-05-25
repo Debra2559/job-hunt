@@ -295,14 +295,6 @@ export default function Career() {
       )}>
         {/* Header */}
         <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate('/')}
-            className="shrink-0 rounded-xl hover:bg-muted"
-          >
-            <ArrowLeft className="w-5 h-5 text-foreground" />
-          </Button>
           <div className="flex items-center gap-3 flex-1">
             <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
               <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
