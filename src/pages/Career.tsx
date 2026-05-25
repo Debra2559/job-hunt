@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText, GraduationCap, Briefcase, Plane, Compass, Target, Lightbulb, Sparkles, Rocket, Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import remarkGfm from 'remark-gfm';
 import { parseCareerReport, type CareerReportData, type BossJobListing } from '@/components/career/CareerReport';
 import { generateCareerReportHTML } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
-import { useAuth } from '@/hooks/useAuth';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
@@ -151,9 +149,7 @@ function SourceCards({ sources }: { sources: WebSource[] }) {
 }
 
 export default function Career() {
-  const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
-  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(user?.id);
+  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(undefined);
   const [input, setInput] = useState('');
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
@@ -169,12 +165,12 @@ export default function Career() {
     }, 50);
   };
 
-  // Auto-greet after history is loaded and there are no existing messages
+  // Auto-greet when there are no existing messages
   useEffect(() => {
-    if (!loadingHistory && !authLoading && messages.length === 0 && !hasGreeted.current) {
+    if (!loadingHistory && messages.length === 0 && !hasGreeted.current) {
       autoGreet();
     }
-  }, [loadingHistory, authLoading, messages.length, autoGreet]);
+  }, [loadingHistory, messages.length, autoGreet]);
 
   // Scroll on new messages
   useEffect(() => {
@@ -224,12 +220,6 @@ export default function Career() {
     return () => { if (reportBlobUrl) URL.revokeObjectURL(reportBlobUrl); };
   }, [reportBlobUrl]);
 
-  // Redirect to auth if not logged in
-  useEffect(() => {
-    if (!authLoading && !user) {
-      navigate('/auth', { state: { from: '/career' } });
-    }
-  }, [authLoading, user, navigate]);
 
   const handleSend = async (content: string) => {
     if (!content.trim() || isLoading) return;
@@ -278,7 +268,7 @@ export default function Career() {
     ),
   };
 
-  if (authLoading || loadingHistory) {
+  if (loadingHistory) {
     return (
       <div className="flex items-center justify-center h-screen bg-gradient-to-b from-background to-muted/30">
         <ThinkingIndicator />
