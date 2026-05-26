@@ -283,35 +283,42 @@ export default function Career() {
 
   if (loadingHistory) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-background to-muted/30">
+      <div className="map-aurora flex items-center justify-center h-screen bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
         <ThinkingIndicator />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="map-aurora relative flex h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
+      {/* 浮云装饰，与地图风格一致 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[6%] left-[6%] text-3xl opacity-50 animate-[float_8s_ease-in-out_infinite]">☁️</div>
+        <div className="absolute top-[12%] right-[8%] text-4xl opacity-40 animate-[float_10s_ease-in-out_infinite]" style={{ animationDelay: '1.5s' }}>☁️</div>
+        <div className="absolute top-[4%] left-[48%] text-2xl opacity-45 animate-[float_12s_ease-in-out_infinite]" style={{ animationDelay: '3s' }}>🌤️</div>
+      </div>
+
       {/* Chat Panel */}
       <div className={cn(
-        "flex flex-col transition-all duration-500 ease-out",
-        activeReport ? "w-1/2 border-r border-border" : "w-full"
+        "relative z-10 flex flex-col transition-all duration-500 ease-out",
+        activeReport ? "w-1/2 border-r border-white/40" : "w-full"
       )}>
         {/* Header */}
-        <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
-          <a href="/" className="shrink-0 w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center transition-colors" title="返回闯关地图">
-            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+        <header className="shrink-0 border-b border-white/40 backdrop-blur-2xl bg-white/65 px-4 py-3 flex items-center gap-3">
+          <a href="/" className="shrink-0 w-9 h-9 rounded-2xl hover:bg-emerald-100/70 flex items-center justify-center transition-colors" title="返回闯关地图">
+            <ArrowLeft className="w-4 h-4 text-emerald-700" />
           </a>
-          <div className="flex items-center gap-3 flex-1">
-            <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="relative w-9 h-9 rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-200 via-teal-200 to-cyan-200 shrink-0 shadow-sm">
               <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <h1 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                职业规划
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
+                <span className="aurora-text">第一章 · 认识自己</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide">智联 AI</span>
               </h1>
-              <p className="text-xs text-muted-foreground">
-                共约 8-12 题 · 5-10 分钟 · 当前第 {Math.min(messages.filter(m => m.role === 'user').length + 1, 12)} 题
+              <p className="text-[11px] text-muted-foreground truncate">
+                🧭 共 8-12 题 · 5-10 分钟 · 当前第 {Math.min(messages.filter(m => m.role === 'user').length + 1, 12)} 题
               </p>
             </div>
           </div>
@@ -320,10 +327,10 @@ export default function Career() {
             size="icon"
             onClick={handleClearHistory}
             disabled={isLoading}
-            className="shrink-0 rounded-xl hover:bg-muted"
+            className="shrink-0 rounded-2xl hover:bg-emerald-100/70"
             title="清空对话历史"
           >
-            <RotateCcw className="w-4 h-4 text-muted-foreground" />
+            <RotateCcw className="w-4 h-4 text-emerald-700" />
           </Button>
         </header>
 
