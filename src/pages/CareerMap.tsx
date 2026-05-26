@@ -1,9 +1,11 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw } from 'lucide-react';
+import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, Flame, Trophy, Gift, Sparkle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
+import { useGameProgress, BADGES, ITEMS, DAILY_TASKS, type DailyTaskId, type BadgeId, type ItemId } from '@/hooks/useGameProgress';
+import { toast } from '@/hooks/use-toast';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 type StageStatus = 'done' | 'active' | 'available' | 'locked';
@@ -108,6 +110,10 @@ function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
 export default function CareerMap() {
   const navigate = useNavigate();
   const { completed, reset } = useQuestProgress();
+  const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
+
+  // 打开地图自动推进每日签到
+  useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
 
   const statuses = useMemo(() => computeStatuses(new Set(completed)), [completed]);
 
@@ -117,6 +123,32 @@ export default function CareerMap() {
   const availableCount = allStages.filter(s => statuses[s.id] !== 'locked').length;
   const totalStages = allStages.length;
   const progressPct = implementedTotal > 0 ? Math.round((doneCount / implementedTotal) * 100) : 0;
+
+  const itemList = (Object.keys(ITEMS) as ItemId[])
+    .map(id => ({ id, count: game.items[id] || 0, ...ITEMS[id] }))
+    .filter(x => x.count > 0);
+
+  const handleUseItem = (id: ItemId) => {
+    if (useItem(id)) {
+      toast({ title: `已使用 ${ITEMS[id].emoji} ${ITEMS[id].name}`, description: ITEMS[id].desc });
+    }
+  };
+
+  const handleClaim = (task: DailyTaskId) => {
+    claimDaily(task);
+    const t = DAILY_TASKS[task];
+    toast({
+      title: `+${t.xp} XP${t.reward ? ` · +${t.reward.count} ${ITEMS[t.reward.item].emoji}` : ''}`,
+      description: `完成「${t.name}」`,
+    });
+  };
+
+  const handleResetAll = () => {
+    if (confirm('确定要重置闯关进度与所有奖励吗？此操作不可撤销。')) {
+      reset();
+      resetGame();
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-background to-violet-50/30">
@@ -138,11 +170,9 @@ export default function CareerMap() {
             <span className="text-xs font-semibold text-foreground">{availableCount}/{totalStages}</span>
             <span className="text-[11px] text-muted-foreground">已开放</span>
           </div>
-          {doneCount > 0 && (
+          {(doneCount > 0 || game.xp > 0) && (
             <button
-              onClick={() => {
-                if (confirm('确定要重置闯关进度吗？已完成的关卡会回到未完成状态。')) reset();
-              }}
+              onClick={handleResetAll}
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               title="重置进度"
             >
@@ -161,6 +191,163 @@ export default function CareerMap() {
           </div>
         </div>
       </header>
+
+      {/* 玩家信息条：等级 / XP / 徽章数 / 道具 / 连签 */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6">
+        <div className="rounded-3xl bg-gradient-to-br from-amber-100 via-rose-50 to-violet-100 border border-white/80 p-4 sm:p-5 shadow-[0_10px_30px_-12px_rgba(244,114,182,0.3)]">
+          <div className="flex items-center gap-4">
+            <div className="relative shrink-0 w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-rose-500 text-white flex items-center justify-center shadow-md">
+              <Zap className="w-6 h-6" strokeWidth={2.4} />
+              <span className="absolute -bottom-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-foreground text-[10px] font-extrabold border border-border/60 shadow-sm">Lv {level.level}</span>
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <span className="text-sm font-bold text-foreground">闯关者 Lv {level.level}</span>
+                <span className="text-[11px] text-muted-foreground tabular-nums">{level.into} / {level.need} XP</span>
+                <span className="text-[11px] text-muted-foreground">· 累计 {game.xp} XP</span>
+              </div>
+              <div className="mt-1.5 h-2 rounded-full bg-white/70 overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-amber-400 to-rose-500 transition-all" style={{ width: `${level.pct}%` }} />
+              </div>
+            </div>
+            <div className="hidden sm:flex flex-col items-end gap-1 text-[11px] shrink-0">
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/80 text-foreground font-semibold">
+                <Trophy className="w-3 h-3 text-amber-500" /> {game.badges.length} 枚徽章
+              </div>
+              <div className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/80 text-foreground font-semibold">
+                <Flame className="w-3 h-3 text-rose-500" /> 连签 {game.daily.streak} 天
+              </div>
+            </div>
+          </div>
+
+          {/* 道具栏 */}
+          <div className="mt-4 pt-3 border-t border-white/70">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider inline-flex items-center gap-1">
+                <Gift className="w-3 h-3" /> 我的道具
+              </span>
+              <span className="text-[10px] text-muted-foreground sm:hidden">徽章 {game.badges.length} · 连签 {game.daily.streak}</span>
+            </div>
+            {itemList.length === 0 ? (
+              <p className="text-[11px] text-muted-foreground">完成每日任务可获得提示道具</p>
+            ) : (
+              <div className="flex gap-2 flex-wrap">
+                {itemList.map(it => (
+                  <button
+                    key={it.id}
+                    onClick={() => handleUseItem(it.id)}
+                    className="group inline-flex items-center gap-1.5 pl-2 pr-2.5 py-1.5 rounded-full bg-white/90 border border-white text-[12px] font-semibold text-foreground hover:bg-white hover:scale-[1.02] active:scale-95 transition-all shadow-sm"
+                    title={it.desc}
+                  >
+                    <span className="text-base leading-none">{it.emoji}</span>
+                    <span>{it.name}</span>
+                    <span className="text-[10px] text-muted-foreground">×{it.count}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* 每日任务 */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-5">
+        <div className="rounded-3xl bg-card/80 backdrop-blur border border-border/60 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-1.5">
+              <Sparkle className="w-4 h-4 text-emerald-500" />
+              每日任务
+              <span className="text-[10px] font-medium text-muted-foreground">· 每天 00:00 刷新</span>
+            </h3>
+            <span className="text-[11px] text-muted-foreground tabular-nums">
+              {game.daily.claimed.length}/{(Object.keys(DAILY_TASKS) as DailyTaskId[]).length}
+            </span>
+          </div>
+          <div className="space-y-2">
+            {(Object.keys(DAILY_TASKS) as DailyTaskId[]).map(tid => {
+              const t = DAILY_TASKS[tid];
+              const cur = game.daily.progress[tid] || 0;
+              const claimed = game.daily.claimed.includes(tid);
+              const reachable = cur >= t.target;
+              const pct = Math.min(100, Math.round((cur / t.target) * 100));
+              return (
+                <div key={tid} className={cn(
+                  'flex items-center gap-3 p-3 rounded-2xl border transition-colors',
+                  claimed ? 'bg-emerald-50/70 border-emerald-200' : reachable ? 'bg-amber-50/80 border-amber-200' : 'bg-background border-border/60'
+                )}>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold text-foreground">{t.name}</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-700 font-bold">+{t.xp} XP</span>
+                      {t.reward && (
+                        <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-violet-100 text-violet-700 font-bold inline-flex items-center gap-0.5">
+                          {ITEMS[t.reward.item].emoji} ×{t.reward.count}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-[11px] text-muted-foreground mt-0.5">{t.desc}</p>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <div className="flex-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div className={cn('h-full transition-all', claimed ? 'bg-emerald-500' : 'bg-gradient-to-r from-amber-400 to-rose-400')} style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="text-[10px] tabular-nums text-muted-foreground shrink-0">{cur}/{t.target}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleClaim(tid)}
+                    disabled={!reachable || claimed}
+                    className={cn(
+                      'shrink-0 px-3 py-1.5 rounded-full text-xs font-bold transition-all',
+                      claimed
+                        ? 'bg-emerald-100 text-emerald-700 cursor-default inline-flex items-center gap-1'
+                        : reachable
+                          ? 'bg-gradient-to-r from-amber-400 to-rose-500 text-white shadow-sm hover:scale-105 active:scale-95'
+                          : 'bg-muted text-muted-foreground cursor-not-allowed'
+                    )}
+                  >
+                    {claimed ? <><Check className="w-3 h-3" strokeWidth={3} />已领</> : reachable ? '领取' : '进行中'}
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* 徽章墙 */}
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-5">
+        <div className="rounded-3xl bg-card/80 backdrop-blur border border-border/60 p-4 sm:p-5">
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-bold text-foreground inline-flex items-center gap-1.5">
+              <Trophy className="w-4 h-4 text-amber-500" />
+              徽章墙
+            </h3>
+            <span className="text-[11px] text-muted-foreground tabular-nums">{game.badges.length}/{Object.keys(BADGES).length}</span>
+          </div>
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2.5">
+            {(Object.keys(BADGES) as BadgeId[]).map(bid => {
+              const b = BADGES[bid];
+              const owned = game.badges.includes(bid);
+              return (
+                <div
+                  key={bid}
+                  className={cn(
+                    'group relative rounded-2xl p-2.5 text-center border transition-all',
+                    owned
+                      ? 'bg-gradient-to-br from-amber-50 to-rose-50 border-amber-200 shadow-sm hover:-translate-y-0.5'
+                      : 'bg-muted/40 border-dashed border-border/70 opacity-60'
+                  )}
+                  title={`${b.name}：${b.desc}`}
+                >
+                  <div className={cn('text-2xl sm:text-3xl leading-none mb-1', !owned && 'grayscale')}>{b.emoji}</div>
+                  <p className={cn('text-[11px] font-bold leading-tight', owned ? 'text-foreground' : 'text-muted-foreground')}>{b.name}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 leading-tight line-clamp-2">{b.desc}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
 
       {/* Map */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-16 sm:space-y-20">
@@ -314,12 +501,10 @@ export default function CareerMap() {
         </section>
 
         {/* Mobile reset */}
-        {doneCount > 0 && (
+        {(doneCount > 0 || game.xp > 0) && (
           <div className="sm:hidden flex justify-center pt-2">
             <button
-              onClick={() => {
-                if (confirm('确定要重置闯关进度吗？')) reset();
-              }}
+              onClick={handleResetAll}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs text-muted-foreground hover:text-foreground bg-card border border-border/60"
             >
               <RotateCcw className="w-3.5 h-3.5" />
