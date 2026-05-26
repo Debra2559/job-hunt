@@ -1,10 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, Flame, Trophy, Gift, Sparkle, Zap } from 'lucide-react';
+import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, Flame, Trophy, Gift, Sparkle, Zap, FastForward } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
-import { useGameProgress, BADGES, ITEMS, DAILY_TASKS, type DailyTaskId, type BadgeId, type ItemId } from '@/hooks/useGameProgress';
+import { useGameProgress, BADGES, ITEMS, DAILY_TASKS, CHAPTER_STAGES, type DailyTaskId, type BadgeId, type ItemId } from '@/hooks/useGameProgress';
+import { useChapterSkip, type ChapterId, type SkipPayload } from '@/hooks/useChapterSkip';
+import ChapterSkipDialog from '@/components/career/ChapterSkipDialog';
 import { toast } from '@/hooks/use-toast';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
