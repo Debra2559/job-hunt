@@ -229,6 +229,11 @@ All colors MUST be HSL.
   }
   .node-pulse { animation: node-pulse 2.4s ease-out infinite; }
 
+  @keyframes float {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-12px) translateX(8px); }
+  }
+
   /* Prose styles for markdown */
   .prose {
     @apply text-foreground;
