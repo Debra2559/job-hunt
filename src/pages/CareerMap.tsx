@@ -111,8 +111,10 @@ function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
 
 export default function CareerMap() {
   const navigate = useNavigate();
-  const { completed, reset } = useQuestProgress();
+  const { completed, markDone, reset } = useQuestProgress();
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
+  const { skipData, saveSkip, resetSkip } = useChapterSkip();
+  const [skipTarget, setSkipTarget] = useState<{ id: ChapterId; title: string; emoji: string } | null>(null);
 
   // 打开地图自动推进每日签到
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
