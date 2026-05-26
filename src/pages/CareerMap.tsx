@@ -527,24 +527,41 @@ export default function CareerMap() {
                 {/* corner sparkle */}
                 <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                 <div className="relative">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-[11px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
                     {chComplete && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-semibold inline-flex items-center gap-0.5">
                         <Check className="w-2.5 h-2.5" strokeWidth={3} /> 通关
                       </span>
                     )}
+                    {skipData[chapterIdOf(ch.num)] && !chComplete && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-semibold inline-flex items-center gap-0.5">
+                        <FastForward className="w-2.5 h-2.5" strokeWidth={3} /> 已跳过
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-2xl sm:text-[28px] font-bold mt-1.5 tracking-tight font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
                   <p className="text-sm sm:text-base opacity-95 mt-1.5">{ch.subtitle}</p>
-                  {chImpl > 0 && (
-                    <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-semibold">
-                      <span className="tabular-nums">{chDone}/{chImpl}</span>
-                      <div className="w-20 h-1 rounded-full bg-white/30 overflow-hidden">
-                        <div className="h-full bg-white transition-all" style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                  <div className="mt-3 flex items-center gap-2 flex-wrap">
+                    {chImpl > 0 && (
+                      <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-semibold">
+                        <span className="tabular-nums">{chDone}/{chImpl}</span>
+                        <div className="w-20 h-1 rounded-full bg-white/30 overflow-hidden">
+                          <div className="h-full bg-white transition-all" style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                    {!chComplete && chImpl > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji }); }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 text-foreground text-[11px] font-bold hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-sm"
+                        title="跳过本章（需提交关键信息）"
+                      >
+                        <FastForward className="w-3 h-3" strokeWidth={2.6} />
+                        跳过本章
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
