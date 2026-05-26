@@ -10,6 +10,7 @@ import { generateCareerReportHTML } from '@/components/career/CareerReportHTML';
 import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 import { VoiceInput } from '@/components/chat/VoiceInput';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
+import { useQuestProgress } from '@/hooks/useQuestProgress';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 type WebSource = { url: string; title: string; snippet: string };
@@ -159,6 +160,7 @@ export default function Career() {
   const [previewMode, setPreviewMode] = useState<'preview' | 'code'>('preview');
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const { markDone } = useQuestProgress();
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -200,9 +202,15 @@ export default function Career() {
           }
         }
       });
-      if (newReports.size > 0) setReports(newReports);
+      if (newReports.size > 0) {
+        setReports(newReports);
+        // Chapter 1 通关：生成报告即意味着「认识自己」三个关卡完成
+        markDone('assess');
+        markDone('recommend');
+        markDone('jd');
+      }
     }
-  }, [loadingHistory, messages, isLoading, bossJobs]);
+  }, [loadingHistory, messages, isLoading, bossJobs, markDone]);
 
   // Generate HTML for iframe
   const reportHTML = useMemo(() => {
