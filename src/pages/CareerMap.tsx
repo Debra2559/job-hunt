@@ -184,8 +184,24 @@ export default function CareerMap() {
     if (confirm('确定要重置闯关进度与所有奖励吗？此操作不可撤销。')) {
       reset();
       resetGame();
+      resetSkip();
     }
   };
+
+  // 跳过本章：标记本章实现关卡全部完成，保存跳关产出
+  const handleSkipConfirm = (payload: SkipPayload[ChapterId]) => {
+    if (!skipTarget) return;
+    const stageIds = CHAPTER_STAGES[skipTarget.id] || [];
+    stageIds.forEach(id => markDone(id));
+    saveSkip(skipTarget.id, payload as any);
+    toast({
+      title: `已跳过「${skipTarget.title}」`,
+      description: '本章关卡已标记完成，可继续推进下一章',
+    });
+    setSkipTarget(null);
+  };
+
+  const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
 
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50/60 via-cyan-50/40 to-violet-50/50">
