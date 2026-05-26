@@ -11,6 +11,7 @@ import { ThinkingIndicator } from '@/components/chat/ThinkingIndicator';
 import { VoiceInput } from '@/components/chat/VoiceInput';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
+import { useGameProgress } from '@/hooks/useGameProgress';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 type WebSource = { url: string; title: string; snippet: string };
@@ -161,6 +162,7 @@ export default function Career() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { markDone } = useQuestProgress();
+  const { onStageCompleted, bumpDaily } = useGameProgress();
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -205,12 +207,13 @@ export default function Career() {
       if (newReports.size > 0) {
         setReports(newReports);
         // Chapter 1 通关：生成报告即意味着「认识自己」三个关卡完成
-        markDone('assess');
-        markDone('recommend');
-        markDone('jd');
+        ['assess', 'recommend', 'jd'].forEach(id => {
+          markDone(id);
+          onStageCompleted(id);
+        });
       }
     }
-  }, [loadingHistory, messages, isLoading, bossJobs, markDone]);
+  }, [loadingHistory, messages, isLoading, bossJobs, markDone, onStageCompleted]);
 
   // Generate HTML for iframe
   const reportHTML = useMemo(() => {
@@ -233,6 +236,7 @@ export default function Career() {
   const handleSend = async (content: string) => {
     if (!content.trim() || isLoading) return;
     setInput('');
+    bumpDaily('ask_career');
     await sendMessage(
       content,
       (index, sources) => {
