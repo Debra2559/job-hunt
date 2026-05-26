@@ -408,7 +408,7 @@ export default function Career() {
         </div>
 
         {/* Input Area */}
-        <div className="shrink-0 border-t border-border bg-background/80 backdrop-blur-sm px-4 py-3">
+        <div className="shrink-0 border-t border-white/40 backdrop-blur-2xl bg-white/65 px-4 py-3">
           <div className={cn("mx-auto flex items-end gap-2", activeReport ? "max-w-2xl" : "max-w-3xl")}>
             <Textarea
               ref={textareaRef}
@@ -416,7 +416,7 @@ export default function Career() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="优先点选上方选项；如需补充可在此输入或语音..."
-              className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-input border-border focus:border-primary/50 focus:ring-primary/20"
+              className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-white/80 border-white/70 focus:border-emerald-400/60 focus:ring-emerald-300/30"
               rows={1}
             />
             <VoiceInput
@@ -427,9 +427,9 @@ export default function Career() {
               onClick={() => handleSend(input)}
               disabled={!input.trim() || isLoading}
               size="icon"
-              className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-primary hover:bg-primary/90 shadow-sm border-0"
+              className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 hover:opacity-95 shadow-[0_8px_22px_-8px_rgba(16,185,129,0.55)] border-0"
             >
-              <Send className="w-4 h-4 text-primary-foreground" />
+              <Send className="w-4 h-4 text-white" />
             </Button>
           </div>
         </div>
