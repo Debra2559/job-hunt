@@ -18,6 +18,7 @@ type StageDef = {
   title: string;
   desc: string;
   icon: any;
+  emoji: string;          // 每关的专属可爱图标
   to?: string;
   comingSoon?: boolean;
   priority?: 'P0' | 'P1';
@@ -28,9 +29,12 @@ type Chapter = {
   title: string;
   subtitle: string;
   emoji: string;
-  gradient: string;
-  signColor: string;       // 区域牌颜色
-  scenery: string[];       // 该区域散落的景物 emoji
+  // 章节主题色（柔和马卡龙）
+  nodeBg: string;         // 节点圆盘渐变
+  nodeHalo: string;       // 节点光晕色
+  ribbon: string;         // ribbon 渐变
+  ribbonShadow: string;   // ribbon 投影颜色
+  scenery: string[];      // 该区域散落的景物 emoji
   stages: StageDef[];
 };
 
@@ -40,13 +44,15 @@ const chapters: Chapter[] = [
     title: '认识自己',
     subtitle: '搞清楚我是谁、我适合什么',
     emoji: '🧭',
-    gradient: 'from-emerald-400 via-teal-400 to-cyan-500',
-    signColor: 'from-emerald-500 to-teal-600',
+    nodeBg: 'from-emerald-200 via-teal-200 to-cyan-200',
+    nodeHalo: 'bg-emerald-300/50',
+    ribbon: 'from-emerald-400 to-teal-500',
+    ribbonShadow: 'shadow-emerald-300/50',
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
-      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, to: '/career', priority: 'P0' },
-      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, to: '/career', priority: 'P0' },
-      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, to: '/career', priority: 'P0' },
+      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, emoji: '🧠', to: '/career', priority: 'P0' },
+      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, emoji: '🎯', to: '/career', priority: 'P0' },
+      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, emoji: '🔍', to: '/career', priority: 'P0' },
     ],
   },
   {
@@ -54,14 +60,16 @@ const chapters: Chapter[] = [
     title: '准备出发',
     subtitle: '梳理经历,打磨简历,弹药上膛',
     emoji: '🎒',
-    gradient: 'from-teal-400 via-cyan-400 to-sky-500',
-    signColor: 'from-cyan-500 to-sky-600',
+    nodeBg: 'from-sky-200 via-cyan-200 to-blue-200',
+    nodeHalo: 'bg-sky-300/50',
+    ribbon: 'from-sky-400 to-cyan-500',
+    ribbonShadow: 'shadow-sky-300/50',
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
-      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, comingSoon: true, priority: 'P0' },
-      { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, comingSoon: true, priority: 'P0' },
-      { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, comingSoon: true, priority: 'P1' },
-      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: Bot, comingSoon: true, priority: 'P0' },
+      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, emoji: '📝', comingSoon: true, priority: 'P0' },
+      { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, emoji: '💡', comingSoon: true, priority: 'P0' },
+      { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', comingSoon: true, priority: 'P1' },
+      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: Bot, emoji: '🤖', comingSoon: true, priority: 'P0' },
     ],
   },
   {
@@ -69,29 +77,35 @@ const chapters: Chapter[] = [
     title: '投递闯关',
     subtitle: '让对的机会主动找到你',
     emoji: '🚀',
-    gradient: 'from-cyan-400 via-violet-400 to-fuchsia-500',
-    signColor: 'from-violet-500 to-fuchsia-600',
+    nodeBg: 'from-violet-200 via-purple-200 to-fuchsia-200',
+    nodeHalo: 'bg-violet-300/50',
+    ribbon: 'from-violet-400 to-fuchsia-500',
+    ribbonShadow: 'shadow-violet-300/50',
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
-      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, comingSoon: true, priority: 'P0' },
-      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: Send, comingSoon: true, priority: 'P0' },
-      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: Scissors, comingSoon: true, priority: 'P1' },
+      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, emoji: '✨', comingSoon: true, priority: 'P0' },
+      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: Send, emoji: '📮', comingSoon: true, priority: 'P0' },
+      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: Scissors, emoji: '✂️', comingSoon: true, priority: 'P1' },
     ],
   },
   {
     num: '04',
     title: '面试通关',
     subtitle: '在镜头前从容做自己',
-    emoji: '🎤',
-    gradient: 'from-violet-400 via-fuchsia-400 to-rose-500',
-    signColor: 'from-fuchsia-500 to-rose-600',
+    emoji: '👑',
+    nodeBg: 'from-rose-200 via-pink-200 to-orange-200',
+    nodeHalo: 'bg-rose-300/50',
+    ribbon: 'from-rose-400 to-orange-500',
+    ribbonShadow: 'shadow-rose-300/50',
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
-      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, comingSoon: true, priority: 'P0' },
-      { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, comingSoon: true, priority: 'P1' },
+      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
+      { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
 ];
+
+
 
 function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
   const flat = chapters.flatMap(c => c.stages);
