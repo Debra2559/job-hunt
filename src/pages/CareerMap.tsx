@@ -36,10 +36,10 @@ const chapters: Chapter[] = [
     title: '认识自己',
     subtitle: '搞清楚我是谁、我适合什么',
     emoji: '🧭',
-    gradient: 'from-emerald-400 to-teal-500',
+    gradient: 'from-emerald-400 via-teal-400 to-cyan-500',
     ring: 'ring-emerald-200',
     stages: [
-      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选，5-10 分钟', icon: Compass, to: '/career', priority: 'P0' },
+      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, to: '/career', priority: 'P0' },
       { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, to: '/career', priority: 'P0' },
       { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, to: '/career', priority: 'P0' },
     ],
@@ -47,10 +47,10 @@ const chapters: Chapter[] = [
   {
     num: '02',
     title: '准备出发',
-    subtitle: '梳理经历，打磨简历，弹药上膛',
+    subtitle: '梳理经历,打磨简历,弹药上膛',
     emoji: '🎒',
-    gradient: 'from-sky-400 to-indigo-500',
-    ring: 'ring-sky-200',
+    gradient: 'from-teal-400 via-cyan-400 to-sky-500',
+    ring: 'ring-cyan-200',
     stages: [
       { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, comingSoon: true, priority: 'P0' },
       { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, comingSoon: true, priority: 'P0' },
@@ -63,7 +63,7 @@ const chapters: Chapter[] = [
     title: '投递闯关',
     subtitle: '让对的机会主动找到你',
     emoji: '🚀',
-    gradient: 'from-violet-400 to-fuchsia-500',
+    gradient: 'from-cyan-400 via-violet-400 to-fuchsia-500',
     ring: 'ring-violet-200',
     stages: [
       { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, comingSoon: true, priority: 'P0' },
@@ -76,8 +76,8 @@ const chapters: Chapter[] = [
     title: '面试通关',
     subtitle: '在镜头前从容做自己',
     emoji: '🎤',
-    gradient: 'from-orange-400 to-rose-500',
-    ring: 'ring-orange-200',
+    gradient: 'from-violet-400 via-fuchsia-400 to-rose-500',
+    ring: 'ring-fuchsia-200',
     stages: [
       { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, comingSoon: true, priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, comingSoon: true, priority: 'P1' },
@@ -184,17 +184,26 @@ export default function CareerMap() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-background to-violet-50/30">
+    <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50/60 via-cyan-50/40 to-violet-50/50">
+      {/* Aurora animated blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="aurora-blob aurora-blob-1 -top-32 -left-20 w-[420px] h-[420px] bg-emerald-300/50" />
+        <div className="aurora-blob aurora-blob-2 top-[20%] -right-24 w-[480px] h-[480px] bg-cyan-300/45" />
+        <div className="aurora-blob aurora-blob-3 top-[55%] left-[10%] w-[520px] h-[520px] bg-violet-300/40" />
+        <div className="aurora-blob aurora-blob-1 bottom-[5%] right-[5%] w-[420px] h-[420px] bg-fuchsia-300/35" />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-20 backdrop-blur-xl bg-background/70 border-b border-border/60">
+      <header className="sticky top-0 z-20 backdrop-blur-2xl bg-white/55 border-b border-white/40">
+
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/40 shrink-0">
             <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-1.5">
-              求职闯关地图
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold">智联 AI</span>
+            <h1 className="text-base sm:text-lg font-bold flex items-center gap-1.5">
+              <span className="aurora-text">求职闯关地图</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide">智联 AI</span>
             </h1>
             <p className="text-xs text-muted-foreground">从认识自己到拿下 offer，一关一关来</p>
           </div>
@@ -488,123 +497,177 @@ export default function CareerMap() {
           <section key={ch.num} className="relative animate-fade-in" style={{ animationDelay: `${ci * 80}ms` }}>
             {/* Chapter banner */}
             <div className="relative mb-8 sm:mb-10">
-              <div className={cn('relative overflow-hidden rounded-3xl p-5 sm:p-6 bg-gradient-to-br text-white shadow-[0_10px_40px_-12px_rgba(0,0,0,0.25)]', ch.gradient)}>
-                <div className="absolute -right-6 -top-6 text-[120px] sm:text-[140px] leading-none opacity-20 select-none">{ch.emoji}</div>
-                <div className="absolute -left-2 top-1/2 -translate-y-1/2 text-[80px] sm:text-[100px] leading-none font-black opacity-10 select-none tracking-tighter">{ch.num}</div>
+              <div className={cn('relative overflow-hidden rounded-[28px] p-6 sm:p-7 bg-gradient-to-br text-white', ch.gradient)}
+                style={{ boxShadow: '0 24px 60px -20px rgba(16,185,129,0.45), inset 0 1px 0 rgba(255,255,255,0.4)' }}
+              >
+                {/* glass highlights */}
+                <div className="absolute inset-0 bg-gradient-to-br from-white/20 via-transparent to-transparent pointer-events-none" />
+                <div className="absolute -right-8 -top-10 text-[150px] sm:text-[170px] leading-none opacity-25 select-none rotate-12">{ch.emoji}</div>
+                <div className="absolute -left-3 top-1/2 -translate-y-1/2 text-[90px] sm:text-[110px] leading-none font-black opacity-[0.12] select-none tracking-tighter font-display-aurora">{ch.num}</div>
+                {/* corner sparkle */}
+                <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                 <div className="relative">
                   <div className="flex items-center gap-2">
-                    <p className="text-[11px] font-bold tracking-[0.2em] opacity-90">CHAPTER {ch.num}</p>
+                    <p className="text-[11px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
                     {chComplete && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/25 backdrop-blur font-semibold inline-flex items-center gap-0.5">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-semibold inline-flex items-center gap-0.5">
                         <Check className="w-2.5 h-2.5" strokeWidth={3} /> 通关
                       </span>
                     )}
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold mt-1 tracking-tight">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
+                  <h2 className="text-2xl sm:text-[28px] font-bold mt-1.5 tracking-tight font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
                   <p className="text-sm sm:text-base opacity-95 mt-1.5">{ch.subtitle}</p>
                   {chImpl > 0 && (
-                    <p className="text-[11px] opacity-80 mt-2 font-medium">本章进度 {chDone}/{chImpl}</p>
+                    <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-semibold">
+                      <span className="tabular-nums">{chDone}/{chImpl}</span>
+                      <div className="w-20 h-1 rounded-full bg-white/30 overflow-hidden">
+                        <div className="h-full bg-white transition-all" style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                      </div>
+                    </div>
                   )}
                 </div>
               </div>
             </div>
 
-            {/* Stage path */}
-            <div className="relative space-y-5 sm:space-y-6">
-              {ch.stages.map((st, si) => {
-                const isLeft = si % 2 === 0;
-                const status = statuses[st.id];
-                const isLocked = status === 'locked';
-                const isDone = status === 'done';
-                const isActive = status === 'active';
-                const Icon = st.icon;
-                return (
-                  <div key={st.id} className={cn('flex', isLeft ? 'justify-start' : 'justify-end')}>
-                    <button
-                      onClick={() => !isLocked && st.to && navigate(st.to)}
-                      disabled={isLocked || !st.to}
-                      className={cn(
-                        'group relative w-[88%] sm:w-[78%] text-left rounded-3xl p-4 sm:p-5 bg-card border-2 transition-all duration-300',
-                        'flex items-center gap-4',
-                        isLocked
-                          ? 'border-dashed border-border/70 opacity-70 cursor-not-allowed'
-                          : cn('border-transparent shadow-[0_8px_24px_-12px_rgba(16,185,129,0.35)] hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-12px_rgba(16,185,129,0.45)] active:scale-[0.99]', ch.ring, 'hover:ring-4'),
-                        isActive && 'ring-4 ring-emerald-200/80 animate-pulse-slow'
-                      )}
-                    >
-                      {/* Stage number badge */}
-                      <div
+            {/* Stage winding path */}
+            <div className="relative">
+              {/* Decorative SVG winding path */}
+              <svg
+                className="absolute inset-0 w-full h-full pointer-events-none"
+                preserveAspectRatio="none"
+                viewBox={`0 0 100 ${ch.stages.length * 100}`}
+              >
+                <defs>
+                  <linearGradient id={`grad-${ch.num}`} x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity="0.5" />
+                    <stop offset="50%" stopColor="#06b6d4" stopOpacity="0.5" />
+                    <stop offset="100%" stopColor="#a855f7" stopOpacity="0.5" />
+                  </linearGradient>
+                </defs>
+                {/* build a smooth winding curve through nodes */}
+                {(() => {
+                  const n = ch.stages.length;
+                  const pts = ch.stages.map((_, i) => ({
+                    x: i % 2 === 0 ? 22 : 78,
+                    y: i * 100 + 50,
+                  }));
+                  let d = `M ${pts[0].x} ${pts[0].y}`;
+                  for (let i = 1; i < n; i++) {
+                    const p0 = pts[i - 1], p1 = pts[i];
+                    const cx1 = p0.x, cy1 = (p0.y + p1.y) / 2;
+                    const cx2 = p1.x, cy2 = (p0.y + p1.y) / 2;
+                    d += ` C ${cx1} ${cy1}, ${cx2} ${cy2}, ${p1.x} ${p1.y}`;
+                  }
+                  return (
+                    <>
+                      <path d={d} fill="none" stroke={`url(#grad-${ch.num})`} strokeWidth="1.2" strokeLinecap="round" />
+                      <path d={d} fill="none" stroke={`url(#grad-${ch.num})`} strokeWidth="0.6" strokeLinecap="round" className="path-flow" opacity="0.9" />
+                    </>
+                  );
+                })()}
+              </svg>
+
+              <div className="relative space-y-6 sm:space-y-7">
+                {ch.stages.map((st, si) => {
+                  const isLeft = si % 2 === 0;
+                  const status = statuses[st.id];
+                  const isLocked = status === 'locked';
+                  const isDone = status === 'done';
+                  const isActive = status === 'active';
+                  const Icon = st.icon;
+                  return (
+                    <div key={st.id} className={cn('flex', isLeft ? 'justify-start' : 'justify-end')}>
+                      <button
+                        onClick={() => !isLocked && st.to && navigate(st.to)}
+                        disabled={isLocked || !st.to}
                         className={cn(
-                          'shrink-0 relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center text-white shadow-md',
-                          isLocked ? 'bg-muted text-muted-foreground shadow-none' : cn('bg-gradient-to-br', ch.gradient)
+                          'group relative w-[88%] sm:w-[76%] text-left rounded-[22px] p-4 sm:p-5 transition-all duration-300 flex items-center gap-4 backdrop-blur-xl',
+                          isLocked
+                            ? 'bg-white/40 border border-dashed border-white/60 opacity-75 cursor-not-allowed'
+                            : 'bg-white/75 border border-white/80 shadow-[0_10px_30px_-12px_rgba(16,185,129,0.35)] hover:-translate-y-1 hover:shadow-[0_18px_40px_-12px_rgba(6,182,212,0.45)] hover:bg-white/95 active:scale-[0.99]',
+                          isActive && 'ring-2 ring-emerald-300/80 ring-offset-2 ring-offset-transparent'
                         )}
                       >
-                        {isLocked
-                          ? <Lock className="w-5 h-5" />
-                          : isDone
-                            ? <Check className="w-7 h-7" strokeWidth={2.5} />
-                            : <Icon className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={2.2} />}
-                        {!isLocked && (
-                          <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-white text-foreground text-[11px] font-bold flex items-center justify-center shadow-sm border border-border/60">
-                            {si + 1}
-                          </span>
+                        {/* glow ring on active */}
+                        {isActive && (
+                          <div className="absolute -inset-px rounded-[22px] bg-gradient-to-r from-emerald-400/30 via-cyan-400/30 to-violet-400/30 blur-md -z-10" />
                         )}
-                      </div>
 
-                      {/* Body */}
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className={cn('text-sm sm:text-base font-bold', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
-                            {st.title}
-                          </h3>
-                          {st.priority && (
-                            <span className={cn(
-                              'text-[10px] px-1.5 py-0.5 rounded-md font-semibold',
-                              st.priority === 'P0' ? 'bg-rose-50 text-rose-600' : 'bg-amber-50 text-amber-600'
-                            )}>
-                              {st.priority}
+                        {/* Stage icon node */}
+                        <div
+                          className={cn(
+                            'shrink-0 relative w-14 h-14 sm:w-[60px] sm:h-[60px] rounded-2xl flex items-center justify-center text-white',
+                            isLocked ? 'bg-gradient-to-br from-slate-200 to-slate-300 text-slate-400' : cn('bg-gradient-to-br shadow-lg', ch.gradient),
+                            isActive && 'node-pulse'
+                          )}
+                        >
+                          {isLocked
+                            ? <Lock className="w-5 h-5" />
+                            : isDone
+                              ? <Check className="w-7 h-7" strokeWidth={2.6} />
+                              : <Icon className="w-6 h-6 sm:w-7 sm:h-7" strokeWidth={2.2} />}
+                          {!isLocked && (
+                            <span className="absolute -top-1.5 -right-1.5 w-6 h-6 rounded-full bg-white text-foreground text-[11px] font-extrabold flex items-center justify-center shadow border border-white font-display-aurora">
+                              {si + 1}
                             </span>
-                          )}
-                          {st.comingSoon && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-muted text-muted-foreground">敬请期待</span>
-                          )}
-                          {isDone && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-emerald-50 text-emerald-600 inline-flex items-center gap-0.5">
-                              <Check className="w-2.5 h-2.5" strokeWidth={3} /> 已通关
-                            </span>
-                          )}
-                          {isActive && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-gradient-to-r from-emerald-500 to-teal-500 text-white">
-                              进行中
-                            </span>
-                          )}
-                          {isLocked && !st.comingSoon && (
-                            <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-muted text-muted-foreground">未解锁</span>
                           )}
                         </div>
-                        <p className={cn('text-xs sm:text-[13px] mt-1 leading-relaxed', isLocked ? 'text-muted-foreground/80' : 'text-muted-foreground')}>
-                          {isLocked && !st.comingSoon ? '完成上一关后开启' : st.desc}
-                        </p>
-                      </div>
 
-                      {/* Arrow */}
-                      {!isLocked && (
-                        <ChevronRight className="shrink-0 w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all" />
-                      )}
-                    </button>
-                  </div>
-                );
-              })}
+                        {/* Body */}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <h3 className={cn('text-sm sm:text-base font-bold font-display-aurora', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
+                              {st.title}
+                            </h3>
+                            {st.priority && (
+                              <span className={cn(
+                                'text-[10px] px-1.5 py-0.5 rounded-md font-bold',
+                                st.priority === 'P0' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
+                              )}>
+                                {st.priority}
+                              </span>
+                            )}
+                            {st.comingSoon && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-500">敬请期待</span>
+                            )}
+                            {isDone && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-emerald-100 text-emerald-700 inline-flex items-center gap-0.5">
+                                <Check className="w-2.5 h-2.5" strokeWidth={3} /> 已通关
+                              </span>
+                            )}
+                            {isActive && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white shadow-sm">
+                                进行中
+                              </span>
+                            )}
+                            {isLocked && !st.comingSoon && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md font-semibold bg-slate-100 text-slate-500">未解锁</span>
+                            )}
+                          </div>
+                          <p className={cn('text-xs sm:text-[13px] mt-1 leading-relaxed', isLocked ? 'text-muted-foreground/80' : 'text-muted-foreground')}>
+                            {isLocked && !st.comingSoon ? '完成上一关后开启' : st.desc}
+                          </p>
+                        </div>
+
+                        {/* Arrow */}
+                        {!isLocked && (
+                          <ChevronRight className="shrink-0 w-5 h-5 text-muted-foreground group-hover:text-emerald-500 group-hover:translate-x-1 transition-all" />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
 
-            {/* Connector to next chapter */}
+            {/* Connector to next chapter — aurora dots */}
             {ci < chapters.length - 1 && (
-              <div className="flex justify-center mt-10 sm:mt-12">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-px h-8 bg-gradient-to-b from-border to-transparent" />
-                  <div className="w-2 h-2 rounded-full bg-border" />
-                  <div className="w-2 h-2 rounded-full bg-border/60" />
-                  <div className="w-2 h-2 rounded-full bg-border/40" />
+              <div className="flex justify-center mt-12 sm:mt-14">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="w-px h-10 bg-gradient-to-b from-emerald-300 via-cyan-300 to-violet-300" />
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.6)]" />
+                  <div className="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(6,182,212,0.6)]" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-400 shadow-[0_0_6px_rgba(168,85,247,0.6)]" />
                 </div>
               </div>
             )}
@@ -614,14 +677,16 @@ export default function CareerMap() {
         {/* Finale */}
         <section className="relative">
           <div className={cn(
-            'rounded-3xl p-8 text-center border shadow-[0_10px_40px_-12px_rgba(244,114,182,0.35)] transition-all',
+            'relative overflow-hidden rounded-[28px] p-8 text-center border border-white/70 backdrop-blur-xl transition-all',
             doneCount === implementedTotal && implementedTotal > 0
-              ? 'bg-gradient-to-br from-amber-200 via-rose-200 to-violet-200 border-white scale-[1.02]'
-              : 'bg-gradient-to-br from-amber-100 via-rose-100 to-violet-100 border-white opacity-80'
+              ? 'bg-gradient-to-br from-emerald-200/90 via-cyan-200/80 to-violet-200/90 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.45)] scale-[1.02]'
+              : 'bg-gradient-to-br from-emerald-100/70 via-cyan-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(6,182,212,0.35)] opacity-90'
           )}>
-            <div className="text-5xl mb-3">🏆</div>
-            <h3 className="text-xl font-extrabold text-foreground">拿下心仪 Offer</h3>
-            <p className="text-sm text-muted-foreground mt-1.5">
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber-200/40 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-violet-300/30 blur-3xl pointer-events-none" />
+            <div className="text-5xl mb-3 drop-shadow-sm">🏆</div>
+            <h3 className="text-xl font-bold font-display-aurora aurora-text">拿下心仪 Offer</h3>
+            <p className="text-sm text-foreground/70 mt-2">
               {doneCount === implementedTotal && implementedTotal > 0
                 ? '恭喜！已开放的关卡全部通关，继续等待新章节解锁～'
                 : '通关后欢迎回来分享你的故事'}
