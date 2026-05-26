@@ -677,14 +677,16 @@ export default function CareerMap() {
         {/* Finale */}
         <section className="relative">
           <div className={cn(
-            'rounded-3xl p-8 text-center border shadow-[0_10px_40px_-12px_rgba(244,114,182,0.35)] transition-all',
+            'relative overflow-hidden rounded-[28px] p-8 text-center border border-white/70 backdrop-blur-xl transition-all',
             doneCount === implementedTotal && implementedTotal > 0
-              ? 'bg-gradient-to-br from-amber-200 via-rose-200 to-violet-200 border-white scale-[1.02]'
-              : 'bg-gradient-to-br from-amber-100 via-rose-100 to-violet-100 border-white opacity-80'
+              ? 'bg-gradient-to-br from-emerald-200/90 via-cyan-200/80 to-violet-200/90 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.45)] scale-[1.02]'
+              : 'bg-gradient-to-br from-emerald-100/70 via-cyan-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(6,182,212,0.35)] opacity-90'
           )}>
-            <div className="text-5xl mb-3">🏆</div>
-            <h3 className="text-xl font-extrabold text-foreground">拿下心仪 Offer</h3>
-            <p className="text-sm text-muted-foreground mt-1.5">
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber-200/40 blur-3xl pointer-events-none" />
+            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-violet-300/30 blur-3xl pointer-events-none" />
+            <div className="text-5xl mb-3 drop-shadow-sm">🏆</div>
+            <h3 className="text-xl font-bold font-display-aurora aurora-text">拿下心仪 Offer</h3>
+            <p className="text-sm text-foreground/70 mt-2">
               {doneCount === implementedTotal && implementedTotal > 0
                 ? '恭喜！已开放的关卡全部通关，继续等待新章节解锁～'
                 : '通关后欢迎回来分享你的故事'}
