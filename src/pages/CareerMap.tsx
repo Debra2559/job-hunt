@@ -124,6 +124,39 @@ export default function CareerMap() {
   const totalStages = allStages.length;
   const progressPct = implementedTotal > 0 ? Math.round((doneCount / implementedTotal) * 100) : 0;
 
+  // ====== 下一步推荐 ======
+  // 1) 优先推荐 active 关卡（顺序解锁里下一个该做的实现关）
+  // 2) 否则若全部实现关已完成，引导到第一个 comingSoon 的关卡（敬请期待）
+  // 3) 没有任何关卡：null
+  const allFlat = chapters.flatMap((c, ci) => c.stages.map((s, si) => ({ stage: s, chapter: c, ci, si })));
+  const activeEntry = allFlat.find(e => statuses[e.stage.id] === 'active');
+  const firstSoonEntry = allFlat.find(e => e.stage.comingSoon);
+  const allDoneImplemented = implementedTotal > 0 && doneCount === implementedTotal;
+  const nextRec = activeEntry || (allDoneImplemented ? firstSoonEntry : null);
+  const nextDoneInChapter = nextRec
+    ? nextRec.chapter.stages.filter(s => statuses[s.id] === 'done').length
+    : 0;
+  const nextImplInChapter = nextRec
+    ? nextRec.chapter.stages.filter(s => !s.comingSoon).length
+    : 0;
+
+  // 智能文案
+  const recHeadline = (() => {
+    if (!nextRec) return '准备好开始你的求职旅程了';
+    if (allDoneImplemented) return '已开放关卡全部通关，先看看后续内容';
+    if (doneCount === 0) return '从这里出发，认识真正的自己';
+    if (nextDoneInChapter > 0 && nextDoneInChapter < nextImplInChapter) return `继续推进「${nextRec.chapter.title}」，离通关只差几步`;
+    return `进入「第${['一','二','三','四'][nextRec.ci]}章 · ${nextRec.chapter.title}」`;
+  })();
+  const recReason = (() => {
+    if (!nextRec) return '';
+    if (allDoneImplemented) return '后续章节正在打磨中，可先体验敬请期待的预告';
+    if (doneCount === 0) return '8-12 题点选 · 5-10 分钟，结束后会生成你的专属职业报告';
+    const remain = implementedTotal - doneCount;
+    return `当前进度 ${doneCount}/${implementedTotal}，距全部开放关卡通关还有 ${remain} 关`;
+  })();
+  const NextIcon = nextRec?.stage.icon;
+
   const itemList = (Object.keys(ITEMS) as ItemId[])
     .map(id => ({ id, count: game.items[id] || 0, ...ITEMS[id] }))
     .filter(x => x.count > 0);
