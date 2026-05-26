@@ -437,12 +437,12 @@ export default function Career() {
 
       {/* Artifact Preview Panel */}
       {activeReport && (
-        <div className="w-1/2 flex flex-col bg-background animate-slide-in-right">
+        <div className="relative z-10 w-1/2 flex flex-col bg-white/85 backdrop-blur-xl animate-slide-in-right">
           {/* Panel Header */}
-          <div className="shrink-0 border-b border-border bg-background px-4 py-2.5 flex items-center gap-3">
+          <div className="shrink-0 border-b border-white/40 bg-white/65 backdrop-blur-2xl px-4 py-2.5 flex items-center gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[hsl(var(--dream-violet)/0.15)] to-[hsl(var(--dream-pink)/0.1)] flex items-center justify-center">
-                <FileText className="w-3.5 h-3.5 text-[hsl(var(--dream-violet))]" />
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-200 to-teal-200 flex items-center justify-center shadow-sm">
+                <FileText className="w-3.5 h-3.5 text-emerald-700" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">职业规划报告</p>
