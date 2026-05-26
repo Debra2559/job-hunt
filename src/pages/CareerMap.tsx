@@ -501,12 +501,10 @@ export default function CareerMap() {
         </section>
 
         {/* Mobile reset */}
-        {doneCount > 0 && (
+        {(doneCount > 0 || game.xp > 0) && (
           <div className="sm:hidden flex justify-center pt-2">
             <button
-              onClick={() => {
-                if (confirm('确定要重置闯关进度吗？')) reset();
-              }}
+              onClick={handleResetAll}
               className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs text-muted-foreground hover:text-foreground bg-card border border-border/60"
             >
               <RotateCcw className="w-3.5 h-3.5" />
