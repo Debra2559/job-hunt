@@ -744,6 +744,17 @@ export default function CareerMap() {
           </div>
         )}
       </div>
+
+      {skipTarget && (
+        <ChapterSkipDialog
+          open={!!skipTarget}
+          onOpenChange={(o) => { if (!o) setSkipTarget(null); }}
+          chapterId={skipTarget.id}
+          chapterTitle={skipTarget.title}
+          chapterEmoji={skipTarget.emoji}
+          onConfirm={handleSkipConfirm}
+        />
+      )}
     </div>
   );
 }
