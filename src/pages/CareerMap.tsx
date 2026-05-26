@@ -36,10 +36,10 @@ const chapters: Chapter[] = [
     title: '认识自己',
     subtitle: '搞清楚我是谁、我适合什么',
     emoji: '🧭',
-    gradient: 'from-emerald-400 to-teal-500',
+    gradient: 'from-emerald-400 via-teal-400 to-cyan-500',
     ring: 'ring-emerald-200',
     stages: [
-      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选，5-10 分钟', icon: Compass, to: '/career', priority: 'P0' },
+      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, to: '/career', priority: 'P0' },
       { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, to: '/career', priority: 'P0' },
       { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, to: '/career', priority: 'P0' },
     ],
@@ -47,10 +47,10 @@ const chapters: Chapter[] = [
   {
     num: '02',
     title: '准备出发',
-    subtitle: '梳理经历，打磨简历，弹药上膛',
+    subtitle: '梳理经历,打磨简历,弹药上膛',
     emoji: '🎒',
-    gradient: 'from-sky-400 to-indigo-500',
-    ring: 'ring-sky-200',
+    gradient: 'from-teal-400 via-cyan-400 to-sky-500',
+    ring: 'ring-cyan-200',
     stages: [
       { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, comingSoon: true, priority: 'P0' },
       { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, comingSoon: true, priority: 'P0' },
@@ -63,7 +63,7 @@ const chapters: Chapter[] = [
     title: '投递闯关',
     subtitle: '让对的机会主动找到你',
     emoji: '🚀',
-    gradient: 'from-violet-400 to-fuchsia-500',
+    gradient: 'from-cyan-400 via-violet-400 to-fuchsia-500',
     ring: 'ring-violet-200',
     stages: [
       { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, comingSoon: true, priority: 'P0' },
@@ -76,8 +76,8 @@ const chapters: Chapter[] = [
     title: '面试通关',
     subtitle: '在镜头前从容做自己',
     emoji: '🎤',
-    gradient: 'from-orange-400 to-rose-500',
-    ring: 'ring-orange-200',
+    gradient: 'from-violet-400 via-fuchsia-400 to-rose-500',
+    ring: 'ring-fuchsia-200',
     stages: [
       { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, comingSoon: true, priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, comingSoon: true, priority: 'P1' },
