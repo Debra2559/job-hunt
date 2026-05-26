@@ -168,7 +168,7 @@ export default function CareerMap() {
     const remain = implementedTotal - doneCount;
     return `当前进度 ${doneCount}/${implementedTotal}，距全部通关还有 ${remain} 关`;
   })();
-  const NextIcon = nextRec?.stage.icon;
+  
 
   const handleResetAll = () => {
     if (confirm('确定要重置闯关进度与所有奖励吗？此操作不可撤销。')) {
