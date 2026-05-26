@@ -184,9 +184,18 @@ export default function CareerMap() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-50/40 via-background to-violet-50/30">
+    <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50/60 via-cyan-50/40 to-violet-50/50">
+      {/* Aurora animated blobs */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="aurora-blob aurora-blob-1 -top-32 -left-20 w-[420px] h-[420px] bg-emerald-300/50" />
+        <div className="aurora-blob aurora-blob-2 top-[20%] -right-24 w-[480px] h-[480px] bg-cyan-300/45" />
+        <div className="aurora-blob aurora-blob-3 top-[55%] left-[10%] w-[520px] h-[520px] bg-violet-300/40" />
+        <div className="aurora-blob aurora-blob-1 bottom-[5%] right-[5%] w-[420px] h-[420px] bg-fuchsia-300/35" />
+      </div>
+
       {/* Header */}
-      <header className="sticky top-0 z-20 backdrop-blur-xl bg-background/70 border-b border-border/60">
+      <header className="sticky top-0 z-20 backdrop-blur-2xl bg-white/55 border-b border-white/40">
+
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3.5 flex items-center gap-3">
           <div className="relative w-10 h-10 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/40 shrink-0">
             <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
