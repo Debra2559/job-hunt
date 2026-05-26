@@ -18,6 +18,7 @@ type StageDef = {
   title: string;
   desc: string;
   icon: any;
+  emoji: string;          // 每关的专属可爱图标
   to?: string;
   comingSoon?: boolean;
   priority?: 'P0' | 'P1';
@@ -28,9 +29,12 @@ type Chapter = {
   title: string;
   subtitle: string;
   emoji: string;
-  gradient: string;
-  signColor: string;       // 区域牌颜色
-  scenery: string[];       // 该区域散落的景物 emoji
+  // 章节主题色（柔和马卡龙）
+  nodeBg: string;         // 节点圆盘渐变
+  nodeHalo: string;       // 节点光晕色
+  ribbon: string;         // ribbon 渐变
+  ribbonShadow: string;   // ribbon 投影颜色
+  scenery: string[];      // 该区域散落的景物 emoji
   stages: StageDef[];
 };
 
@@ -40,13 +44,15 @@ const chapters: Chapter[] = [
     title: '认识自己',
     subtitle: '搞清楚我是谁、我适合什么',
     emoji: '🧭',
-    gradient: 'from-emerald-400 via-teal-400 to-cyan-500',
-    signColor: 'from-emerald-500 to-teal-600',
+    nodeBg: 'from-emerald-200 via-teal-200 to-cyan-200',
+    nodeHalo: 'bg-emerald-300/50',
+    ribbon: 'from-emerald-400 to-teal-500',
+    ribbonShadow: 'shadow-emerald-300/50',
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
-      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, to: '/career', priority: 'P0' },
-      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, to: '/career', priority: 'P0' },
-      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, to: '/career', priority: 'P0' },
+      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, emoji: '🧠', to: '/career', priority: 'P0' },
+      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, emoji: '🎯', to: '/career', priority: 'P0' },
+      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, emoji: '🔍', to: '/career', priority: 'P0' },
     ],
   },
   {
@@ -54,14 +60,16 @@ const chapters: Chapter[] = [
     title: '准备出发',
     subtitle: '梳理经历,打磨简历,弹药上膛',
     emoji: '🎒',
-    gradient: 'from-teal-400 via-cyan-400 to-sky-500',
-    signColor: 'from-cyan-500 to-sky-600',
+    nodeBg: 'from-sky-200 via-cyan-200 to-blue-200',
+    nodeHalo: 'bg-sky-300/50',
+    ribbon: 'from-sky-400 to-cyan-500',
+    ribbonShadow: 'shadow-sky-300/50',
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
-      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, comingSoon: true, priority: 'P0' },
-      { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, comingSoon: true, priority: 'P0' },
-      { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, comingSoon: true, priority: 'P1' },
-      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: Bot, comingSoon: true, priority: 'P0' },
+      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, emoji: '📝', comingSoon: true, priority: 'P0' },
+      { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, emoji: '💡', comingSoon: true, priority: 'P0' },
+      { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', comingSoon: true, priority: 'P1' },
+      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: Bot, emoji: '🤖', comingSoon: true, priority: 'P0' },
     ],
   },
   {
@@ -69,29 +77,35 @@ const chapters: Chapter[] = [
     title: '投递闯关',
     subtitle: '让对的机会主动找到你',
     emoji: '🚀',
-    gradient: 'from-cyan-400 via-violet-400 to-fuchsia-500',
-    signColor: 'from-violet-500 to-fuchsia-600',
+    nodeBg: 'from-violet-200 via-purple-200 to-fuchsia-200',
+    nodeHalo: 'bg-violet-300/50',
+    ribbon: 'from-violet-400 to-fuchsia-500',
+    ribbonShadow: 'shadow-violet-300/50',
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
-      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, comingSoon: true, priority: 'P0' },
-      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: Send, comingSoon: true, priority: 'P0' },
-      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: Scissors, comingSoon: true, priority: 'P1' },
+      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, emoji: '✨', comingSoon: true, priority: 'P0' },
+      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: Send, emoji: '📮', comingSoon: true, priority: 'P0' },
+      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: Scissors, emoji: '✂️', comingSoon: true, priority: 'P1' },
     ],
   },
   {
     num: '04',
     title: '面试通关',
     subtitle: '在镜头前从容做自己',
-    emoji: '🎤',
-    gradient: 'from-violet-400 via-fuchsia-400 to-rose-500',
-    signColor: 'from-fuchsia-500 to-rose-600',
+    emoji: '👑',
+    nodeBg: 'from-rose-200 via-pink-200 to-orange-200',
+    nodeHalo: 'bg-rose-300/50',
+    ribbon: 'from-rose-400 to-orange-500',
+    ribbonShadow: 'shadow-rose-300/50',
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
-      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, comingSoon: true, priority: 'P0' },
-      { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, comingSoon: true, priority: 'P1' },
+      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
+      { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
 ];
+
+
 
 function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
   const flat = chapters.flatMap(c => c.stages);
@@ -154,7 +168,7 @@ export default function CareerMap() {
     const remain = implementedTotal - doneCount;
     return `当前进度 ${doneCount}/${implementedTotal}，距全部通关还有 ${remain} 关`;
   })();
-  const NextIcon = nextRec?.stage.icon;
+  
 
   const handleResetAll = () => {
     if (confirm('确定要重置闯关进度与所有奖励吗？此操作不可撤销。')) {
@@ -239,7 +253,7 @@ export default function CareerMap() {
                 return (
                   <div key={ch.num} className="flex-1 min-w-0">
                     <div className={cn('h-1.5 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
-                      <div className={cn('h-full bg-gradient-to-r transition-all', ch.gradient)} style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
+                      <div className={cn('h-full bg-gradient-to-r transition-all', ch.ribbon)} style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
                     </div>
                   </div>
                 );
@@ -259,7 +273,7 @@ export default function CareerMap() {
             className={cn(
               'group relative w-full text-left rounded-3xl p-5 overflow-hidden transition-all duration-300',
               'bg-gradient-to-br text-white shadow-[0_18px_50px_-18px_rgba(16,185,129,0.5)]',
-              nextRec.chapter.gradient,
+              nextRec.chapter.ribbon,
               !nextRec.stage.comingSoon && 'hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer',
               nextRec.stage.comingSoon && 'opacity-90 cursor-not-allowed'
             )}
@@ -267,8 +281,8 @@ export default function CareerMap() {
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
             <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
             <div className="relative flex items-start gap-4">
-              <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 text-foreground flex items-center justify-center shadow-lg">
-                {NextIcon && <NextIcon className="w-7 h-7" strokeWidth={2.2} />}
+              <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 text-foreground flex items-center justify-center shadow-lg text-3xl">
+                <span>{nextRec.stage.emoji}</span>
                 <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-foreground text-[10px] font-extrabold border border-white shadow-sm">{nextRec.si + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
@@ -318,70 +332,71 @@ export default function CareerMap() {
 
           return (
             <section key={ch.num} className="relative animate-fade-in" style={{ animationDelay: `${ci * 80}ms` }}>
-              {/* 区域木牌（替代原 banner，更游戏化） */}
-              <div className="relative flex justify-center mb-6">
-                <div className={cn('relative px-5 py-3 rounded-2xl bg-gradient-to-br text-white shadow-[0_10px_25px_-8px_rgba(0,0,0,0.25)] border-2 border-white/70', ch.signColor)}>
-                  {/* 牌子两边的圆钉 */}
-                  <span className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white/80 shadow" />
-                  <span className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white/80 shadow" />
-                  <div className="flex items-center gap-2">
-                    <span className="text-2xl">{ch.emoji}</span>
-                    <div className="leading-tight">
-                      <p className="text-[10px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
-                      <h2 className="text-base sm:text-lg font-bold font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
-                    </div>
+              {/* 章节 Ribbon 飘带 */}
+              <div className="relative flex justify-center mb-2">
+                <div className={cn(
+                  'relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white',
+                  'bg-gradient-to-r shadow-lg',
+                  ch.ribbon, ch.ribbonShadow
+                )}>
+                  {/* 左圆章 */}
+                  <span className="w-8 h-8 rounded-full bg-white/95 text-foreground flex items-center justify-center text-lg shadow-inner shrink-0">
+                    {ch.emoji}
+                  </span>
+                  <div className="leading-tight">
+                    <p className="text-[9px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
+                    <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
                   </div>
-                  <div className="flex items-center gap-2 mt-2 flex-wrap justify-center">
-                    {chImpl > 0 && (
-                      <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/25 backdrop-blur text-[10px] font-bold tabular-nums">
-                        {chDone}/{chImpl}
-                        <span className="w-12 h-1 rounded-full bg-white/30 overflow-hidden inline-block">
-                          <span className="block h-full bg-white" style={{ width: `${(chDone / chImpl) * 100}%` }} />
-                        </span>
-                      </span>
-                    )}
-                    {chComplete && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
-                        <Check className="w-2.5 h-2.5" strokeWidth={3} />通关
-                      </span>
-                    )}
-                    {skipData[chapterIdOf(ch.num)] && !chComplete && (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
-                        <FastForward className="w-2.5 h-2.5" strokeWidth={3} />已跳过
-                      </span>
-                    )}
-                    {!chComplete && chImpl > 0 && (
-                      <button
-                        onClick={() => setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji })}
-                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-foreground text-[10px] font-bold hover:scale-105 active:scale-95 transition-all"
-                      >
-                        <FastForward className="w-2.5 h-2.5" strokeWidth={2.8} />跳过本章
-                      </button>
-                    )}
-                  </div>
+                  {chComplete && (
+                    <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
+                      <Check className="w-2.5 h-2.5" strokeWidth={3} />通关
+                    </span>
+                  )}
                 </div>
               </div>
 
-              {/* 游戏地图区域 */}
+              {/* 副标题 + 操作 */}
+              <div className="flex items-center justify-center gap-2 flex-wrap mb-5">
+                <p className="text-[12px] text-muted-foreground">{ch.subtitle}</p>
+                {chImpl > 0 && (
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/70 backdrop-blur border border-white text-[10px] font-bold tabular-nums text-foreground shadow-sm">
+                    {chDone}/{chImpl}
+                    <span className="w-10 h-1 rounded-full bg-muted overflow-hidden inline-block">
+                      <span className={cn('block h-full bg-gradient-to-r', ch.ribbon)} style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                    </span>
+                  </span>
+                )}
+                {skipData[chapterIdOf(ch.num)] && !chComplete && (
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 font-bold inline-flex items-center gap-0.5">
+                    <FastForward className="w-2.5 h-2.5" strokeWidth={3} />已跳过
+                  </span>
+                )}
+                {!chComplete && chImpl > 0 && (
+                  <button
+                    onClick={() => setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji })}
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-foreground text-[10px] font-bold hover:scale-105 active:scale-95 transition-all border border-border/40 shadow-sm"
+                  >
+                    <FastForward className="w-2.5 h-2.5" strokeWidth={2.8} />跳过本章
+                  </button>
+                )}
+              </div>
+
+              {/* 游戏地图区域（无外框，散落景物 + 蜿蜒小径 + 节点） */}
               <div className="relative" style={{ height: sectionHeight }}>
-                {/* 区域底色（草地/水域感） */}
-                <div className="absolute inset-0 rounded-[40px] bg-gradient-to-b from-emerald-100/40 via-teal-50/30 to-cyan-100/40 border border-white/60 backdrop-blur-sm overflow-hidden">
-                  {/* 散落的景物 */}
-                  {ch.scenery.map((emo, i) => {
-                    // 用确定性的伪随机位置
-                    const seed = (ci * 13 + i * 37) % 100;
-                    const left = 5 + ((seed * 7) % 85);
-                    const top = 10 + ((seed * 11) % 80);
-                    const size = 18 + ((seed * 3) % 16);
-                    return (
-                      <span
-                        key={i}
-                        className="absolute select-none pointer-events-none opacity-70"
-                        style={{ left: `${left}%`, top: `${top}%`, fontSize: `${size}px` }}
-                      >{emo}</span>
-                    );
-                  })}
-                </div>
+                {/* 散落的景物 */}
+                {ch.scenery.map((emo, i) => {
+                  const seed = (ci * 13 + i * 37) % 100;
+                  const left = 5 + ((seed * 7) % 85);
+                  const top = 10 + ((seed * 11) % 80);
+                  const size = 18 + ((seed * 3) % 16);
+                  return (
+                    <span
+                      key={i}
+                      className="absolute select-none pointer-events-none opacity-60"
+                      style={{ left: `${left}%`, top: `${top}%`, fontSize: `${size}px` }}
+                    >{emo}</span>
+                  );
+                })}
 
                 {/* 蜿蜒小径 SVG */}
                 <svg
@@ -395,11 +410,8 @@ export default function CareerMap() {
                       <stop offset="100%" stopColor="#fef3c7" stopOpacity="0.9" />
                     </linearGradient>
                   </defs>
-                  {/* 路径阴影 */}
-                  <path d={d} fill="none" stroke="rgba(120, 113, 108, 0.15)" strokeWidth="6" strokeLinecap="round" transform="translate(0.3, 1)" />
-                  {/* 路径主体（米白色泥土小径） */}
+                  <path d={d} fill="none" stroke="rgba(120, 113, 108, 0.18)" strokeWidth="6" strokeLinecap="round" transform="translate(0.3, 1)" />
                   <path d={d} fill="none" stroke={`url(#path-${ch.num})`} strokeWidth="5" strokeLinecap="round" />
-                  {/* 虚线点缀（脚印感） */}
                   <path d={d} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" strokeLinecap="round" strokeDasharray="0.5 3" />
                 </svg>
 
@@ -409,68 +421,79 @@ export default function CareerMap() {
                   const isLocked = status === 'locked';
                   const isDone = status === 'done';
                   const isActive = status === 'active';
-                  const Icon = st.icon;
                   const node = nodes[si];
                   const labelLeft = node.x < 50;
                   return (
                     <div
                       key={st.id}
                       className="absolute"
-                      style={{
-                        left: `${node.x}%`,
-                        top: `${node.y}px`,
-                        transform: 'translate(-50%, -50%)',
-                      }}
+                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: 'translate(-50%, -50%)' }}
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
-                        {/* 圆形关卡按钮 */}
-                        <button
-                          onClick={() => !isLocked && st.to && navigate(st.to)}
-                          disabled={isLocked || !st.to}
-                          className={cn(
-                            'relative w-[72px] h-[72px] sm:w-[80px] sm:h-[80px] rounded-full flex items-center justify-center transition-all duration-300 group',
-                            isLocked
-                              ? 'bg-gradient-to-br from-slate-200 to-slate-300 text-slate-400 cursor-not-allowed'
-                              : cn('bg-gradient-to-br text-white shadow-[0_8px_20px_-4px_rgba(0,0,0,0.25)] hover:scale-110 hover:-rotate-3 active:scale-95 cursor-pointer', ch.gradient),
-                            isActive && 'ring-4 ring-amber-300/80 ring-offset-2 ring-offset-transparent'
-                          )}
-                          style={!isLocked ? { boxShadow: '0 10px 24px -6px rgba(0,0,0,0.3), inset 0 -3px 0 rgba(0,0,0,0.15), inset 0 2px 0 rgba(255,255,255,0.4)' } : undefined}
-                          title={st.title}
-                        >
-                          {/* 活跃光晕 */}
+                        {/* 软糖式 emoji 节点 */}
+                        <div className="relative shrink-0">
+                          {/* 外层光晕（active） */}
                           {isActive && (
-                            <span className="absolute inset-0 rounded-full bg-amber-300/40 blur-xl -z-10 animate-pulse" />
+                            <span className={cn('absolute -inset-3 rounded-full blur-2xl animate-pulse', ch.nodeHalo)} />
                           )}
-                          {/* 关卡序号徽章 */}
-                          <span className={cn(
-                            'absolute -top-1.5 -left-1.5 w-7 h-7 rounded-full bg-white text-foreground text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-white font-display-aurora',
-                            isLocked && 'opacity-70'
-                          )}>
-                            {si + 1}
-                          </span>
-                          {/* 状态徽章 */}
-                          {isDone && (
-                            <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow border-2 border-white">
-                              <Check className="w-4 h-4" strokeWidth={3.5} />
+                          {/* 节点底座阴影（悬浮感） */}
+                          <span className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-14 h-2 rounded-full bg-black/15 blur-md" />
+                          <button
+                            onClick={() => !isLocked && st.to && navigate(st.to)}
+                            disabled={isLocked || !st.to}
+                            className={cn(
+                              'relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
+                              'border-[5px] border-white',
+                              isLocked
+                                ? 'bg-gradient-to-br from-slate-100 to-slate-200 cursor-not-allowed'
+                                : cn('bg-gradient-to-br hover:scale-110 hover:-rotate-6 active:scale-95 cursor-pointer', ch.nodeBg),
+                              isActive && 'ring-[3px] ring-amber-300/90 ring-offset-2 ring-offset-transparent'
+                            )}
+                            style={{
+                              boxShadow: isLocked
+                                ? '0 6px 14px -4px rgba(0,0,0,0.15)'
+                                : '0 12px 28px -6px rgba(0,0,0,0.28), inset 0 -4px 0 rgba(0,0,0,0.10), inset 0 3px 0 rgba(255,255,255,0.7)',
+                            }}
+                            title={st.title}
+                          >
+                            {/* 高光 */}
+                            {!isLocked && (
+                              <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/70 blur-[2px] rotate-[-20deg] pointer-events-none" />
+                            )}
+                            {/* 内容 emoji / lock */}
+                            {isLocked ? (
+                              <Lock className="w-7 h-7 text-slate-400" strokeWidth={2.4} />
+                            ) : (
+                              <span className="text-[34px] sm:text-[38px] leading-none drop-shadow-sm select-none">
+                                {st.emoji}
+                              </span>
+                            )}
+                            {/* 序号徽章 */}
+                            <span className={cn(
+                              'absolute -top-2 -left-2 w-7 h-7 rounded-full bg-white text-foreground text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-white font-display-aurora',
+                              isLocked && 'opacity-70'
+                            )}>
+                              {si + 1}
                             </span>
-                          )}
-                          {isActive && (
-                            <span className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 px-1.5 py-0.5 rounded-md text-[9px] font-extrabold bg-amber-400 text-amber-950 shadow border border-white whitespace-nowrap animate-bounce">
-                              GO!
-                            </span>
-                          )}
-                          {/* 图标 */}
-                          {isLocked
-                            ? <Lock className="w-6 h-6" />
-                            : <Icon className="w-7 h-7 sm:w-8 sm:h-8 drop-shadow" strokeWidth={2.4} />}
-                        </button>
+                            {/* 完成 */}
+                            {isDone && (
+                              <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow border-2 border-white">
+                                <Check className="w-4 h-4" strokeWidth={3.5} />
+                              </span>
+                            )}
+                            {/* GO 标签 */}
+                            {isActive && (
+                              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-400 text-amber-950 shadow border-2 border-white whitespace-nowrap animate-bounce">
+                                GO!
+                              </span>
+                            )}
+                          </button>
+                        </div>
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2 max-w-[150px] sm:max-w-[180px] rounded-xl px-3 py-2 backdrop-blur-md border shadow-sm transition-all',
-                          isLocked
-                            ? 'bg-white/55 border-white/60 opacity-80'
-                            : 'bg-white/90 border-white',
+                          'mx-2.5 max-w-[150px] sm:max-w-[180px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
+                          isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>
                           <p className={cn('text-[12px] sm:text-[13px] font-bold leading-tight font-display-aurora', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
@@ -497,20 +520,20 @@ export default function CareerMap() {
 
               {/* 章节衔接装饰 */}
               {ci < chapters.length - 1 && (
-                <div className="flex justify-center my-4">
-                  <div className="flex flex-col items-center gap-1.5 opacity-60">
-                    <span className="text-2xl">🏞️</span>
-                    <div className="flex gap-1">
-                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                      <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
-                    </div>
+                <div className="flex justify-center my-2">
+                  <div className="flex items-center gap-1.5 opacity-50">
+                    <span className="w-1 h-1 rounded-full bg-emerald-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <span className="w-2 h-2 rounded-full bg-violet-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400" />
+                    <span className="w-1 h-1 rounded-full bg-rose-400" />
                   </div>
                 </div>
               )}
             </section>
           );
         })}
+
 
         {/* Finale 城堡 */}
         <section className="relative mt-8">
