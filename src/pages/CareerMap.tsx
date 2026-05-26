@@ -1,10 +1,12 @@
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, Flame, Trophy, Gift, Sparkle, Zap } from 'lucide-react';
+import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, Flame, Trophy, Gift, Sparkle, Zap, FastForward } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
-import { useGameProgress, BADGES, ITEMS, DAILY_TASKS, type DailyTaskId, type BadgeId, type ItemId } from '@/hooks/useGameProgress';
+import { useGameProgress, BADGES, ITEMS, DAILY_TASKS, CHAPTER_STAGES, type DailyTaskId, type BadgeId, type ItemId } from '@/hooks/useGameProgress';
+import { useChapterSkip, type ChapterId, type SkipPayload } from '@/hooks/useChapterSkip';
+import ChapterSkipDialog from '@/components/career/ChapterSkipDialog';
 import { toast } from '@/hooks/use-toast';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
@@ -109,8 +111,10 @@ function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
 
 export default function CareerMap() {
   const navigate = useNavigate();
-  const { completed, reset } = useQuestProgress();
+  const { completed, markDone, reset } = useQuestProgress();
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
+  const { skipData, saveSkip, resetSkip } = useChapterSkip();
+  const [skipTarget, setSkipTarget] = useState<{ id: ChapterId; title: string; emoji: string } | null>(null);
 
   // 打开地图自动推进每日签到
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
@@ -180,8 +184,24 @@ export default function CareerMap() {
     if (confirm('确定要重置闯关进度与所有奖励吗？此操作不可撤销。')) {
       reset();
       resetGame();
+      resetSkip();
     }
   };
+
+  // 跳过本章：标记本章实现关卡全部完成，保存跳关产出
+  const handleSkipConfirm = (payload: SkipPayload[ChapterId]) => {
+    if (!skipTarget) return;
+    const stageIds = CHAPTER_STAGES[skipTarget.id] || [];
+    stageIds.forEach(id => markDone(id));
+    saveSkip(skipTarget.id, payload as any);
+    toast({
+      title: `已跳过「${skipTarget.title}」`,
+      description: '本章关卡已标记完成，可继续推进下一章',
+    });
+    setSkipTarget(null);
+  };
+
+  const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
 
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-emerald-50/60 via-cyan-50/40 to-violet-50/50">
@@ -507,24 +527,41 @@ export default function CareerMap() {
                 {/* corner sparkle */}
                 <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-white/80 shadow-[0_0_12px_rgba(255,255,255,0.9)]" />
                 <div className="relative">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <p className="text-[11px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
                     {chComplete && (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-semibold inline-flex items-center gap-0.5">
                         <Check className="w-2.5 h-2.5" strokeWidth={3} /> 通关
                       </span>
                     )}
+                    {skipData[chapterIdOf(ch.num)] && !chComplete && (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/30 backdrop-blur font-semibold inline-flex items-center gap-0.5">
+                        <FastForward className="w-2.5 h-2.5" strokeWidth={3} /> 已跳过
+                      </span>
+                    )}
                   </div>
                   <h2 className="text-2xl sm:text-[28px] font-bold mt-1.5 tracking-tight font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
                   <p className="text-sm sm:text-base opacity-95 mt-1.5">{ch.subtitle}</p>
-                  {chImpl > 0 && (
-                    <div className="mt-3 inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-semibold">
-                      <span className="tabular-nums">{chDone}/{chImpl}</span>
-                      <div className="w-20 h-1 rounded-full bg-white/30 overflow-hidden">
-                        <div className="h-full bg-white transition-all" style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                  <div className="mt-3 flex items-center gap-2 flex-wrap">
+                    {chImpl > 0 && (
+                      <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-semibold">
+                        <span className="tabular-nums">{chDone}/{chImpl}</span>
+                        <div className="w-20 h-1 rounded-full bg-white/30 overflow-hidden">
+                          <div className="h-full bg-white transition-all" style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                    {!chComplete && chImpl > 0 && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji }); }}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 text-foreground text-[11px] font-bold hover:bg-white hover:scale-105 active:scale-95 transition-all shadow-sm"
+                        title="跳过本章（需提交关键信息）"
+                      >
+                        <FastForward className="w-3 h-3" strokeWidth={2.6} />
+                        跳过本章
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -707,6 +744,17 @@ export default function CareerMap() {
           </div>
         )}
       </div>
+
+      {skipTarget && (
+        <ChapterSkipDialog
+          open={!!skipTarget}
+          onOpenChange={(o) => { if (!o) setSkipTarget(null); }}
+          chapterId={skipTarget.id}
+          chapterTitle={skipTarget.title}
+          chapterEmoji={skipTarget.emoji}
+          onConfirm={handleSkipConfirm}
+        />
+      )}
     </div>
   );
 }
