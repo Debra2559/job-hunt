@@ -229,8 +229,11 @@ All colors MUST be HSL.
   }
   .node-pulse { animation: node-pulse 2.4s ease-out infinite; }
 
+  /* Prose styles for markdown */
+  .prose {
     @apply text-foreground;
   }
+
   
   .prose h1, .prose h2, .prose h3, .prose h4 {
     @apply font-semibold text-foreground mt-4 mb-2;
