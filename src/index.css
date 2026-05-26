@@ -169,8 +169,66 @@ All colors MUST be HSL.
     animation: dream-pulse 4s ease-in-out infinite;
   }
 
-  /* Prose styles for markdown */
-  .prose {
+  /* ===== Aurora Map theme ===== */
+  .map-aurora {
+    font-family: 'DM Sans', system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  }
+  .map-aurora h1,
+  .map-aurora h2,
+  .map-aurora h3,
+  .map-aurora .font-display-aurora {
+    font-family: 'Space Grotesk', 'DM Sans', system-ui, sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  @keyframes aurora-drift {
+    0%, 100% { transform: translate3d(0,0,0) scale(1); }
+    33% { transform: translate3d(40px,-30px,0) scale(1.08); }
+    66% { transform: translate3d(-30px,20px,0) scale(0.95); }
+  }
+  @keyframes aurora-drift-2 {
+    0%, 100% { transform: translate3d(0,0,0) scale(1); }
+    50% { transform: translate3d(-50px,40px,0) scale(1.1); }
+  }
+  .aurora-blob {
+    position: absolute;
+    border-radius: 9999px;
+    filter: blur(70px);
+    opacity: 0.55;
+    pointer-events: none;
+    will-change: transform;
+  }
+  .aurora-blob-1 { animation: aurora-drift 22s ease-in-out infinite; }
+  .aurora-blob-2 { animation: aurora-drift-2 28s ease-in-out infinite; }
+  .aurora-blob-3 { animation: aurora-drift 32s ease-in-out infinite reverse; }
+
+  @keyframes aurora-shimmer {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 200% 50%; }
+  }
+  .aurora-text {
+    background: linear-gradient(90deg, #10b981, #06b6d4, #a855f7, #10b981);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: aurora-shimmer 6s linear infinite;
+  }
+
+  @keyframes path-dash {
+    to { stroke-dashoffset: -24; }
+  }
+  .path-flow {
+    stroke-dasharray: 6 8;
+    animation: path-dash 2.5s linear infinite;
+  }
+
+  @keyframes node-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(160 84% 50% / 0.45); }
+    50% { box-shadow: 0 0 0 14px hsl(160 84% 50% / 0); }
+  }
+  .node-pulse { animation: node-pulse 2.4s ease-out infinite; }
+
     @apply text-foreground;
   }
   
