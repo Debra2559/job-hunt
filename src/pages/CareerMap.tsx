@@ -201,9 +201,9 @@ export default function CareerMap() {
             <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-1.5">
-              求职闯关地图
-              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold">智联 AI</span>
+            <h1 className="text-base sm:text-lg font-bold flex items-center gap-1.5">
+              <span className="aurora-text">求职闯关地图</span>
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide">智联 AI</span>
             </h1>
             <p className="text-xs text-muted-foreground">从认识自己到拿下 offer，一关一关来</p>
           </div>
