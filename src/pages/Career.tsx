@@ -283,35 +283,42 @@ export default function Career() {
 
   if (loadingHistory) {
     return (
-      <div className="flex items-center justify-center h-screen bg-gradient-to-b from-background to-muted/30">
+      <div className="map-aurora flex items-center justify-center h-screen bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
         <ThinkingIndicator />
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gradient-to-b from-background to-muted/30">
+    <div className="map-aurora relative flex h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
+      {/* 浮云装饰，与地图风格一致 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[6%] left-[6%] text-3xl opacity-50 animate-[float_8s_ease-in-out_infinite]">☁️</div>
+        <div className="absolute top-[12%] right-[8%] text-4xl opacity-40 animate-[float_10s_ease-in-out_infinite]" style={{ animationDelay: '1.5s' }}>☁️</div>
+        <div className="absolute top-[4%] left-[48%] text-2xl opacity-45 animate-[float_12s_ease-in-out_infinite]" style={{ animationDelay: '3s' }}>🌤️</div>
+      </div>
+
       {/* Chat Panel */}
       <div className={cn(
-        "flex flex-col transition-all duration-500 ease-out",
-        activeReport ? "w-1/2 border-r border-border" : "w-full"
+        "relative z-10 flex flex-col transition-all duration-500 ease-out",
+        activeReport ? "w-1/2 border-r border-white/40" : "w-full"
       )}>
         {/* Header */}
-        <header className="shrink-0 border-b border-border bg-background/80 backdrop-blur-sm px-4 py-3 flex items-center gap-3">
-          <a href="/" className="shrink-0 w-9 h-9 rounded-xl hover:bg-muted flex items-center justify-center transition-colors" title="返回闯关地图">
-            <ArrowLeft className="w-4 h-4 text-muted-foreground" />
+        <header className="shrink-0 border-b border-white/40 backdrop-blur-2xl bg-white/65 px-4 py-3 flex items-center gap-3">
+          <a href="/" className="shrink-0 w-9 h-9 rounded-2xl hover:bg-emerald-100/70 flex items-center justify-center transition-colors" title="返回闯关地图">
+            <ArrowLeft className="w-4 h-4 text-emerald-700" />
           </a>
-          <div className="flex items-center gap-3 flex-1">
-            <div className="relative w-9 h-9 rounded-full overflow-hidden bg-gradient-to-br from-primary/20 to-accent/30">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <div className="relative w-9 h-9 rounded-2xl overflow-hidden bg-gradient-to-br from-emerald-200 via-teal-200 to-cyan-200 shrink-0 shadow-sm">
               <img src={aiTeacherAvatar} alt="职业规划" className="w-full h-full object-cover" />
             </div>
-            <div>
-              <h1 className="text-sm font-semibold text-foreground flex items-center gap-1.5">
-                职业规划
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">AI</span>
+            <div className="min-w-0">
+              <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
+                <span className="aurora-text">第一章 · 认识自己</span>
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide">智联 AI</span>
               </h1>
-              <p className="text-xs text-muted-foreground">
-                共约 8-12 题 · 5-10 分钟 · 当前第 {Math.min(messages.filter(m => m.role === 'user').length + 1, 12)} 题
+              <p className="text-[11px] text-muted-foreground truncate">
+                🧭 共 8-12 题 · 5-10 分钟 · 当前第 {Math.min(messages.filter(m => m.role === 'user').length + 1, 12)} 题
               </p>
             </div>
           </div>
@@ -320,10 +327,10 @@ export default function Career() {
             size="icon"
             onClick={handleClearHistory}
             disabled={isLoading}
-            className="shrink-0 rounded-xl hover:bg-muted"
+            className="shrink-0 rounded-2xl hover:bg-emerald-100/70"
             title="清空对话历史"
           >
-            <RotateCcw className="w-4 h-4 text-muted-foreground" />
+            <RotateCcw className="w-4 h-4 text-emerald-700" />
           </Button>
         </header>
 
@@ -347,10 +354,10 @@ export default function Career() {
                     )}
                     <div
                       className={cn(
-                        'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
+                        'max-w-[85%] rounded-3xl px-4 py-3 text-sm',
                         msg.role === 'user'
-                          ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
-                          : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
+                          ? 'bg-gradient-to-br from-emerald-100 to-teal-100 text-foreground shadow-[0_6px_18px_-10px_rgba(16,185,129,0.4)]'
+                          : 'bg-white/85 backdrop-blur-sm border border-white/70 shadow-[0_8px_24px_-12px_rgba(16,185,129,0.25)]'
                       )}
                     >
                       {msg.role === 'assistant' ? (
@@ -367,10 +374,10 @@ export default function Career() {
                             <button
                               onClick={() => setActiveReport(reportData)}
                               className={cn(
-                                "w-full mt-2 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2",
+                                "w-full mt-2 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2",
                                 activeReport === reportData
-                                  ? "bg-primary/10 text-primary border border-primary/20"
-                                  : "bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] hover:opacity-90"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95 hover:-translate-y-0.5"
                               )}
                             >
                               <FileText className="w-4 h-4" />
@@ -401,7 +408,7 @@ export default function Career() {
         </div>
 
         {/* Input Area */}
-        <div className="shrink-0 border-t border-border bg-background/80 backdrop-blur-sm px-4 py-3">
+        <div className="shrink-0 border-t border-white/40 backdrop-blur-2xl bg-white/65 px-4 py-3">
           <div className={cn("mx-auto flex items-end gap-2", activeReport ? "max-w-2xl" : "max-w-3xl")}>
             <Textarea
               ref={textareaRef}
@@ -409,7 +416,7 @@ export default function Career() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="优先点选上方选项；如需补充可在此输入或语音..."
-              className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-input border-border focus:border-primary/50 focus:ring-primary/20"
+              className="min-h-[44px] max-h-[120px] resize-none rounded-2xl bg-white/80 border-white/70 focus:border-emerald-400/60 focus:ring-emerald-300/30"
               rows={1}
             />
             <VoiceInput
@@ -420,9 +427,9 @@ export default function Career() {
               onClick={() => handleSend(input)}
               disabled={!input.trim() || isLoading}
               size="icon"
-              className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-primary hover:bg-primary/90 shadow-sm border-0"
+              className="shrink-0 rounded-2xl h-[44px] w-[44px] bg-gradient-to-br from-emerald-400 via-teal-500 to-cyan-500 hover:opacity-95 shadow-[0_8px_22px_-8px_rgba(16,185,129,0.55)] border-0"
             >
-              <Send className="w-4 h-4 text-primary-foreground" />
+              <Send className="w-4 h-4 text-white" />
             </Button>
           </div>
         </div>
@@ -430,12 +437,12 @@ export default function Career() {
 
       {/* Artifact Preview Panel */}
       {activeReport && (
-        <div className="w-1/2 flex flex-col bg-background animate-slide-in-right">
+        <div className="relative z-10 w-1/2 flex flex-col bg-white/85 backdrop-blur-xl animate-slide-in-right">
           {/* Panel Header */}
-          <div className="shrink-0 border-b border-border bg-background px-4 py-2.5 flex items-center gap-3">
+          <div className="shrink-0 border-b border-white/40 bg-white/65 backdrop-blur-2xl px-4 py-2.5 flex items-center gap-3">
             <div className="flex items-center gap-2 flex-1 min-w-0">
-              <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-[hsl(var(--dream-violet)/0.15)] to-[hsl(var(--dream-pink)/0.1)] flex items-center justify-center">
-                <FileText className="w-3.5 h-3.5 text-[hsl(var(--dream-violet))]" />
+              <div className="w-7 h-7 rounded-xl bg-gradient-to-br from-emerald-200 to-teal-200 flex items-center justify-center shadow-sm">
+                <FileText className="w-3.5 h-3.5 text-emerald-700" />
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">职业规划报告</p>
