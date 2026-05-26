@@ -2,7 +2,7 @@ import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, Flame, Trophy, Gift, Sparkle, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Progress } from '@/components/ui/progress';
+
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress, BADGES, ITEMS, DAILY_TASKS, type DailyTaskId, type BadgeId, type ItemId } from '@/hooks/useGameProgress';
 import { toast } from '@/hooks/use-toast';
@@ -124,6 +124,39 @@ export default function CareerMap() {
   const totalStages = allStages.length;
   const progressPct = implementedTotal > 0 ? Math.round((doneCount / implementedTotal) * 100) : 0;
 
+  // ====== 下一步推荐 ======
+  // 1) 优先推荐 active 关卡（顺序解锁里下一个该做的实现关）
+  // 2) 否则若全部实现关已完成，引导到第一个 comingSoon 的关卡（敬请期待）
+  // 3) 没有任何关卡：null
+  const allFlat = chapters.flatMap((c, ci) => c.stages.map((s, si) => ({ stage: s, chapter: c, ci, si })));
+  const activeEntry = allFlat.find(e => statuses[e.stage.id] === 'active');
+  const firstSoonEntry = allFlat.find(e => e.stage.comingSoon);
+  const allDoneImplemented = implementedTotal > 0 && doneCount === implementedTotal;
+  const nextRec = activeEntry || (allDoneImplemented ? firstSoonEntry : null);
+  const nextDoneInChapter = nextRec
+    ? nextRec.chapter.stages.filter(s => statuses[s.id] === 'done').length
+    : 0;
+  const nextImplInChapter = nextRec
+    ? nextRec.chapter.stages.filter(s => !s.comingSoon).length
+    : 0;
+
+  // 智能文案
+  const recHeadline = (() => {
+    if (!nextRec) return '准备好开始你的求职旅程了';
+    if (allDoneImplemented) return '已开放关卡全部通关，先看看后续内容';
+    if (doneCount === 0) return '从这里出发，认识真正的自己';
+    if (nextDoneInChapter > 0 && nextDoneInChapter < nextImplInChapter) return `继续推进「${nextRec.chapter.title}」，离通关只差几步`;
+    return `进入「第${['一','二','三','四'][nextRec.ci]}章 · ${nextRec.chapter.title}」`;
+  })();
+  const recReason = (() => {
+    if (!nextRec) return '';
+    if (allDoneImplemented) return '后续章节正在打磨中，可先体验敬请期待的预告';
+    if (doneCount === 0) return '8-12 题点选 · 5-10 分钟，结束后会生成你的专属职业报告';
+    const remain = implementedTotal - doneCount;
+    return `当前进度 ${doneCount}/${implementedTotal}，距全部开放关卡通关还有 ${remain} 关`;
+  })();
+  const NextIcon = nextRec?.stage.icon;
+
   const itemList = (Object.keys(ITEMS) as ItemId[])
     .map(id => ({ id, count: game.items[id] || 0, ...ITEMS[id] }))
     .filter(x => x.count > 0);
@@ -181,16 +214,112 @@ export default function CareerMap() {
             </button>
           )}
         </div>
-        {/* Overall progress */}
+        {/* 分章节里程碑进度条 */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-3">
-          <div className="flex items-center gap-3">
-            <Progress value={progressPct} className="h-1.5 flex-1 bg-emerald-100" />
+          <div className="flex items-center gap-2">
+            <div className="flex-1 flex items-center gap-1">
+              {chapters.map((ch, ci) => {
+                const chImpl = ch.stages.filter(s => !s.comingSoon).length;
+                const chDone = ch.stages.filter(s => statuses[s.id] === 'done').length;
+                const pct = chImpl === 0 ? 0 : Math.round((chDone / chImpl) * 100);
+                const isCurrent = activeEntry?.ci === ci;
+                return (
+                  <div key={ch.num} className="flex-1 min-w-0">
+                    <div className={cn(
+                      'h-1.5 rounded-full overflow-hidden bg-emerald-100/70 relative',
+                      isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background'
+                    )}>
+                      <div
+                        className={cn('h-full bg-gradient-to-r transition-all', ch.gradient)}
+                        style={{ width: chImpl === 0 ? '0%' : `${pct}%` }}
+                      />
+                    </div>
+                    <div className="hidden sm:flex justify-between mt-0.5 px-0.5">
+                      <span className={cn('text-[9px] font-bold tracking-wider', isCurrent ? 'text-foreground' : 'text-muted-foreground')}>
+                        CH{ch.num}
+                      </span>
+                      <span className="text-[9px] tabular-nums text-muted-foreground">{chImpl === 0 ? '—' : `${chDone}/${chImpl}`}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
             <span className="text-[11px] font-semibold text-muted-foreground tabular-nums shrink-0">
               {doneCount}/{implementedTotal} · {progressPct}%
             </span>
           </div>
         </div>
       </header>
+
+      {/* 下一步推荐 */}
+      {nextRec && (
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6">
+          <button
+            onClick={() => !nextRec.stage.comingSoon && nextRec.stage.to && navigate(nextRec.stage.to)}
+            disabled={nextRec.stage.comingSoon || !nextRec.stage.to}
+            className={cn(
+              'group relative w-full text-left rounded-3xl p-5 sm:p-6 overflow-hidden transition-all duration-300',
+              'bg-gradient-to-br text-white shadow-[0_18px_50px_-18px_rgba(16,185,129,0.5)]',
+              nextRec.chapter.gradient,
+              !nextRec.stage.comingSoon && 'hover:-translate-y-0.5 hover:shadow-[0_24px_60px_-18px_rgba(16,185,129,0.6)] active:scale-[0.99] cursor-pointer',
+              nextRec.stage.comingSoon && 'opacity-90 cursor-not-allowed'
+            )}
+          >
+            {/* 背景装饰 */}
+            <div className="absolute -right-8 -top-8 text-[160px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
+            <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none pointer-events-none">NEXT STEP</div>
+
+            <div className="relative flex items-start gap-4">
+              {/* 图标徽章 */}
+              <div className="shrink-0 relative w-16 h-16 sm:w-[68px] sm:h-[68px] rounded-2xl bg-white/95 text-foreground flex items-center justify-center shadow-lg">
+                {NextIcon && <NextIcon className="w-7 h-7 sm:w-8 sm:h-8" strokeWidth={2.2} style={{ color: 'currentColor' }} />}
+                <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-foreground text-[10px] font-extrabold border border-white shadow-sm">
+                  {nextRec.si + 1}
+                </span>
+              </div>
+
+              {/* 内容 */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">
+                    推荐 · 第{['一','二','三','四'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关
+                  </span>
+                  {nextRec.stage.priority && (
+                    <span className={cn(
+                      'text-[10px] px-1.5 py-0.5 rounded-md font-bold',
+                      nextRec.stage.priority === 'P0' ? 'bg-white/95 text-rose-600' : 'bg-white/95 text-amber-600'
+                    )}>
+                      {nextRec.stage.priority}
+                    </span>
+                  )}
+                  {nextRec.stage.comingSoon && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/25 backdrop-blur">敬请期待</span>
+                  )}
+                  {nextImplInChapter > 0 && (
+                    <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/20 backdrop-blur tabular-nums">
+                      章节 {nextDoneInChapter}/{nextImplInChapter}
+                    </span>
+                  )}
+                </div>
+                <h2 className="text-lg sm:text-xl font-extrabold mt-1.5 leading-tight">{recHeadline}</h2>
+                <p className="text-sm font-bold opacity-95 mt-1">
+                  下一关：{nextRec.stage.title}
+                </p>
+                <p className="text-xs sm:text-[13px] opacity-90 mt-1 leading-relaxed">
+                  {recReason || nextRec.stage.desc}
+                </p>
+                {!nextRec.stage.comingSoon && nextRec.stage.to && (
+                  <div className="mt-3 inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white text-foreground text-xs font-bold shadow-sm group-hover:gap-2.5 transition-all">
+                    {doneCount === 0 ? '立即出发' : '继续闯关'}
+                    <ChevronRight className="w-3.5 h-3.5" strokeWidth={3} />
+                  </div>
+                )}
+              </div>
+            </div>
+          </button>
+        </div>
+      )}
+
 
       {/* 玩家信息条：等级 / XP / 徽章数 / 道具 / 连签 */}
       <div className="max-w-3xl mx-auto px-4 sm:px-6 pt-6">
