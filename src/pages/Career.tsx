@@ -354,10 +354,10 @@ export default function Career() {
                     )}
                     <div
                       className={cn(
-                        'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
+                        'max-w-[85%] rounded-3xl px-4 py-3 text-sm',
                         msg.role === 'user'
-                          ? 'bg-[hsl(var(--chat-bubble-user))] text-foreground'
-                          : 'bg-[hsl(var(--chat-bubble-ai))] border border-border/50 shadow-sm'
+                          ? 'bg-gradient-to-br from-emerald-100 to-teal-100 text-foreground shadow-[0_6px_18px_-10px_rgba(16,185,129,0.4)]'
+                          : 'bg-white/85 backdrop-blur-sm border border-white/70 shadow-[0_8px_24px_-12px_rgba(16,185,129,0.25)]'
                       )}
                     >
                       {msg.role === 'assistant' ? (
@@ -374,10 +374,10 @@ export default function Career() {
                             <button
                               onClick={() => setActiveReport(reportData)}
                               className={cn(
-                                "w-full mt-2 py-3 rounded-2xl text-sm font-semibold transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2",
+                                "w-full mt-2 py-3 rounded-2xl text-sm font-bold transition-all duration-300 active:scale-[0.98] flex items-center justify-center gap-2",
                                 activeReport === reportData
-                                  ? "bg-primary/10 text-primary border border-primary/20"
-                                  : "bg-gradient-to-r from-[hsl(var(--dream-violet))] to-[hsl(var(--dream-pink))] text-white shadow-[0_4px_14px_-3px_hsl(var(--dream-violet)/0.4)] hover:opacity-90"
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95 hover:-translate-y-0.5"
                               )}
                             >
                               <FileText className="w-4 h-4" />
