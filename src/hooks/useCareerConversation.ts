@@ -305,6 +305,7 @@ export function useCareerConversation(userId: string | undefined) {
       }
     }
     setMessages([]);
+    writeLocal([]);
     hasGreeted.current = false;
   }, [conversationId]);
 
