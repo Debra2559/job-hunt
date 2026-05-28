@@ -5,14 +5,28 @@ import type { BossJobListing } from '@/components/career/CareerReport';
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 const CAREER_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/career-agent`;
+const LS_KEY = 'career:messages:v1';
+
+function readLocal(): Msg[] {
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr.filter((m: any) => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string') : [];
+  } catch { return []; }
+}
+function writeLocal(msgs: Msg[]) {
+  try { localStorage.setItem(LS_KEY, JSON.stringify(msgs)); } catch {}
+}
 
 export function useCareerConversation(userId: string | undefined) {
-  const [messages, setMessages] = useState<Msg[]>([]);
+  const [messages, setMessages] = useState<Msg[]>(() => readLocal());
   const [isLoading, setIsLoading] = useState(false);
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const assistantContentRef = useRef('');
-  const hasGreeted = useRef(false);
+  const hasGreeted = useRef(readLocal().length > 0);
+
 
   // Load existing career conversation on mount
   useEffect(() => {
