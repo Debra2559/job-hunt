@@ -219,8 +219,9 @@ export default function CareerMap() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/65 border-b border-white/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="relative w-9 h-9 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/40 shrink-0">
-            <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-300 via-teal-400 to-cyan-400 shadow-[0_8px_20px_-6px_rgba(20,184,166,0.55),inset_0_2px_0_rgba(255,255,255,0.55)]">
+            <Compass className="w-5 h-5 text-white drop-shadow-sm" strokeWidth={2.4} />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-300 border-2 border-white" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
