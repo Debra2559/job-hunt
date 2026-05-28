@@ -282,7 +282,14 @@ export default function Career() {
     setTimeout(() => autoGreet(), 100);
   };
 
-  const getDisplayContent = (content: string) => content.replace(/```career-report[\s\S]*?```/g, '').trim();
+  // 移除已完成的 ```career-report``` 块；若仍在流式生成（已开启但未闭合），整段移除等待状态另行展示
+  const getDisplayContent = (content: string) =>
+    content
+      .replace(/```career-report[\s\S]*?```/g, '')
+      .replace(/```career-report[\s\S]*$/, '')
+      .trim();
+  const isReportStreaming = (content: string) =>
+    /```career-report/.test(content) && !/```career-report[\s\S]*?```/.test(content);
 
   const markdownComponents = {
     a: ({ href, children, ...props }: any) => (
@@ -386,6 +393,20 @@ export default function Career() {
                               <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
                                 {displayContent}
                               </ReactMarkdown>
+                            </div>
+                          )}
+                          {isReportStreaming(msg.content) && !reportData && (
+                            <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 border border-emerald-200/60">
+                              <div className="relative w-8 h-8 shrink-0">
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 opacity-30 animate-ping" />
+                                <div className="relative w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-500 flex items-center justify-center">
+                                  <FileText className="w-4 h-4 text-white" />
+                                </div>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-semibold text-emerald-800">职业规划报告生成中…</p>
+                                <p className="text-[11px] text-emerald-700/70">正在整理你的画像、岗位推荐与成长路径</p>
+                              </div>
                             </div>
                           )}
                           {reportData && (
