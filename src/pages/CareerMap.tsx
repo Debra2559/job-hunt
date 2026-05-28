@@ -272,15 +272,7 @@ export default function CareerMap() {
             <span>🤖</span> 认领助理
           </button>
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
-          {(doneCount > 0 || game.xp > 0) && (
-            <button
-              onClick={handleResetAll}
-              className="hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted"
-              title="重置进度"
-            >
-              <RotateCcw className="w-3 h-3" />
-            </button>
-          )}
+          {/* 重置按钮已隐藏 */}
         </div>
         {/* 分章节里程碑进度条 */}
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5">
