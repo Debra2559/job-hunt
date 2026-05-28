@@ -535,6 +535,17 @@ export default function CareerMap() {
                             )}
                             {st.comingSoon && <span className="text-[9px] px-1 py-0.5 rounded font-bold bg-slate-100 text-slate-500">敬请期待</span>}
                           </div>
+                          {isLocked && !st.comingSoon && (
+                            <button
+                              onClick={() => setStageSkipTarget({ stageId: st.id, stageTitle: st.title, ci, si })}
+                              className={cn(
+                                'mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all bg-gradient-to-r',
+                                ch.ribbon,
+                              )}
+                            >
+                              <ChevronsRight className="w-3 h-3" strokeWidth={3} />跳到这关
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
