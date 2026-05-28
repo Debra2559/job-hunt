@@ -12,6 +12,7 @@ import { VoiceInput } from '@/components/chat/VoiceInput';
 import { useCareerConversation } from '@/hooks/useCareerConversation';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
+import { useAuth } from '@/hooks/useAuth';
 import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
 
 type WebSource = { url: string; title: string; snippet: string };
