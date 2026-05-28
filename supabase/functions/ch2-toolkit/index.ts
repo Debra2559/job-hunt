@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-type Mode = "resume" | "tips" | "company" | "agent" | "assistant";
+type Mode = "resume" | "resume-structured" | "tips" | "company" | "agent" | "assistant";
 
 const PROMPTS: Record<Exclude<Mode, "assistant">, string> = {
   resume: `你是一位顶级简历教练。基于用户提供的零散经历/语音/文字，输出一份**面向校招**的、可直接复制到 PDF 的中文简历草稿（Markdown 格式）。
