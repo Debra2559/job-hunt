@@ -9,6 +9,7 @@ import { useAssistant } from '@/hooks/useAssistant';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { SELECTED_JOBS_LS_KEY } from './CareerRecommend';
+import JobPrereqInline from '@/components/career/JobPrereqInline';
 
 type PickedJob = { title: string; category?: string; skills?: string[] };
 
