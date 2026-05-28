@@ -110,8 +110,13 @@ export default function CareerTips() {
         )
       }
     >
+      <JobContextBanner
+        gradient="from-amber-400 via-yellow-500 to-orange-500"
+        hint="设定目标岗位后，AI 给的 Tips 会更针对你想去的方向。"
+      />
       {messages.length === 0 ? (
         <div className="space-y-4">
+
           <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 p-5">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-5 h-5 text-amber-600" />
