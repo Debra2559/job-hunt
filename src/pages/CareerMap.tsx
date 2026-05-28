@@ -129,8 +129,8 @@ function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
 }
 
 // 每关在区域内的 x 偏移百分比（蜿蜒路径的节点 x 坐标）
-// 移动端：节点贴左，卡片向右展开；桌面端：蜿蜒
-const NODE_X_PATTERN_MOBILE = [18, 18, 18, 18, 18, 18];
+// 移动端：左右交替（童话地图风）；桌面端：蜿蜒
+const NODE_X_PATTERN_MOBILE = [72, 28, 72, 28, 72, 28];
 const NODE_X_PATTERN_DESKTOP = [22, 50, 78, 50, 22, 78];
 function useIsMobile() {
   const [m, setM] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
@@ -141,6 +141,7 @@ function useIsMobile() {
   }, []);
   return m;
 }
+
 
 export default function CareerMap() {
   const navigate = useNavigate();
