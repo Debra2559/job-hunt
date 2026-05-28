@@ -2,3 +2,6 @@ project_id = "xofdpaptrqlzntsyhvyr"
 
 [functions.career-agent]
 verify_jwt = false
+
+[functions.job-insights]
+verify_jwt = false
