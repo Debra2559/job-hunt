@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.job-insights]
 verify_jwt = false
+
+[functions.ch2-toolkit]
+verify_jwt = false
