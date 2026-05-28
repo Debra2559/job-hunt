@@ -61,7 +61,7 @@ export const DAILY_TASKS: Record<DailyTaskId, { name: string; desc: string; targ
 
 // 关卡 → 所属章节（用于章节通关判定）
 export const CHAPTER_STAGES: Record<string, string[]> = {
-  ch1: ['assess', 'recommend', 'jd'],
+  ch1: ['assess', 'recommend', 'jd', 'claim_assistant'],
   ch2: ['resume', 'tips', 'company'],
   ch3: ['feed', 'apply', 'jd-break'],
   ch4: ['qa', 'mock'],

@@ -56,6 +56,7 @@ const chapters: Chapter[] = [
       { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
       { id: 'recommend', title: '岗位推荐', desc: '基于报告挑选感兴趣方向', icon: Crosshair, emoji: '🎯', to: '/career/recommend', priority: 'P0' },
       { id: 'jd', title: '岗位 JD 汇总', desc: 'AI 汇集真实在招与项目要求', icon: Newspaper, emoji: '🔍', to: '/career/jd', priority: 'P0' },
+      { id: 'claim_assistant', title: '认领专属助理', desc: '按岗位匹配一位 AI 学长', icon: BotMessageSquare, emoji: '🤖', to: '/career/assistants', priority: 'P0' },
     ],
   },
   {
@@ -264,13 +265,7 @@ export default function CareerMap() {
             <MapIcon className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
           </div>
-          <button
-            onClick={() => navigate('/career/assistants')}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[11px] font-bold shadow-sm hover:scale-105 active:scale-95 transition-all"
-            title="认领你的专属 AI 助理"
-          >
-            <span>🤖</span> 认领助理
-          </button>
+          {/* 认领助理入口已并入第一章关卡 */}
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
           {/* 重置按钮已隐藏 */}
         </div>
