@@ -220,11 +220,9 @@ export default function Career() {
             }));
           } catch { /* ignore quota */ }
         }
-        // Chapter 1 通关：生成报告即意味着「认识自己」三个关卡完成
-        ['assess', 'recommend', 'jd'].forEach(id => {
-          markDone(id);
-          onStageCompleted(id);
-        });
+        // 第一关「性格 & 能力测评」通关：仅标记 assess，后续两关由「岗位推荐」「JD 汇总」分别完成
+        markDone('assess');
+        onStageCompleted('assess');
       }
     }
   }, [loadingHistory, messages, isLoading, bossJobs, markDone, onStageCompleted, user?.id]);
