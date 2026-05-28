@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { fireFireworks } from '@/components/Fireworks';
 
 const STORAGE_KEY = 'quest:game:v1';
 
