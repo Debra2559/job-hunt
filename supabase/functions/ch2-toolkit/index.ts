@@ -105,7 +105,7 @@ serve(async (req) => {
       ];
     }
 
-    const isJson = mode === "company";
+    const isJson = mode === "company" || mode === "resume-structured";
 
     if (isJson) {
       const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
