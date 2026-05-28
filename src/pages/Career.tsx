@@ -483,7 +483,7 @@ export default function Career() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">职业规划报告</p>
-                <p className="text-[11px] text-muted-foreground">第一章 · 认识自己 · 已保存</p>
+                <p className="text-[11px] text-muted-foreground">第一章 · 第 1 关 · 已保存</p>
               </div>
             </div>
             <Button
@@ -509,12 +509,12 @@ export default function Career() {
           {/* 下一关 CTA */}
           <div className="shrink-0 border-t border-white/40 bg-white/75 backdrop-blur-2xl px-4 py-3">
             <a
-              href="/?next=ch2"
+              href="/career/recommend"
               className="group flex items-center justify-between gap-3 w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95 hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex flex-col items-start leading-tight">
-                <span className="text-[11px] uppercase tracking-wider opacity-90">第一章已通关 🎉</span>
-                <span className="text-sm font-bold">进入第二章 · 应聘准备</span>
+                <span className="text-[11px] uppercase tracking-wider opacity-90">第 1 关通关 🎉</span>
+                <span className="text-sm font-bold">下一关 · 岗位推荐 · 挑选感兴趣的方向</span>
               </div>
               <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
             </a>
