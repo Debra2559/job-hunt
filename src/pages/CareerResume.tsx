@@ -8,6 +8,7 @@ import Ch2PageShell from '@/components/career/Ch2PageShell';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { streamCh2 } from '@/lib/ch2Stream';
+import JobContextBanner from '@/components/career/JobContextBanner';
 
 const QUESTIONS = [
   { key: 'basic', label: '基本信息', placeholder: '姓名 / 学校专业 / 年级 / 联系方式 / 求职方向（写多少都行）' },
