@@ -56,6 +56,7 @@ const chapters: Chapter[] = [
       { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
       { id: 'recommend', title: '岗位推荐', desc: '基于报告挑选感兴趣方向', icon: Crosshair, emoji: '🎯', to: '/career/recommend', priority: 'P0' },
       { id: 'jd', title: '岗位 JD 汇总', desc: 'AI 汇集真实在招与项目要求', icon: Newspaper, emoji: '🔍', to: '/career/jd', priority: 'P0' },
+      { id: 'claim_assistant', title: '认领专属助理', desc: '按岗位匹配一位 AI 学长', icon: BotMessageSquare, emoji: '🤖', to: '/career/assistants', priority: 'P0' },
     ],
   },
   {
