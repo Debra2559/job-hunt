@@ -153,7 +153,8 @@ function SourceCards({ sources }: { sources: WebSource[] }) {
 }
 
 export default function Career() {
-  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(undefined);
+  const { user } = useAuth();
+  const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(user?.id);
   const [input, setInput] = useState('');
   const [reports, setReports] = useState<Map<number, CareerReportData>>(new Map());
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
