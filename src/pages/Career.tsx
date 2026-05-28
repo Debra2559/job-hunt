@@ -350,10 +350,13 @@ export default function Career() {
             size="icon"
             onClick={handleClearHistory}
             disabled={isLoading}
-            className="shrink-0 rounded-2xl hover:bg-emerald-100/70"
-            title="清空对话历史"
+            className="shrink-0 rounded-2xl hover:bg-emerald-100/70 relative group"
+            title="重新开始"
           >
             <RotateCcw className="w-4 h-4 text-emerald-700" />
+            <span className="pointer-events-none absolute top-full right-0 mt-1.5 px-2 py-1 rounded-lg bg-emerald-900/90 text-white text-[11px] font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity shadow-lg z-50">
+              重新开始
+            </span>
           </Button>
         </header>
 
