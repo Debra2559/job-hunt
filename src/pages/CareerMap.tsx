@@ -337,9 +337,6 @@ export default function CareerMap() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">推荐 · 第{['一','二','三','四'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关</span>
-                  {nextRec.stage.priority && (
-                    <span className={cn('text-[10px] px-1.5 py-0.5 rounded-md font-bold', nextRec.stage.priority === 'P0' ? 'bg-white/95 text-rose-600' : 'bg-white/95 text-amber-600')}>{nextRec.stage.priority}</span>
-                  )}
                   {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/25 backdrop-blur">敬请期待</span>}
                 </div>
                 <h2 className="text-lg font-extrabold mt-1.5 leading-tight">{recHeadline}</h2>
@@ -553,12 +550,6 @@ export default function CareerMap() {
                             {isLocked && !st.comingSoon ? '完成上一关后开启' : st.desc}
                           </p>
                           <div className={cn('flex items-center gap-1 mt-1 flex-wrap', labelLeft ? 'justify-start' : 'justify-end')}>
-                            {st.priority && (
-                              <span className={cn(
-                                'text-[9px] px-1 py-0.5 rounded font-bold',
-                                st.priority === 'P0' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
-                              )}>{st.priority}</span>
-                            )}
                             {st.comingSoon && <span className="text-[9px] px-1 py-0.5 rounded font-bold bg-slate-100 text-slate-500">敬请期待</span>}
                           </div>
                           {isLocked && (
