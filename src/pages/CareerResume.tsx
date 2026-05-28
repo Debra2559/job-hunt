@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Send, Sparkles, Loader2, Copy, RotateCcw, Check, ArrowRight, FileText } from 'lucide-react';
+import { Sparkles, Loader2, Copy, RotateCcw, Check, ArrowRight, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/hooks/use-toast';
