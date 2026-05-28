@@ -265,13 +265,7 @@ export default function CareerMap() {
             <MapIcon className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
           </div>
-          <button
-            onClick={() => navigate('/career/assistants')}
-            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[11px] font-bold shadow-sm hover:scale-105 active:scale-95 transition-all"
-            title="认领你的专属 AI 助理"
-          >
-            <span>🤖</span> 认领助理
-          </button>
+          {/* 认领助理入口已并入第一章关卡 */}
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
           {/* 重置按钮已隐藏 */}
         </div>
