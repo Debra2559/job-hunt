@@ -129,8 +129,8 @@ function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
 }
 
 // 每关在区域内的 x 偏移百分比（蜿蜒路径的节点 x 坐标）
-// 移动端：节点贴左，卡片向右展开；桌面端：蜿蜒
-const NODE_X_PATTERN_MOBILE = [18, 18, 18, 18, 18, 18];
+// 移动端：左右交替（童话地图风）；桌面端：蜿蜒
+const NODE_X_PATTERN_MOBILE = [72, 28, 72, 28, 72, 28];
 const NODE_X_PATTERN_DESKTOP = [22, 50, 78, 50, 22, 78];
 function useIsMobile() {
   const [m, setM] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
@@ -141,6 +141,7 @@ function useIsMobile() {
   }, []);
   return m;
 }
+
 
 export default function CareerMap() {
   const navigate = useNavigate();
@@ -236,8 +237,8 @@ export default function CareerMap() {
 
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
-      {/* 远景：山峦 SVG */}
-      <svg className="absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
+      {/* 远景：山峦 SVG（桌面端，移动端为了简洁隐藏） */}
+      <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
         <defs>
           <linearGradient id="mt1" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="#a7f3d0" />
@@ -251,6 +252,15 @@ export default function CareerMap() {
         <path d="M0,260 L120,160 L240,220 L380,120 L520,200 L660,140 L820,210 L960,150 L1100,220 L1200,180 L1200,360 L0,360 Z" fill="url(#mt1)" />
         <path d="M0,300 L160,230 L320,280 L460,210 L620,270 L780,220 L940,290 L1080,240 L1200,280 L1200,360 L0,360 Z" fill="url(#mt2)" />
       </svg>
+
+      {/* 移动端：柔和渐变光斑装饰（替代山峦） */}
+      <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[5%] -left-10 w-48 h-48 rounded-full bg-emerald-200/40 blur-3xl" />
+        <div className="absolute top-[35%] -right-12 w-56 h-56 rounded-full bg-cyan-200/40 blur-3xl" />
+        <div className="absolute top-[65%] -left-8 w-48 h-48 rounded-full bg-violet-200/40 blur-3xl" />
+        <div className="absolute bottom-[5%] -right-10 w-52 h-52 rounded-full bg-rose-200/40 blur-3xl" />
+      </div>
+
 
       {/* 浮云装饰 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -442,20 +452,21 @@ export default function CareerMap() {
 
               {/* 游戏地图区域（无外框，散落景物 + 蜿蜒小径 + 节点） */}
               <div className="relative" style={{ height: sectionHeight }}>
-                {/* 散落的景物 */}
-                {ch.scenery.map((emo, i) => {
+                {/* 散落的景物（移动端只保留 2 个，避免拥挤） */}
+                {(isMobile ? ch.scenery.slice(0, 2) : ch.scenery).map((emo, i) => {
                   const seed = (ci * 13 + i * 37) % 100;
                   const left = 5 + ((seed * 7) % 85);
                   const top = 10 + ((seed * 11) % 80);
-                  const size = 18 + ((seed * 3) % 16);
+                  const size = isMobile ? 16 + ((seed * 2) % 8) : 18 + ((seed * 3) % 16);
                   return (
                     <span
                       key={i}
-                      className="absolute select-none pointer-events-none opacity-60"
+                      className="absolute select-none pointer-events-none opacity-40 sm:opacity-60"
                       style={{ left: `${left}%`, top: `${top}%`, fontSize: `${size}px` }}
                     >{emo}</span>
                   );
                 })}
+
 
                 {/* 蜿蜒小径 SVG */}
                 <svg
@@ -481,12 +492,12 @@ export default function CareerMap() {
                   const isDone = status === 'done';
                   const isActive = status === 'active';
                   const node = nodes[si];
-                  const labelLeft = isMobile ? false : node.x < 50;
+                  const labelLeft = node.x < 50; // 节点在左侧时，名片放在右边（labelLeft 指名片在左侧的位置）
                   return (
                     <div
                       key={st.id}
                       className="absolute"
-                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: isMobile ? 'translate(0, -50%)' : 'translate(-50%, -50%)' }}
+                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: 'translate(-50%, -50%)' }}
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         {/* 软糖式 emoji 节点 */}
@@ -501,7 +512,7 @@ export default function CareerMap() {
                             onClick={() => !isLocked && st.to && navigate(st.to)}
                             disabled={isLocked || !st.to}
                             className={cn(
-                              'relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
+                              'relative w-[68px] h-[68px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
                               'border-[5px] border-white',
                               isLocked
                                 ? 'bg-gradient-to-br from-slate-100 to-slate-200 cursor-not-allowed'
@@ -521,24 +532,24 @@ export default function CareerMap() {
                             )}
                             {/* 内容图标 / lock */}
                             {isLocked ? (
-                              <Lock className="w-7 h-7 text-slate-400" strokeWidth={2.4} />
+                              <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
                               <st.icon
-                                className="w-9 h-9 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]"
+                                className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]"
                                 strokeWidth={2.2}
                               />
                             )}
                             {/* 序号徽章 */}
                             <span className={cn(
-                              'absolute -top-2 -left-2 w-7 h-7 rounded-full bg-white text-foreground text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-white font-display-aurora',
+                              'absolute -top-2 -left-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-foreground text-[11px] sm:text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-white font-display-aurora',
                               isLocked && 'opacity-70'
                             )}>
                               {si + 1}
                             </span>
                             {/* 完成 */}
                             {isDone && (
-                              <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow border-2 border-white">
-                                <Check className="w-4 h-4" strokeWidth={3.5} />
+                              <span className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow border-2 border-white">
+                                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3.5} />
                               </span>
                             )}
                             {/* GO 标签 */}
@@ -552,8 +563,12 @@ export default function CareerMap() {
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2.5 w-[55vw] max-w-[200px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
-                          isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
+                          'mx-2 sm:mx-2.5 w-[44vw] max-w-[180px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border transition-all',
+                          isLocked
+                            ? 'bg-white/35 border-white/40 shadow-[0_4px_12px_-3px_rgba(0,0,0,0.05)]'
+                            : isActive
+                              ? 'bg-white/85 border-white shadow-[0_8px_20px_-4px_rgba(16,185,129,0.25)]'
+                              : 'bg-white/70 border-white/60 shadow-[0_4px_12px_-3px_rgba(0,0,0,0.08)]',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>
                           <p className={cn('text-[12px] sm:text-[13px] font-bold leading-snug font-display-aurora break-words', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
@@ -583,6 +598,7 @@ export default function CareerMap() {
                   );
                 })}
               </div>
+
 
               {/* 章节衔接装饰 */}
               {ci < chapters.length - 1 && (
