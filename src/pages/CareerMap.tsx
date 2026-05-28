@@ -144,6 +144,8 @@ function useIsMobile() {
 
 export default function CareerMap() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const NODE_X_PATTERN = isMobile ? NODE_X_PATTERN_MOBILE : NODE_X_PATTERN_DESKTOP;
   const { completed, markDone, reset } = useQuestProgress();
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
   const { skipData, saveSkip, resetSkip } = useChapterSkip();
