@@ -269,8 +269,8 @@ export default function CareerMap() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
-              <span className="aurora-text">求职闯关地图</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide">智联 AI</span>
+              <span className="aurora-text truncate">求职闯关地图</span>
+              <span className="hidden sm:inline text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide shrink-0">智联 AI</span>
             </h1>
             <p className="text-[11px] text-muted-foreground hidden sm:block">从认识自己到拿下 offer，一关一关来</p>
           </div>
