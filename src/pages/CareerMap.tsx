@@ -452,20 +452,21 @@ export default function CareerMap() {
 
               {/* 游戏地图区域（无外框，散落景物 + 蜿蜒小径 + 节点） */}
               <div className="relative" style={{ height: sectionHeight }}>
-                {/* 散落的景物 */}
-                {ch.scenery.map((emo, i) => {
+                {/* 散落的景物（移动端只保留 2 个，避免拥挤） */}
+                {(isMobile ? ch.scenery.slice(0, 2) : ch.scenery).map((emo, i) => {
                   const seed = (ci * 13 + i * 37) % 100;
                   const left = 5 + ((seed * 7) % 85);
                   const top = 10 + ((seed * 11) % 80);
-                  const size = 18 + ((seed * 3) % 16);
+                  const size = isMobile ? 16 + ((seed * 2) % 8) : 18 + ((seed * 3) % 16);
                   return (
                     <span
                       key={i}
-                      className="absolute select-none pointer-events-none opacity-60"
+                      className="absolute select-none pointer-events-none opacity-40 sm:opacity-60"
                       style={{ left: `${left}%`, top: `${top}%`, fontSize: `${size}px` }}
                     >{emo}</span>
                   );
                 })}
+
 
                 {/* 蜿蜒小径 SVG */}
                 <svg
