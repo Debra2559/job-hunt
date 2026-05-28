@@ -65,7 +65,11 @@ export const CHAPTER_STAGES: Record<string, string[]> = {
   ch2: ['resume', 'tips', 'company'],
   ch3: ['feed', 'apply', 'jd-break'],
   ch4: ['qa', 'mock'],
+  ch5: ['onboard-prep', 'plan-90', 'first-week', 'probation'],
+  ch6: ['communication', 'collab', 'meeting', 'anti-pua'],
+  ch7: ['review', 'negotiate', 'pathing'],
 };
+
 
 const CHAPTER_BADGE: Record<string, BadgeId> = {
   ch1: 'chapter_1_clear',

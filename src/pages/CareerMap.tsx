@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, BrainCircuit, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight } from 'lucide-react';
+import { Compass, BrainCircuit, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight, Briefcase, CalendarCheck2, Handshake, GraduationCap, Users, Presentation, ShieldCheck, TrendingUp, Coins, GitBranch, Trophy, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
@@ -106,6 +106,58 @@ const chapters: Chapter[] = [
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
+  // ===== 拿下 Offer 是新征程的起点 =====
+  {
+    num: '05',
+    title: '入职适应',
+    subtitle: 'Offer 不是终点,是新故事的开始',
+    emoji: '🌅',
+    nodeBg: 'from-amber-400 via-orange-400 to-rose-400',
+    nodeHalo: 'bg-amber-300/60',
+    ribbon: 'from-amber-400 to-orange-500',
+    ribbonShadow: 'shadow-amber-300/50',
+    scenery: ['🌻', '☀️', '🍞', '🪴', '📋'],
+    stages: [
+      { id: 'onboard-prep', title: '背调 & 入职准备', desc: '材料清单、社保转移、报到流程', icon: Briefcase, emoji: '💼', comingSoon: true, priority: 'P0' },
+      { id: 'plan-90', title: '30 / 60 / 90 天计划', desc: 'AI 帮你拟定上手节奏与里程碑', icon: CalendarCheck2, emoji: '📅', comingSoon: true, priority: 'P0' },
+      { id: 'first-week', title: '第一周破冰', desc: 'leader / 同事 / 上下游 自我介绍', icon: Handshake, emoji: '🤝', comingSoon: true, priority: 'P1' },
+      { id: 'probation', title: '转正答辩', desc: '复盘亮点、STAR/金字塔输出', icon: GraduationCap, emoji: '🎓', comingSoon: true, priority: 'P0' },
+    ],
+  },
+  {
+    num: '06',
+    title: '职场文化生存',
+    subtitle: '把规则摸清,把自己保护好',
+    emoji: '🛡️',
+    nodeBg: 'from-indigo-400 via-violet-500 to-purple-500',
+    nodeHalo: 'bg-indigo-300/60',
+    ribbon: 'from-indigo-400 to-purple-500',
+    ribbonShadow: 'shadow-indigo-300/50',
+    scenery: ['📚', '🫧', '🌙', '🪞', '🗝️'],
+    stages: [
+      { id: 'communication', title: '沟通礼仪 & 汇报', desc: '邮件、IM、周报的人话模板', icon: MessagesSquare, emoji: '✉️', comingSoon: true, priority: 'P0' },
+      { id: 'collab', title: '跨部门协作', desc: '推不动事情时该怎么办', icon: Users, emoji: '👥', comingSoon: true, priority: 'P0' },
+      { id: 'meeting', title: '高效会议', desc: '开会发言、控场、纪要的套路', icon: Presentation, emoji: '🗣️', comingSoon: true, priority: 'P1' },
+      { id: 'anti-pua', title: '反 PUA 自保', desc: '识别 PUA 话术,保护自己的边界', icon: ShieldCheck, emoji: '🛡️', comingSoon: true, priority: 'P0' },
+    ],
+  },
+  {
+    num: '07',
+    title: '长期成长',
+    subtitle: '从打工人到自己的 CEO',
+    emoji: '🌳',
+    nodeBg: 'from-emerald-400 via-lime-500 to-yellow-500',
+    nodeHalo: 'bg-emerald-300/60',
+    ribbon: 'from-emerald-500 to-yellow-500',
+    ribbonShadow: 'shadow-emerald-300/50',
+    scenery: ['🌳', '🪙', '🧭', '🍀', '🌟'],
+    stages: [
+      { id: 'review', title: '绩效面谈 & OKR', desc: '把价值讲清楚,把目标对齐准', icon: TrendingUp, emoji: '📈', comingSoon: true, priority: 'P0' },
+      { id: 'negotiate', title: '加薪 & 跳槽谈薪', desc: '基于市场行情的话术与底牌', icon: Coins, emoji: '💰', comingSoon: true, priority: 'P0' },
+      { id: 'pathing', title: 'M / P 双通道', desc: '管理线还是专业线,怎么选路', icon: GitBranch, emoji: '🧭', comingSoon: true, priority: 'P1' },
+    ],
+  },
+
 ];
 
 
@@ -177,7 +229,7 @@ export default function CareerMap() {
     if (allDoneImplemented) return '已开放关卡全部通关，先看看后续内容';
     if (doneCount === 0) return '从这里出发，认识真正的自己';
     if (nextDoneInChapter > 0 && nextDoneInChapter < nextImplInChapter) return `继续推进「${nextRec.chapter.title}」`;
-    return `进入「第${['一','二','三','四'][nextRec.ci]}章 · ${nextRec.chapter.title}」`;
+    return `进入「第${['一','二','三','四','五','六','七'][nextRec.ci]}章 · ${nextRec.chapter.title}」`;
   })();
   const recReason = (() => {
     if (!nextRec) return '';
@@ -359,7 +411,7 @@ export default function CareerMap() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">推荐 · 第{['一','二','三','四'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关</span>
+                  <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">推荐 · 第{['一','二','三','四','五','六','七'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关</span>
                   {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/25 backdrop-blur">敬请期待</span>}
                 </div>
                 <h2 className="text-lg font-extrabold mt-1.5 leading-tight">{recHeadline}</h2>
@@ -414,7 +466,7 @@ export default function CareerMap() {
                   </span>
                   <div className="leading-tight">
                     <p className="text-[9px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
-                    <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
+                    <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四','五','六','七'][ci]}章 · {ch.title}</h2>
                   </div>
                   {chComplete && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
@@ -601,7 +653,7 @@ export default function CareerMap() {
 
 
               {/* 章节衔接装饰 */}
-              {ci < chapters.length - 1 && (
+              {ci < chapters.length - 1 && ci !== 3 && (
                 <div className="flex justify-center my-2">
                   <div className="flex items-center gap-1.5 opacity-50">
                     <span className="w-1 h-1 rounded-full bg-emerald-400" />
@@ -612,31 +664,61 @@ export default function CareerMap() {
                   </div>
                 </div>
               )}
+
+              {/* 🎉 Offer 里程碑（Ch4 之后、Ch5 之前注入） */}
+              {ci === 3 && (
+                <div className="relative my-8 animate-fade-in">
+                  <div className={cn(
+                    'relative overflow-hidden rounded-[28px] p-6 sm:p-8 text-center border border-white/70 backdrop-blur-xl transition-all',
+                    doneCount >= 9
+                      ? 'bg-gradient-to-br from-amber-200/90 via-rose-200/85 to-violet-200/90 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.45)]'
+                      : 'bg-gradient-to-br from-amber-100/70 via-rose-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(244,114,182,0.3)] opacity-95'
+                  )}>
+                    <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-amber-200/50 blur-3xl pointer-events-none" />
+                    <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-violet-300/40 blur-3xl pointer-events-none" />
+                    <div className="absolute top-3 right-4 flex gap-1 pointer-events-none">
+                      <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
+                      <Sparkles className="w-3 h-3 text-rose-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
+                    </div>
+                    <div className="relative inline-flex items-center justify-center mb-3">
+                      <div className="absolute inset-0 bg-amber-300/40 rounded-full blur-2xl" />
+                      <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-300 to-rose-400 flex items-center justify-center shadow-xl border-4 border-white">
+                        <Trophy className="w-10 h-10 text-white drop-shadow-md" strokeWidth={2.2} />
+                      </div>
+                    </div>
+                    <p className="text-[10px] font-bold tracking-[0.3em] text-rose-500/80 mb-1 font-display-aurora">MILESTONE · OFFER GET</p>
+                    <h3 className="text-xl sm:text-2xl font-bold font-display-aurora aurora-text">拿下心仪 Offer 🎉</h3>
+                    <p className="text-xs sm:text-sm text-foreground/70 mt-2 max-w-sm mx-auto leading-relaxed">
+                      恭喜走完求职路。<span className="font-bold text-foreground">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
+                    </p>
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/70 backdrop-blur border border-white text-[11px] font-bold text-rose-600">
+                      <ChevronsRight className="w-3 h-3" strokeWidth={3} />
+                      新征程开启
+                    </div>
+                  </div>
+                </div>
+              )}
             </section>
           );
         })}
 
 
-        {/* Finale 城堡 */}
-        <section className="relative mt-8">
-          <div className={cn(
-            'relative overflow-hidden rounded-[28px] p-8 text-center border border-white/70 backdrop-blur-xl transition-all',
-            doneCount === implementedTotal && implementedTotal > 0
-              ? 'bg-gradient-to-br from-amber-200/90 via-rose-200/80 to-violet-200/90 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.45)] scale-[1.02]'
-              : 'bg-gradient-to-br from-emerald-100/70 via-cyan-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(6,182,212,0.35)] opacity-90'
-          )}>
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-amber-200/40 blur-3xl pointer-events-none" />
+        {/* 系列终点：成为更好的自己 */}
+        <section className="relative mt-10">
+          <div className="relative overflow-hidden rounded-[28px] p-8 text-center border border-white/70 backdrop-blur-xl bg-gradient-to-br from-emerald-100/70 via-cyan-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(6,182,212,0.35)]">
+            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-emerald-200/40 blur-3xl pointer-events-none" />
             <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-violet-300/30 blur-3xl pointer-events-none" />
             <div className="text-5xl mb-1">🏰</div>
-            <div className="text-4xl mb-2">🏆</div>
-            <h3 className="text-xl font-bold font-display-aurora aurora-text">拿下心仪 Offer</h3>
-            <p className="text-sm text-foreground/70 mt-2">
+            <div className="text-3xl mb-2">🌳✨</div>
+            <h3 className="text-xl font-bold font-display-aurora aurora-text">成为更好的自己</h3>
+            <p className="text-sm text-foreground/70 mt-2 max-w-sm mx-auto leading-relaxed">
               {doneCount === implementedTotal && implementedTotal > 0
-                ? '恭喜！已开放的关卡全部通关，继续等待新章节解锁～'
-                : '通关后欢迎回来分享你的故事'}
+                ? '已开放的关卡全部通关 🎊 后续章节正在打磨中，敬请期待～'
+                : '从认识自己到长期成长，一关一关，慢慢来。'}
             </p>
           </div>
         </section>
+
 
         {/* Mobile reset */}
         {(doneCount > 0 || game.xp > 0) && (
