@@ -3,6 +3,17 @@ import type { Config } from "tailwindcss";
 export default {
   darkMode: ["class"],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
+  // 生产环境保留所有章节/关卡用到的动态渐变与光晕色（chapters 数组里以字符串拼接给 cn() 用，
+  // Tailwind 解析器有时会把这些当作未使用类剔除，导致发布后颜色变浅或消失）
+  safelist: [
+    { pattern: /^(from|via|to)-(emerald|teal|cyan|sky|blue|violet|purple|fuchsia|rose|pink|orange|amber)-(300|400|500|600)$/ },
+    { pattern: /^bg-(emerald|teal|cyan|sky|blue|violet|purple|fuchsia|rose|pink|orange|amber)-(100|200|300|400|500)(\/\d{1,3})?$/ },
+    { pattern: /^shadow-(emerald|teal|cyan|sky|blue|violet|purple|fuchsia|rose|pink|orange|amber)-(200|300|400)(\/\d{1,3})?$/ },
+    { pattern: /^ring-(emerald|teal|cyan|sky|blue|violet|purple|fuchsia|rose|pink|orange|amber)-(200|300|400)$/ },
+    { pattern: /^text-(emerald|teal|cyan|sky|blue|violet|purple|fuchsia|rose|pink|orange|amber)-(500|600|700|800)$/ },
+    { pattern: /^border-(emerald|teal|cyan|sky|blue|violet|purple|fuchsia|rose|pink|orange|amber)-(200|300|400|500)(\/\d{1,3})?$/ },
+    'bg-gradient-to-r', 'bg-gradient-to-br', 'bg-gradient-to-b', 'bg-gradient-to-tr',
+  ],
   prefix: "",
   theme: {
     container: {
