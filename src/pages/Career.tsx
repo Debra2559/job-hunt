@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText, GraduationCap, Briefcase, Plane, Compass, Target, Lightbulb, Sparkles, Rocket, Check } from 'lucide-react';
+import { ArrowLeft, Send, ExternalLink, RotateCcw, X, FileText, GraduationCap, Briefcase, Plane, Compass, Target, Lightbulb, Sparkles, Rocket, Check, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -152,6 +152,8 @@ function SourceCards({ sources }: { sources: WebSource[] }) {
   );
 }
 
+const REPORT_LS_KEY = 'career:report:v1';
+
 export default function Career() {
   const { user } = useAuth();
   const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(user?.id);
@@ -160,7 +162,6 @@ export default function Career() {
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
   const [bossJobs, setBossJobs] = useState<BossJobListing[]>([]);
   const [activeReport, setActiveReport] = useState<CareerReportData | null>(null);
-  const [previewMode, setPreviewMode] = useState<'preview' | 'code'>('preview');
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { markDone } = useQuestProgress();
@@ -208,6 +209,17 @@ export default function Career() {
       });
       if (newReports.size > 0) {
         setReports(newReports);
+        // 持久化最近一次报告，供后续章节读取
+        const latest = Array.from(newReports.values()).pop();
+        if (latest) {
+          try {
+            localStorage.setItem(REPORT_LS_KEY, JSON.stringify({
+              data: latest,
+              userId: user?.id ?? null,
+              savedAt: new Date().toISOString(),
+            }));
+          } catch { /* ignore quota */ }
+        }
         // Chapter 1 通关：生成报告即意味着「认识自己」三个关卡完成
         ['assess', 'recommend', 'jd'].forEach(id => {
           markDone(id);
@@ -215,7 +227,7 @@ export default function Career() {
         });
       }
     }
-  }, [loadingHistory, messages, isLoading, bossJobs, markDone, onStageCompleted]);
+  }, [loadingHistory, messages, isLoading, bossJobs, markDone, onStageCompleted, user?.id]);
 
   // Generate HTML for iframe
   const reportHTML = useMemo(() => {
@@ -452,99 +464,41 @@ export default function Career() {
               </div>
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-foreground truncate">职业规划报告</p>
-                <p className="text-[11px] text-muted-foreground">HTML Document</p>
+                <p className="text-[11px] text-muted-foreground">第一章 · 认识自己 · 已保存</p>
               </div>
             </div>
-
-            {/* Mode tabs */}
-            <div className="flex items-center rounded-lg border border-border bg-muted/50 p-0.5">
-              <button
-                onClick={() => setPreviewMode('preview')}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all",
-                  previewMode === 'preview'
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Eye className="w-3.5 h-3.5" />
-                预览
-              </button>
-              <button
-                onClick={() => setPreviewMode('code')}
-                className={cn(
-                  "px-3 py-1.5 rounded-md text-xs font-medium flex items-center gap-1.5 transition-all",
-                  previewMode === 'code'
-                    ? "bg-background text-foreground shadow-sm"
-                    : "text-muted-foreground hover:text-foreground"
-                )}
-              >
-                <Code className="w-3.5 h-3.5" />
-                源码
-              </button>
-            </div>
-
-            {/* Actions */}
-            <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg"
-                title="复制HTML"
-                onClick={() => { navigator.clipboard.writeText(reportHTML); }}
-              >
-                <Copy className="w-3.5 h-3.5 text-muted-foreground" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg"
-                title="下载HTML"
-                onClick={() => {
-                  const a = document.createElement('a');
-                  a.href = reportBlobUrl;
-                  a.download = `职业规划报告.html`;
-                  a.click();
-                }}
-              >
-                <Download className="w-3.5 h-3.5 text-muted-foreground" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg"
-                title="在新标签页打开"
-                onClick={() => window.open(reportBlobUrl, '_blank')}
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-muted-foreground" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg"
-                onClick={() => setActiveReport(null)}
-              >
-                <X className="w-4 h-4 text-muted-foreground" />
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg"
+              onClick={() => setActiveReport(null)}
+            >
+              <X className="w-4 h-4 text-muted-foreground" />
+            </Button>
           </div>
 
           {/* Panel Content */}
           <div className="flex-1 overflow-hidden">
-            {previewMode === 'preview' ? (
-              <iframe
-                src={reportBlobUrl}
-                className="w-full h-full border-0"
-                title="职业规划报告预览"
-                sandbox="allow-scripts"
-              />
-            ) : (
-              <div className="h-full overflow-auto bg-[#1e1e2e] p-4">
-                <pre className="text-[13px] leading-relaxed font-mono text-[#cdd6f4] whitespace-pre-wrap break-words">
-                  <code>{reportHTML}</code>
-                </pre>
+            <iframe
+              src={reportBlobUrl}
+              className="w-full h-full border-0"
+              title="职业规划报告预览"
+              sandbox="allow-scripts"
+            />
+          </div>
+
+          {/* 下一关 CTA */}
+          <div className="shrink-0 border-t border-white/40 bg-white/75 backdrop-blur-2xl px-4 py-3">
+            <a
+              href="/?next=ch2"
+              className="group flex items-center justify-between gap-3 w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95 hover:-translate-y-0.5 transition-all duration-300"
+            >
+              <div className="flex flex-col items-start leading-tight">
+                <span className="text-[11px] uppercase tracking-wider opacity-90">第一章已通关 🎉</span>
+                <span className="text-sm font-bold">进入第二章 · 应聘准备</span>
               </div>
-            )}
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-0.5 transition-transform" />
+            </a>
           </div>
         </div>
       )}
