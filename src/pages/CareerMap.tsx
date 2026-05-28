@@ -229,7 +229,7 @@ export default function CareerMap() {
     if (allDoneImplemented) return '已开放关卡全部通关，先看看后续内容';
     if (doneCount === 0) return '从这里出发，认识真正的自己';
     if (nextDoneInChapter > 0 && nextDoneInChapter < nextImplInChapter) return `继续推进「${nextRec.chapter.title}」`;
-    return `进入「第${['一','二','三','四'][nextRec.ci]}章 · ${nextRec.chapter.title}」`;
+    return `进入「第${['一','二','三','四','五','六','七'][nextRec.ci]}章 · ${nextRec.chapter.title}」`;
   })();
   const recReason = (() => {
     if (!nextRec) return '';
@@ -411,7 +411,7 @@ export default function CareerMap() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 flex-wrap">
-                  <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">推荐 · 第{['一','二','三','四'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关</span>
+                  <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">推荐 · 第{['一','二','三','四','五','六','七'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关</span>
                   {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/25 backdrop-blur">敬请期待</span>}
                 </div>
                 <h2 className="text-lg font-extrabold mt-1.5 leading-tight">{recHeadline}</h2>
@@ -466,7 +466,7 @@ export default function CareerMap() {
                   </span>
                   <div className="leading-tight">
                     <p className="text-[9px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
-                    <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四'][ci]}章 · {ch.title}</h2>
+                    <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四','五','六','七'][ci]}章 · {ch.title}</h2>
                   </div>
                   {chComplete && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
