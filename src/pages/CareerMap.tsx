@@ -191,20 +191,28 @@ export default function CareerMap() {
 
   const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
 
-  // 直接跳到指定关卡：把它之前所有未完成的「已实现」关卡标记完成
+  // 直接跳到指定关卡：把它之前所有未完成的关卡（含敬请期待）标记完成，支持跨章节
   const stagesToSkipBefore = (stageId: string) => {
     const flat = chapters.flatMap(c => c.stages);
     const idx = flat.findIndex(s => s.id === stageId);
     if (idx < 0) return [] as string[];
-    return flat.slice(0, idx).filter(s => !s.comingSoon && !completed.includes(s.id)).map(s => s.id);
+    return flat.slice(0, idx).filter(s => !completed.includes(s.id)).map(s => s.id);
   };
 
   const confirmStageSkip = () => {
     if (!stageSkipTarget) return;
     const ids = stagesToSkipBefore(stageSkipTarget.stageId);
     ids.forEach(id => markDone(id));
-    toast({ title: `已跳到「${stageSkipTarget.stageTitle}」`, description: `跳过了前面 ${ids.length} 关，可直接开始这一关` });
     const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
+    const crossChapters = new Set(
+      chapters.flatMap(c => c.stages.filter(s => ids.includes(s.id)).map(() => c.num))
+    ).size;
+    toast({
+      title: `已跳到「${stageSkipTarget.stageTitle}」`,
+      description: crossChapters > 1
+        ? `跨越 ${crossChapters} 个章节，跳过了 ${ids.length} 关`
+        : `跳过了前面 ${ids.length} 关，可直接开始这一关`,
+    });
     setStageSkipTarget(null);
     if (targetStage?.to) navigate(targetStage.to);
   };
