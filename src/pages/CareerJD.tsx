@@ -64,6 +64,9 @@ export default function CareerJD() {
   const { markDone, isDone } = useQuestProgress();
   const { onStageCompleted } = useGameProgress();
   const [completed, setCompleted] = useState(false);
+  const [insights, setInsights] = useState<Record<string, JobInsight>>({});
+  const [insightLoading, setInsightLoading] = useState<Record<string, boolean>>({});
+  const [insightError, setInsightError] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setPicked(readPicked());
@@ -71,6 +74,45 @@ export default function CareerJD() {
   }, [isDone]);
 
   const active = picked[activeIdx];
+
+  // 拉取当前岗位的"岗位画像"（带 localStorage 缓存）
+  useEffect(() => {
+    if (!active) return;
+    const key = active.title;
+    if (insights[key] || insightLoading[key]) return;
+    const cacheKey = INSIGHT_LS_PREFIX + key;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setInsights(prev => ({ ...prev, [key]: JSON.parse(cached) }));
+        return;
+      }
+    } catch { /* noop */ }
+    fetchInsight(key, { category: active.category, skills: active.skills });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.title]);
+
+  const fetchInsight = async (title: string, ctx: { category?: string; skills?: string[] }, force = false) => {
+    setInsightLoading(prev => ({ ...prev, [title]: true }));
+    setInsightError(prev => ({ ...prev, [title]: '' }));
+    try {
+      if (force) {
+        try { localStorage.removeItem(INSIGHT_LS_PREFIX + title); } catch { /* noop */ }
+      }
+      const { data, error } = await supabase.functions.invoke('job-insights', {
+        body: { title, category: ctx.category, skills: ctx.skills },
+      });
+      if (error) throw error;
+      const insight = (data as { insight?: JobInsight })?.insight || {};
+      setInsights(prev => ({ ...prev, [title]: insight }));
+      try { localStorage.setItem(INSIGHT_LS_PREFIX + title, JSON.stringify(insight)); } catch { /* noop */ }
+    } catch (e) {
+      setInsightError(prev => ({ ...prev, [title]: (e as Error).message || '加载失败' }));
+    } finally {
+      setInsightLoading(prev => ({ ...prev, [title]: false }));
+    }
+  };
+
 
   const handleSelectJob = (i: number) => {
     setActiveIdx(i);
