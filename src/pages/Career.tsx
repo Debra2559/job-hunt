@@ -152,6 +152,8 @@ function SourceCards({ sources }: { sources: WebSource[] }) {
   );
 }
 
+const REPORT_LS_KEY = 'career:report:v1';
+
 export default function Career() {
   const { user } = useAuth();
   const { messages, isLoading, loadingHistory, sendMessage, autoGreet, hasGreeted, clearHistory } = useCareerConversation(user?.id);
@@ -160,7 +162,6 @@ export default function Career() {
   const [webSources, setWebSources] = useState<Map<number, WebSource[]>>(new Map());
   const [bossJobs, setBossJobs] = useState<BossJobListing[]>([]);
   const [activeReport, setActiveReport] = useState<CareerReportData | null>(null);
-  const [previewMode, setPreviewMode] = useState<'preview' | 'code'>('preview');
   const scrollRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { markDone } = useQuestProgress();
