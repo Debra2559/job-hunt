@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { SELECTED_JOBS_LS_KEY } from './CareerRecommend';
+import JobPrereqInline from '@/components/career/JobPrereqInline';
 import { supabase } from '@/integrations/supabase/client';
 
 type PickedJob = {
