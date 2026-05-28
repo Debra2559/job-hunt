@@ -1,165 +1,266 @@
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Sparkles, Loader2, Copy, RotateCcw, Check, ArrowRight, FileText } from 'lucide-react';
+import {
+  Sparkles, Loader2, ArrowRight, Upload, FileText, Wand2, Download, Eye, Pencil,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from '@/hooks/use-toast';
 import Ch2PageShell from '@/components/career/Ch2PageShell';
+import JobContextBanner from '@/components/career/JobContextBanner';
+import ResumeEditor from '@/components/career/ResumeEditor';
+import ResumePreview from '@/components/career/ResumePreview';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
-import { streamCh2 } from '@/lib/ch2Stream';
-import JobContextBanner from '@/components/career/JobContextBanner';
+import { extractTextFromFile } from '@/lib/parseResumeFile';
+import { emptyResume, normalizeResume, type ResumeData } from '@/lib/resumeTypes';
+import { supabase } from '@/integrations/supabase/client';
 
-const QUESTIONS = [
-  { key: 'basic', label: '基本信息', placeholder: '姓名 / 学校专业 / 年级 / 联系方式 / 求职方向（写多少都行）' },
-  { key: 'edu', label: '教育经历', placeholder: '学历、成绩、奖学金、相关课程、辅修双学位…' },
-  { key: 'intern', label: '实习 / 工作', placeholder: '在哪、做了什么、用什么方法、带来什么数字结果。每段实习一行就行。' },
-  { key: 'project', label: '项目 / 比赛', placeholder: '课程项目、独立项目、开源、竞赛、获奖。哪怕只有想法也写出来。' },
-  { key: 'campus', label: '校园经历', placeholder: '社团 / 学生会 / 志愿者 / 班委 / 组织活动…' },
-  { key: 'skill', label: '技能 & 证书', placeholder: '语言、工具、编程、设计软件、四六级、行业证书…' },
-] as const;
+const GRADIENT = 'from-sky-400 via-cyan-500 to-blue-500';
+
+async function generateStructured(input: string): Promise<ResumeData> {
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+  const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  const resp = await fetch(`${SUPABASE_URL}/functions/v1/ch2-toolkit`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      apikey: ANON,
+      Authorization: `Bearer ${accessToken || ANON}`,
+    },
+    body: JSON.stringify({ mode: 'resume-structured', input }),
+  });
+  if (!resp.ok) throw new Error(`AI ${resp.status}`);
+  const json = await resp.json();
+  return normalizeResume(json?.data);
+}
 
 export default function CareerResume() {
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [output, setOutput] = useState('');
-  const [streaming, setStreaming] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [resume, setResume] = useState<ResumeData>(emptyResume());
+  const [desc, setDesc] = useState('');
+  const [tab, setTab] = useState<'desc' | 'upload'>('desc');
+  const [view, setView] = useState<'edit' | 'preview'>('edit');
+  const [loading, setLoading] = useState(false);
+  const [hasContent, setHasContent] = useState(false);
   const [completed, setCompleted] = useState(false);
   const { markDone, isDone } = useQuestProgress();
   const { onStageCompleted } = useGameProgress();
-  const stopRef = useRef<() => void>();
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const hasInput = Object.values(answers).some(v => v && v.trim());
+  const markGenerated = () => {
+    setHasContent(true);
+    if (!isDone('resume')) {
+      markDone('resume');
+      onStageCompleted('resume');
+      setCompleted(true);
+      toast({ title: '🎉 第 1 关通关', description: '简历草稿已生成，可继续编辑或导出 PDF' });
+    } else {
+      setCompleted(true);
+    }
+  };
 
-  const handleGenerate = async () => {
-    if (!hasInput) {
-      toast({ title: '至少先填一栏', description: '哪怕只写一两句也可以，AI 会帮你补结构' });
+  const handleGenerateFromDesc = async () => {
+    if (!desc.trim()) {
+      toast({ title: '先描述一下你的经历', description: '哪怕只是一段话也可以' });
       return;
     }
-    setOutput('');
-    setStreaming(true);
-
-    const userText = QUESTIONS
-      .map(q => answers[q.key]?.trim() ? `【${q.label}】\n${answers[q.key]}` : null)
-      .filter(Boolean)
-      .join('\n\n');
-
+    setLoading(true);
     try {
-      const stop = await streamCh2({
-        mode: 'resume',
-        input: userText,
-        onDelta: (chunk) => setOutput(prev => prev + chunk),
-        onDone: () => {
-          setStreaming(false);
-          if (!isDone('resume')) {
-            markDone('resume');
-            onStageCompleted('resume');
-            setCompleted(true);
-            toast({ title: '🎉 第 1 关通关', description: '简历草稿已生成，记得手动核对' });
-          } else {
-            setCompleted(true);
-          }
-        },
-        onError: (e) => {
-          setStreaming(false);
-          toast({ title: '生成失败', description: e, variant: 'destructive' });
-        },
-      });
-      stopRef.current = stop;
+      const data = await generateStructured(desc.trim());
+      setResume(data);
+      markGenerated();
     } catch (e: any) {
-      setStreaming(false);
-      toast({ title: '请求失败', description: e?.message || '稍后再试', variant: 'destructive' });
+      toast({ title: '生成失败', description: e?.message || '稍后再试', variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleCopy = async () => {
-    await navigator.clipboard.writeText(output);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+  const handleUpload = async (file: File) => {
+    setLoading(true);
+    try {
+      toast({ title: '正在解析文件…', description: file.name });
+      const text = await extractTextFromFile(file);
+      if (!text || text.length < 20) throw new Error('未能从文件中提取出有效内容');
+      const data = await generateStructured(`以下是用户上传的简历原文，请解析为结构化 JSON：\n\n${text}`);
+      setResume(data);
+      markGenerated();
+      toast({ title: '解析完成', description: '已自动填入下方表单，记得检查' });
+    } catch (e: any) {
+      toast({ title: '解析失败', description: e?.message || '稍后再试', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    }
   };
 
-  const handleReset = () => {
-    setOutput('');
-    setAnswers({});
+  const handleStartBlank = () => {
+    setResume(emptyResume());
+    setHasContent(true);
+    setView('edit');
+  };
+
+  const handleExport = () => {
+    setView('preview');
+    setTimeout(() => window.print(), 250);
   };
 
   return (
     <Ch2PageShell
       emoji="📝"
-      title="对话式一键简历"
-      subtitle="挨个填、想到啥写啥，AI 自动润色 + STAR 法则量化"
-      gradient="from-sky-400 via-cyan-500 to-blue-500"
+      title="一键简历"
+      subtitle="上传 / 描述 / 手填三选一，AI 自动结构化，直接导出 PDF"
+      gradient={GRADIENT}
       footer={
         completed ? (
           <>
-            <div className="flex-1 text-xs text-muted-foreground">🎉 第 1 关已通关，继续看看下一关</div>
+            <div className="flex-1 text-xs text-muted-foreground hidden sm:block">🎉 第 1 关已通关</div>
+            <Button onClick={handleExport} variant="outline" className="shrink-0 rounded-2xl h-11 px-4 font-semibold">
+              <Download className="w-4 h-4 mr-1" /> 导出 PDF
+            </Button>
             <Link
               to="/career/tips"
               className="shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-5 h-11 bg-gradient-to-r from-sky-400 via-cyan-500 to-blue-500 text-white font-bold shadow-lg hover:opacity-95"
             >
-              下一关 · 求职小 Tips <ArrowRight className="w-4 h-4" />
+              下一关 <ArrowRight className="w-4 h-4" />
             </Link>
           </>
-        ) : (
+        ) : hasContent ? (
           <>
-            <div className="flex-1 text-xs text-muted-foreground">
-              {streaming ? 'AI 正在为你拼装简历…' : hasInput ? '填得越具体，AI 还原越准' : '至少填一栏，例如「实习 / 项目」'}
-            </div>
-            <Button
-              onClick={handleGenerate}
-              disabled={streaming || !hasInput}
-              className="shrink-0 rounded-2xl px-5 h-11 bg-gradient-to-r from-sky-400 via-cyan-500 to-blue-500 text-white font-bold shadow-lg disabled:opacity-40"
-            >
-              {streaming ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
-              {streaming ? '生成中' : '一键生成简历'}
+            <div className="flex-1 text-xs text-muted-foreground hidden sm:block">填好后可直接导出 PDF</div>
+            <Button onClick={handleExport} className={`shrink-0 rounded-2xl h-11 px-5 text-white font-bold shadow-lg bg-gradient-to-r ${GRADIENT}`}>
+              <Download className="w-4 h-4 mr-1" /> 导出 PDF
             </Button>
           </>
+        ) : (
+          <div className="flex-1 text-xs text-muted-foreground text-center">从上传、描述或空白开始 ⬆</div>
         )
       }
     >
-      <JobContextBanner
-        gradient="from-sky-400 via-cyan-500 to-blue-500"
-        hint="设定目标岗位后，AI 写简历会按这个方向定关键词与项目侧重。"
-      />
-      <div className="space-y-3 mb-6">
+      <JobContextBanner gradient={GRADIENT} hint="设定目标岗位后，AI 写简历会按这个方向定关键词与项目侧重。" />
 
-        {QUESTIONS.map((q, i) => (
-          <div key={q.key} className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur p-4 shadow-sm">
-            <div className="flex items-center gap-2 mb-2">
-              <span className="w-6 h-6 rounded-full bg-gradient-to-br from-sky-400 to-cyan-500 text-white text-[11px] font-bold flex items-center justify-center">{i + 1}</span>
-              <h3 className="text-sm font-bold">{q.label}</h3>
-              <span className="text-[10px] text-muted-foreground">可跳过</span>
-            </div>
-            <Textarea
-              value={answers[q.key] || ''}
-              onChange={(e) => setAnswers(prev => ({ ...prev, [q.key]: e.target.value }))}
-              placeholder={q.placeholder}
-              rows={3}
-              className="resize-none text-sm bg-white/70 border-white"
-            />
-          </div>
-        ))}
-      </div>
+      {!hasContent && (
+        <div className="rounded-3xl border border-white/70 bg-white/85 backdrop-blur p-4 sm:p-5 shadow-sm mb-4">
+          <Tabs value={tab} onValueChange={(v) => setTab(v as 'desc' | 'upload')}>
+            <TabsList className="grid grid-cols-2 w-full mb-3 bg-sky-50">
+              <TabsTrigger value="desc" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Wand2 className="w-3.5 h-3.5 mr-1" /> 描述生成
+              </TabsTrigger>
+              <TabsTrigger value="upload" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                <Upload className="w-3.5 h-3.5 mr-1" /> 上传简历
+              </TabsTrigger>
+            </TabsList>
 
-      {(output || streaming) && (
-        <div className="rounded-2xl border border-sky-200 bg-gradient-to-br from-white/95 to-sky-50/80 backdrop-blur shadow-lg overflow-hidden mb-6">
-          <div className="flex items-center justify-between px-4 py-2.5 bg-gradient-to-r from-sky-50 to-cyan-50 border-b border-sky-100">
-            <div className="flex items-center gap-2 text-sm font-bold">
-              <FileText className="w-4 h-4 text-sky-600" /> 生成的简历草稿
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button onClick={handleReset} className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
-                <RotateCcw className="w-3 h-3" /> 重来
+            <TabsContent value="desc" className="mt-0">
+              <p className="text-xs text-muted-foreground mb-2">
+                用一段话讲讲你自己：学校、专业、实习、项目、技能…AI 会自动拆解成结构化简历。
+              </p>
+              <Textarea
+                rows={6}
+                value={desc}
+                onChange={(e) => setDesc(e.target.value)}
+                placeholder={`示例：我是同济大学计算机大三学生，2026 届。\n暑期在字节做了 2 个月数据分析实习，用 SQL + Python 搭了一个用户留存看板。\n自己做过一个校园二手书 App，React + Supabase，上线 3 个月 800+ 用户。\n想找数据分析 / 增长方向的岗位。`}
+                className="resize-none text-sm bg-white/70 border-white"
+              />
+              <Button
+                onClick={handleGenerateFromDesc}
+                disabled={loading}
+                className={`w-full mt-3 h-11 rounded-2xl text-white font-bold shadow-lg bg-gradient-to-r ${GRADIENT}`}
+              >
+                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                {loading ? '正在生成…' : '一键生成可编辑简历'}
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="upload" className="mt-0">
+              <button
+                onClick={() => fileRef.current?.click()}
+                disabled={loading}
+                className="w-full rounded-2xl border-2 border-dashed border-sky-300 bg-sky-50/50 hover:bg-sky-50 transition py-8 text-center"
+              >
+                {loading ? (
+                  <Loader2 className="w-7 h-7 animate-spin mx-auto text-sky-500" />
+                ) : (
+                  <FileText className="w-7 h-7 mx-auto text-sky-500" />
+                )}
+                <div className="mt-2 text-sm font-semibold text-foreground">
+                  {loading ? '正在解析…' : '点击上传简历'}
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-1">支持 PDF / DOCX / TXT，本地解析后由 AI 结构化</div>
               </button>
-              <button onClick={handleCopy} disabled={!output} className="text-[11px] text-sky-700 font-semibold hover:text-sky-800 inline-flex items-center gap-1 disabled:opacity-40">
-                {copied ? <><Check className="w-3 h-3" /> 已复制</> : <><Copy className="w-3 h-3" /> 复制</>}
-              </button>
-            </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept=".pdf,.docx,.txt,.md"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  if (f) handleUpload(f);
+                }}
+              />
+            </TabsContent>
+          </Tabs>
+
+          <div className="mt-3 text-center">
+            <button
+              onClick={handleStartBlank}
+              className="text-[12px] text-sky-600 hover:text-sky-700 font-medium"
+            >
+              或者，从空白开始手动填写 →
+            </button>
           </div>
-          <pre className="text-[13px] leading-relaxed whitespace-pre-wrap break-words p-4 font-sans text-foreground/90 max-h-[60vh] overflow-y-auto">
-            {output}
-            {streaming && <span className="inline-block w-1.5 h-4 bg-sky-500 ml-0.5 align-middle animate-pulse" />}
-          </pre>
+        </div>
+      )}
+
+      {hasContent && (
+        <>
+          <div className="sticky top-[60px] z-10 -mx-1 px-1 py-2 mb-3 flex items-center gap-2">
+            <div className="inline-flex rounded-full bg-white/85 backdrop-blur border border-white p-0.5 shadow-sm">
+              <button
+                onClick={() => setView('edit')}
+                className={`px-3 h-8 rounded-full text-xs font-semibold inline-flex items-center gap-1 transition ${
+                  view === 'edit' ? `bg-gradient-to-r ${GRADIENT} text-white shadow` : 'text-foreground/70'
+                }`}
+              >
+                <Pencil className="w-3 h-3" /> 编辑
+              </button>
+              <button
+                onClick={() => setView('preview')}
+                className={`px-3 h-8 rounded-full text-xs font-semibold inline-flex items-center gap-1 transition ${
+                  view === 'preview' ? `bg-gradient-to-r ${GRADIENT} text-white shadow` : 'text-foreground/70'
+                }`}
+              >
+                <Eye className="w-3 h-3" /> 预览
+              </button>
+            </div>
+            <div className="flex-1" />
+            <button
+              onClick={() => { setHasContent(false); setResume(emptyResume()); setDesc(''); }}
+              className="text-[11px] text-muted-foreground hover:text-foreground"
+            >
+              重新开始
+            </button>
+          </div>
+
+          {view === 'edit' ? (
+            <ResumeEditor data={resume} onChange={setResume} />
+          ) : (
+            <div className="overflow-x-auto -mx-2 px-2 pb-4">
+              <div className="origin-top-left scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100" style={{ transformOrigin: 'top center' }}>
+                <ResumePreview data={resume} />
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Always render hidden printable copy so print works from any view */}
+      {hasContent && view !== 'preview' && (
+        <div className="hidden print:block">
+          <ResumePreview data={resume} />
         </div>
       )}
     </Ch2PageShell>
