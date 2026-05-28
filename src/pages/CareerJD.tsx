@@ -229,7 +229,82 @@ export default function CareerJD() {
               </div>
             </div>
 
-            {/* 技能 & 项目要求 */}
+            {/* 岗位画像（AI 生成：一天日常 + 网友声音 + 爽点/累点） */}
+            <JobInsightCard
+              title={active.title}
+              insight={insights[active.title]}
+              loading={!!insightLoading[active.title]}
+              error={insightError[active.title]}
+              onRetry={() => fetchInsight(active.title, { category: active.category, skills: active.skills }, true)}
+            />
+
+            {/* 去社媒看真实日常 / 视频 / 图片 */}
+            <div className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur-sm p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-rose-600" />
+                </div>
+                <h3 className="font-bold">去社媒看真实日常</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">小红书的吐槽、B站的 Vlog、知乎的深度问答、抖音短视频…一键带话题搜索</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {SOCIAL.map(s => (
+                  <a
+                    key={s.name}
+                    href={s.build(active.title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('group flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-colors', s.color)}
+                  >
+                    <span className="text-lg leading-none">{s.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1">
+                        <span className="truncate">{s.name}</span>
+                        <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+                      </div>
+                      <div className="text-[10px] font-normal opacity-75 truncate">{s.desc}</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              {/* 视频 / 图片专项搜索 */}
+              <div className="pt-1 grid grid-cols-2 gap-2">
+                <a
+                  href={`https://search.bilibili.com/video?keyword=${encodeURIComponent(active.title + ' 工作日常')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-sky-500/10 text-sky-700 border border-sky-300/40 hover:bg-sky-500/15"
+                >
+                  <Video className="w-3.5 h-3.5" /> 视频：B站「{active.title} 工作日常」
+                </a>
+                <a
+                  href={`https://image.baidu.com/search/index?tn=baiduimage&word=${encodeURIComponent(active.title + ' 工作环境')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-300/40 hover:bg-emerald-500/15"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" /> 图片：「{active.title} 工作环境」
+                </a>
+              </div>
+
+              {insights[active.title]?.hashtags && insights[active.title]!.hashtags!.length > 0 && (
+                <div className="pt-1">
+                  <p className="text-[11px] text-muted-foreground mb-1.5">💡 推荐搜索话题</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {insights[active.title]!.hashtags!.map((h, i) => (
+                      <a
+                        key={i}
+                        href={`https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(h)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
+                      >
+                        #{h}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur-sm p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center">
