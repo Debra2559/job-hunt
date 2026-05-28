@@ -24,6 +24,7 @@ const App = () => (
       <Sonner />
       <Fireworks />
       <BrowserRouter>
+        <FloatingAssistant />
         <Routes>
           <Route path="/" element={<CareerMap />} />
           <Route path="/map" element={<CareerMap />} />
@@ -33,7 +34,8 @@ const App = () => (
           <Route path="/career/resume" element={<CareerResume />} />
           <Route path="/career/tips" element={<CareerTips />} />
           <Route path="/career/company" element={<CareerCompany />} />
-          <Route path="/career/agent" element={<CareerAgent />} />
+          <Route path="/career/assistants" element={<AssistantHub />} />
+          <Route path="/career/agent" element={<AssistantHub />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
