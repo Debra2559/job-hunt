@@ -553,12 +553,6 @@ export default function CareerMap() {
                             {isLocked && !st.comingSoon ? '完成上一关后开启' : st.desc}
                           </p>
                           <div className={cn('flex items-center gap-1 mt-1 flex-wrap', labelLeft ? 'justify-start' : 'justify-end')}>
-                            {st.priority && (
-                              <span className={cn(
-                                'text-[9px] px-1 py-0.5 rounded font-bold',
-                                st.priority === 'P0' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-700'
-                              )}>{st.priority}</span>
-                            )}
                             {st.comingSoon && <span className="text-[9px] px-1 py-0.5 rounded font-bold bg-slate-100 text-slate-500">敬请期待</span>}
                           </div>
                           {isLocked && (
