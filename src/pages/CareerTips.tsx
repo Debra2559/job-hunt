@@ -7,6 +7,7 @@ import Ch2PageShell from '@/components/career/Ch2PageShell';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { streamCh2 } from '@/lib/ch2Stream';
+import JobContextBanner from '@/components/career/JobContextBanner';
 
 const QUICK_PROMPTS = [
   '简历投递黄金时间是什么时候？',
