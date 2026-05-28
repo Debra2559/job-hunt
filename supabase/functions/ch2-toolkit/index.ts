@@ -5,10 +5,9 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Different modes for chapter 2 toolkit
-type Mode = "resume" | "tips" | "company" | "agent";
+type Mode = "resume" | "tips" | "company" | "agent" | "assistant";
 
-const PROMPTS: Record<Mode, string> = {
+const PROMPTS: Record<Exclude<Mode, "assistant">, string> = {
   resume: `你是一位顶级简历教练。基于用户提供的零散经历/语音/文字，输出一份**面向校招**的、可直接复制到 PDF 的中文简历草稿（Markdown 格式）。
 
 要求：
@@ -51,8 +50,10 @@ serve(async (req) => {
     const mode: Mode = body.mode;
     const userInput: string = body.input || "";
     const context: string = body.context || "";
+    const systemPrompt: string = body.systemPrompt || "";
+    const history: Array<{ role: "user" | "assistant"; content: string }> = body.history || [];
 
-    if (!mode || !PROMPTS[mode]) {
+    if (!mode || (mode !== "assistant" && !(PROMPTS as Record<string, string>)[mode])) {
       return new Response(JSON.stringify({ error: "invalid mode" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -62,14 +63,29 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const isJson = mode === "company";
-    const messages = [
-      { role: "system", content: PROMPTS[mode] },
-      ...(context ? [{ role: "user", content: `参考素材：\n${context}` }] : []),
-      { role: "user", content: userInput },
-    ];
+    // ---- Build messages ----
+    let messages: Array<{ role: string; content: string }>;
+    if (mode === "assistant") {
+      if (!systemPrompt) {
+        return new Response(JSON.stringify({ error: "systemPrompt required for assistant mode" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      messages = [
+        { role: "system", content: systemPrompt },
+        ...history.slice(-20).map(m => ({ role: m.role, content: m.content })),
+        { role: "user", content: userInput },
+      ];
+    } else {
+      messages = [
+        { role: "system", content: PROMPTS[mode as Exclude<Mode, "assistant">] },
+        ...(context ? [{ role: "user", content: `参考素材：\n${context}` }] : []),
+        { role: "user", content: userInput },
+      ];
+    }
 
-    // company mode returns JSON; others stream
+    const isJson = mode === "company";
+
     if (isJson) {
       const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -96,7 +112,7 @@ serve(async (req) => {
       });
     }
 
-    // streaming for resume / tips / agent
+    // streaming for resume / tips / agent / assistant
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },

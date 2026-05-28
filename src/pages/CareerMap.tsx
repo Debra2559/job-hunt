@@ -72,7 +72,6 @@ const chapters: Chapter[] = [
       { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', to: '/career/resume', priority: 'P0' },
       { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, emoji: '💡', to: '/career/tips', priority: 'P0' },
       { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', to: '/career/company', priority: 'P1' },
-      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: BotMessageSquare, emoji: '🤖', to: '/career/agent', priority: 'P0' },
     ],
   },
   {
@@ -265,6 +264,13 @@ export default function CareerMap() {
             <MapIcon className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
           </div>
+          <button
+            onClick={() => navigate('/career/assistants')}
+            className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white text-[11px] font-bold shadow-sm hover:scale-105 active:scale-95 transition-all"
+            title="认领你的专属 AI 助理"
+          >
+            <span>🤖</span> 认领助理
+          </button>
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
           {(doneCount > 0 || game.xp > 0) && (
             <button

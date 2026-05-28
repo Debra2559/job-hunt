@@ -1,9 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
 
+type Msg = { role: 'user' | 'assistant'; content: string };
+
 type StreamOpts = {
-  mode: 'resume' | 'tips' | 'agent';
+  mode: 'resume' | 'tips' | 'agent' | 'assistant';
   input: string;
   context?: string;
+  /** for assistant mode */
+  systemPrompt?: string;
+  history?: Msg[];
   onDelta: (chunk: string) => void;
   onDone: () => void;
   onError: (msg: string) => void;
@@ -28,7 +33,13 @@ export async function streamCh2(opts: StreamOpts): Promise<() => void> {
       apikey: ANON,
       Authorization: `Bearer ${accessToken || ANON}`,
     },
-    body: JSON.stringify({ mode: opts.mode, input: opts.input, context: opts.context }),
+    body: JSON.stringify({
+      mode: opts.mode,
+      input: opts.input,
+      context: opts.context,
+      systemPrompt: opts.systemPrompt,
+      history: opts.history,
+    }),
     signal: controller.signal,
   })
     .then(async (resp) => {
