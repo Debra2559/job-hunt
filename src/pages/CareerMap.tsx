@@ -237,8 +237,8 @@ export default function CareerMap() {
 
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
-      {/* 远景：山峦 SVG */}
-      <svg className="absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
+      {/* 远景：山峦 SVG（桌面端，移动端为了简洁隐藏） */}
+      <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
         <defs>
           <linearGradient id="mt1" x1="0" x2="0" y1="0" y2="1">
             <stop offset="0%" stopColor="#a7f3d0" />
@@ -252,6 +252,15 @@ export default function CareerMap() {
         <path d="M0,260 L120,160 L240,220 L380,120 L520,200 L660,140 L820,210 L960,150 L1100,220 L1200,180 L1200,360 L0,360 Z" fill="url(#mt1)" />
         <path d="M0,300 L160,230 L320,280 L460,210 L620,270 L780,220 L940,290 L1080,240 L1200,280 L1200,360 L0,360 Z" fill="url(#mt2)" />
       </svg>
+
+      {/* 移动端：柔和渐变光斑装饰（替代山峦） */}
+      <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[5%] -left-10 w-48 h-48 rounded-full bg-emerald-200/40 blur-3xl" />
+        <div className="absolute top-[35%] -right-12 w-56 h-56 rounded-full bg-cyan-200/40 blur-3xl" />
+        <div className="absolute top-[65%] -left-8 w-48 h-48 rounded-full bg-violet-200/40 blur-3xl" />
+        <div className="absolute bottom-[5%] -right-10 w-52 h-52 rounded-full bg-rose-200/40 blur-3xl" />
+      </div>
+
 
       {/* 浮云装饰 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
