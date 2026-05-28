@@ -129,10 +129,23 @@ function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
 }
 
 // 每关在区域内的 x 偏移百分比（蜿蜒路径的节点 x 坐标）
-const NODE_X_PATTERN = [22, 50, 78, 50, 22, 78];
+// 移动端：节点贴左，卡片向右展开；桌面端：蜿蜒
+const NODE_X_PATTERN_MOBILE = [18, 18, 18, 18, 18, 18];
+const NODE_X_PATTERN_DESKTOP = [22, 50, 78, 50, 22, 78];
+function useIsMobile() {
+  const [m, setM] = useState(() => typeof window !== 'undefined' && window.innerWidth < 640);
+  useEffect(() => {
+    const onResize = () => setM(window.innerWidth < 640);
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+  return m;
+}
 
 export default function CareerMap() {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const NODE_X_PATTERN = isMobile ? NODE_X_PATTERN_MOBILE : NODE_X_PATTERN_DESKTOP;
   const { completed, markDone, reset } = useQuestProgress();
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
   const { skipData, saveSkip, resetSkip } = useChapterSkip();
@@ -256,8 +269,8 @@ export default function CareerMap() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
-              <span className="aurora-text">求职闯关地图</span>
-              <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide">智联 AI</span>
+              <span className="aurora-text truncate">求职闯关地图</span>
+              <span className="hidden sm:inline text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide shrink-0">智联 AI</span>
             </h1>
             <p className="text-[11px] text-muted-foreground hidden sm:block">从认识自己到拿下 offer，一关一关来</p>
           </div>
@@ -468,12 +481,12 @@ export default function CareerMap() {
                   const isDone = status === 'done';
                   const isActive = status === 'active';
                   const node = nodes[si];
-                  const labelLeft = node.x < 50;
+                  const labelLeft = isMobile ? false : node.x < 50;
                   return (
                     <div
                       key={st.id}
                       className="absolute"
-                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: 'translate(-50%, -50%)' }}
+                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: isMobile ? 'translate(0, -50%)' : 'translate(-50%, -50%)' }}
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         {/* 软糖式 emoji 节点 */}
@@ -539,7 +552,7 @@ export default function CareerMap() {
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2.5 w-[170px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
+                          'mx-2.5 w-[55vw] max-w-[200px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
                           isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>

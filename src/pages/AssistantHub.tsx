@@ -123,7 +123,7 @@ export default function AssistantHub() {
         </div>
       </header>
 
-      <main className="relative max-w-5xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
+      <main className="relative max-w-5xl mx-auto px-3 sm:px-6 py-5 sm:py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 sm:gap-6">
         <section>
           {/* ===== 推荐区：根据已选岗位匹配 ===== */}
           {recommended ? (
