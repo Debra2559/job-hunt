@@ -344,3 +344,21 @@ All colors MUST be HSL.
     user-select: none;
   }
 }
+
+/* ===== Print: only show .resume-print, hide chrome ===== */
+@media print {
+  @page { size: A4; margin: 12mm; }
+  html, body { background: #fff !important; }
+  body * { visibility: hidden !important; }
+  .resume-print, .resume-print * { visibility: visible !important; }
+  .resume-print {
+    position: absolute !important;
+    left: 0; top: 0;
+    width: 100% !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
