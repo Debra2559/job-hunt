@@ -53,9 +53,9 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-emerald-300/50',
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
-      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, emoji: '🧠', to: '/career', priority: 'P0' },
-      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, emoji: '🎯', to: '/career', priority: 'P0' },
-      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, emoji: '🔍', to: '/career', priority: 'P0' },
+      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
+      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Crosshair, emoji: '🎯', to: '/career', priority: 'P0' },
+      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: Newspaper, emoji: '🔍', to: '/career', priority: 'P0' },
     ],
   },
   {
@@ -69,10 +69,10 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-sky-300/50',
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
-      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, emoji: '📝', comingSoon: true, priority: 'P0' },
+      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', comingSoon: true, priority: 'P0' },
       { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, emoji: '💡', comingSoon: true, priority: 'P0' },
       { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', comingSoon: true, priority: 'P1' },
-      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: Bot, emoji: '🤖', comingSoon: true, priority: 'P0' },
+      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: BotMessageSquare, emoji: '🤖', comingSoon: true, priority: 'P0' },
     ],
   },
   {
@@ -86,9 +86,9 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-violet-300/50',
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
-      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, emoji: '✨', comingSoon: true, priority: 'P0' },
-      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: Send, emoji: '📮', comingSoon: true, priority: 'P0' },
-      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: Scissors, emoji: '✂️', comingSoon: true, priority: 'P1' },
+      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Rocket, emoji: '✨', comingSoon: true, priority: 'P0' },
+      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: MailPlus, emoji: '📮', comingSoon: true, priority: 'P0' },
+      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: ScissorsLineDashed, emoji: '✂️', comingSoon: true, priority: 'P1' },
     ],
   },
   {
@@ -102,7 +102,7 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-rose-300/50',
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
-      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
+      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessagesSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
