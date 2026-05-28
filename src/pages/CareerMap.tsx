@@ -204,14 +204,18 @@ export default function CareerMap() {
     const ids = stagesToSkipBefore(stageSkipTarget.stageId);
     ids.forEach(id => markDone(id));
     const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
-    const crossChapters = new Set(
+    // 若目标为敬请期待，同时标记目标本身已"预览通过"，方便继续向后推进
+    if (targetStage?.comingSoon && !completed.includes(targetStage.id)) {
+      markDone(targetStage.id);
+    }
+    const chaptersCrossed = new Set(
       chapters.flatMap(c => c.stages.filter(s => ids.includes(s.id)).map(() => c.num))
     ).size;
     toast({
       title: `已跳到「${stageSkipTarget.stageTitle}」`,
-      description: crossChapters > 1
-        ? `跨越 ${crossChapters} 个章节，跳过了 ${ids.length} 关`
-        : `跳过了前面 ${ids.length} 关，可直接开始这一关`,
+      description: chaptersCrossed > 1
+        ? `跨越 ${chaptersCrossed} 个章节，跳过了 ${ids.length} 关`
+        : `跳过了前面 ${ids.length} 关`,
     });
     setStageSkipTarget(null);
     if (targetStage?.to) navigate(targetStage.to);
