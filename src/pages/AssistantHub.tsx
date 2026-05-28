@@ -167,17 +167,13 @@ export default function AssistantHub() {
               </div>
             </div>
           ) : (
-            <div className="rounded-3xl bg-gradient-to-br from-violet-100/80 via-white to-fuchsia-50/80 border border-white/70 backdrop-blur p-5 mb-5 shadow-sm">
-              <div className="flex items-center gap-2 mb-1.5">
-                <Sparkles className="w-4 h-4 text-violet-600" />
-                <h2 className="font-bold">先去选个岗位，回来给你智能匹配</h2>
-              </div>
-              <p className="text-[13px] text-foreground/75 leading-relaxed mb-3">
-                完成「岗位推荐」后，我们会根据你选的方向自动给你挑一位最对口的 AI 学长。也可以先在下方手动挑一位。
-              </p>
-              <Button onClick={() => navigate('/career/recommend')} className="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white">
-                去选岗位 <ArrowRight className="w-4 h-4 ml-1" />
-              </Button>
+            <div className="mb-5">
+              <JobPrereqInline
+                gradient="from-violet-400 via-purple-500 to-fuchsia-500"
+                title="先告诉我你想冲哪个岗位？"
+                subtitle="选一个目标，立刻给你匹配一位最对口的 AI 学长。"
+                onSaved={() => window.location.reload()}
+              />
             </div>
           )}
 
