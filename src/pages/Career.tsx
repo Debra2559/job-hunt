@@ -209,6 +209,17 @@ export default function Career() {
       });
       if (newReports.size > 0) {
         setReports(newReports);
+        // 持久化最近一次报告，供后续章节读取
+        const latest = Array.from(newReports.values()).pop();
+        if (latest) {
+          try {
+            localStorage.setItem(REPORT_LS_KEY, JSON.stringify({
+              data: latest,
+              userId: user?.id ?? null,
+              savedAt: new Date().toISOString(),
+            }));
+          } catch { /* ignore quota */ }
+        }
         // Chapter 1 通关：生成报告即意味着「认识自己」三个关卡完成
         ['assess', 'recommend', 'jd'].forEach(id => {
           markDone(id);
@@ -216,7 +227,7 @@ export default function Career() {
         });
       }
     }
-  }, [loadingHistory, messages, isLoading, bossJobs, markDone, onStageCompleted]);
+  }, [loadingHistory, messages, isLoading, bossJobs, markDone, onStageCompleted, user?.id]);
 
   // Generate HTML for iframe
   const reportHTML = useMemo(() => {
