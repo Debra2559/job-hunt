@@ -248,10 +248,14 @@ export default function Career() {
     );
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // 中文输入法 compose 中不发送，避免 IME 终稿回写残留
+    if ((e.nativeEvent as any).isComposing || (e as any).keyCode === 229) return;
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend(input);
+      const content = input;
+      setInput('');
+      handleSend(content);
     }
   };
 

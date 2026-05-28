@@ -30,11 +30,10 @@ const isDev = (() => {
 
 // Return the reason a line looks like a question/prompt rather than an option, or null.
 function questionReason(text: string): FilterReason | null {
-  if (text.length > 35) return 'too-long';
-  if (/[?？]/.test(text)) return 'has-question-mark';
+  if (text.length > 200) return 'too-long';
+  if (/[?？]$/.test(text)) return 'has-question-mark';
   if (/[:：]\s*$/.test(text)) return 'ends-with-colon';
-  if (/[:：].*[\u4e00-\u9fa5]/.test(text)) return 'colon-followed-by-chinese';
-  if (/(想法是|打算|请选择|你目前|你的)/.test(text)) return 'prompt-keyword';
+  if (/(请选择以下|你目前的想法是|你的想法是是什么|请回答)/.test(text)) return 'prompt-keyword';
   return null;
 }
 
@@ -83,28 +82,41 @@ export function parseOptions(
     debug.push({ line, reason, detail });
   };
 
+  // 先尝试把 "A. xxx B. xxx C. xxx D. xxx" 这种单段内嵌格式拆开
+  const expanded: string[] = [];
   for (const rawLine of lines) {
+    const t = rawLine.trim();
+    if (!t) { expanded.push(rawLine); continue; }
+    // 单行内含 >=2 个 "A./B./C./D." 形式则按字母选项切分
+    const letters = t.match(/(?:^|\s)([A-Z])[.．、)）]\s*/g);
+    if (letters && letters.length >= 2 && /[A-Z][.．、)）]\s*\S+\s+[A-Z][.．、)）]/.test(t)) {
+      const parts = t.split(/(?=(?:^|\s)[A-Z][.．、)）]\s*)/).map(s => s.trim()).filter(Boolean);
+      expanded.push(...parts);
+    } else {
+      expanded.push(rawLine);
+    }
+  }
+
+  for (const rawLine of expanded) {
     const trimmed = rawLine.trim();
     if (!trimmed) continue;
 
-    let match = trimmed.match(/^([A-Z])[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
+    let match = trimmed.match(/^([A-Z])[.．）、)]\s*\*{0,2}(.+?)\*{0,2}$/);
     let captured: string | null = null;
-    let maxLen = 40;
+    let maxLen = 180;
 
     if (match && match.length >= 3) {
       captured = stripEmoji(match[2].replace(/\*{1,2}/g, '').trim());
-      maxLen = 40;
+      maxLen = 180;
     } else {
-      match = trimmed.match(/^\d+[.）、]\s*\*{0,2}(.+?)\*{0,2}$/);
+      match = trimmed.match(/^\d+[.．）、)]\s*\*{0,2}(.+?)\*{0,2}$/);
       if (match) {
         captured = stripEmoji(match[1].replace(/\*{1,2}/g, '').trim());
-        maxLen = 35;
+        maxLen = 180;
       }
     }
 
     if (captured === null) {
-      // Only flag prose lines that look like they were *meant* to be options
-      // (avoid spamming for empty/heading/markdown lines)
       if (/^[\d一二三四五六七八九十A-Z]/.test(trimmed)) {
         pushFiltered(trimmed, 'no-pattern-match');
       }
