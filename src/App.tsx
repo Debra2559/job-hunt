@@ -7,6 +7,10 @@ import Career from "./pages/Career";
 import CareerMap from "./pages/CareerMap";
 import CareerRecommend from "./pages/CareerRecommend";
 import CareerJD from "./pages/CareerJD";
+import CareerResume from "./pages/CareerResume";
+import CareerTips from "./pages/CareerTips";
+import CareerCompany from "./pages/CareerCompany";
+import CareerAgent from "./pages/CareerAgent";
 import NotFound from "./pages/NotFound";
 import Fireworks from "./components/Fireworks";
 
@@ -25,6 +29,10 @@ const App = () => (
           <Route path="/career" element={<Career />} />
           <Route path="/career/recommend" element={<CareerRecommend />} />
           <Route path="/career/jd" element={<CareerJD />} />
+          <Route path="/career/resume" element={<CareerResume />} />
+          <Route path="/career/tips" element={<CareerTips />} />
+          <Route path="/career/company" element={<CareerCompany />} />
+          <Route path="/career/agent" element={<CareerAgent />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
