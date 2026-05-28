@@ -137,6 +137,7 @@ export default function CareerMap() {
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
   const { skipData, saveSkip, resetSkip } = useChapterSkip();
   const [skipTarget, setSkipTarget] = useState<{ id: ChapterId; title: string; emoji: string } | null>(null);
+  const [stageSkipTarget, setStageSkipTarget] = useState<{ stageId: string; stageTitle: string; ci: number; si: number } | null>(null);
 
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
 
