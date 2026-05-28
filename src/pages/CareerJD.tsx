@@ -348,9 +348,9 @@ export default function CareerJD() {
       </main>
 
       {/* 底部完成 CTA */}
-      <div className="fixed bottom-0 left-0 right-0 z-20 px-4 py-3 backdrop-blur-2xl bg-white/75 border-t border-white/40">
-        <div className="max-w-5xl mx-auto flex items-center gap-3">
-          <div className="flex-1 text-xs text-muted-foreground">
+      <div className="fixed bottom-0 left-0 right-0 z-20 px-3 sm:px-4 py-2.5 sm:py-3 backdrop-blur-2xl bg-white/75 border-t border-white/40">
+        <div className="max-w-5xl mx-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <div className="flex-1 text-[11px] sm:text-xs text-muted-foreground leading-tight">
             {completed
               ? '🎉 第一章已通关，去看看第二章的准备清单'
               : canComplete
@@ -360,17 +360,17 @@ export default function CareerJD() {
           {completed ? (
             <Link
               to="/?next=ch2"
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-5 h-11 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white font-bold shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95"
+              className="shrink-0 w-full sm:w-auto justify-center inline-flex items-center gap-1.5 rounded-2xl px-4 sm:px-5 h-10 sm:h-11 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white font-bold text-sm shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95"
             >
               <Sparkles className="w-4 h-4" />
-              进入第二章 · 准备出发
+              进入第二章
               <ArrowRight className="w-4 h-4" />
             </Link>
           ) : (
             <Button
               onClick={handleComplete}
               disabled={!canComplete}
-              className="shrink-0 rounded-2xl px-5 h-11 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white font-bold shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95 disabled:opacity-40"
+              className="shrink-0 w-full sm:w-auto rounded-2xl px-4 sm:px-5 h-10 sm:h-11 bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white font-bold text-sm shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)] hover:opacity-95 disabled:opacity-40"
             >
               完成第 3 关 · 通关第一章
               <ArrowRight className="w-4 h-4 ml-1" />
