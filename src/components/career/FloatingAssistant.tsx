@@ -98,15 +98,15 @@ export default function FloatingAssistant() {
         <button
           onClick={() => setOpen(true)}
           className={cn(
-            'fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40',
-            'group flex items-center gap-2 pl-2 pr-3.5 h-14 rounded-full text-white font-bold text-sm shadow-2xl',
+            'fixed bottom-24 right-3 sm:bottom-6 sm:right-6 z-40',
+            'group flex items-center gap-2 pl-1.5 pr-2 sm:pl-2 sm:pr-3.5 h-12 sm:h-14 rounded-full text-white font-bold text-sm shadow-2xl',
             'bg-gradient-to-br hover:scale-105 active:scale-95 transition-all duration-300',
             assistant.gradient,
           )}
           style={{ boxShadow: '0 16px 40px -10px rgba(124,58,237,0.45), inset 0 2px 0 rgba(255,255,255,0.5)' }}
           aria-label={`打开 ${assistant.name}`}
         >
-          <span className="relative w-10 h-10 rounded-full bg-white/30 backdrop-blur flex items-center justify-center text-2xl shadow-inner">
+          <span className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/30 backdrop-blur flex items-center justify-center text-xl sm:text-2xl shadow-inner">
             <span className="drop-shadow">{assistant.emoji}</span>
             <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white animate-pulse" />
           </span>
