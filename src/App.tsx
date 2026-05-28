@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Career from "./pages/Career";
 import CareerMap from "./pages/CareerMap";
+import CareerRecommend from "./pages/CareerRecommend";
+import CareerJD from "./pages/CareerJD";
 import NotFound from "./pages/NotFound";
 import Fireworks from "./components/Fireworks";
 
