@@ -248,8 +248,8 @@ export default function CareerResume() {
           {view === 'edit' ? (
             <ResumeEditor data={resume} onChange={setResume} />
           ) : (
-            <div className="overflow-x-auto -mx-2 px-2 pb-4">
-              <div className="origin-top-left scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100" style={{ transformOrigin: 'top center' }}>
+            <div className="overflow-x-auto -mx-2 px-2 pb-4 print:hidden">
+              <div className="origin-top scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100 mx-auto" style={{ width: 'fit-content' }}>
                 <ResumePreview data={resume} />
               </div>
             </div>
@@ -257,8 +257,8 @@ export default function CareerResume() {
         </>
       )}
 
-      {/* Always render hidden printable copy so print works from any view */}
-      {hasContent && view !== 'preview' && (
+      {/* Hidden printable copy — used by window.print() */}
+      {hasContent && (
         <div className="hidden print:block">
           <ResumePreview data={resume} />
         </div>
