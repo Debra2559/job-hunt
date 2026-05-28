@@ -92,8 +92,13 @@ export default function CareerCompany() {
         )
       }
     >
+      <JobContextBanner
+        gradient="from-emerald-400 via-green-500 to-teal-500"
+        hint="设定目标岗位后，公司调研会突出该岗位在这家公司的面试侧重。"
+      />
       {/* search bar */}
       <div className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur p-4 mb-5 shadow-sm">
+
         <div className="flex gap-2">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
