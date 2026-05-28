@@ -270,22 +270,43 @@ export default function CareerMap() {
           {/* 重置按钮已隐藏 */}
         </div>
         {/* 分章节里程碑进度条 */}
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-5">
           <div className="flex items-center gap-2">
-            <div className="flex-1 flex items-center gap-1">
-              {chapters.map((ch, ci) => {
-                const chImpl = ch.stages.filter(s => !s.comingSoon).length;
-                const chDone = ch.stages.filter(s => statuses[s.id] === 'done').length;
-                const pct = chImpl === 0 ? 0 : Math.round((chDone / chImpl) * 100);
-                const isCurrent = activeEntry?.ci === ci;
-                return (
-                  <div key={ch.num} className="flex-1 min-w-0">
-                    <div className={cn('h-1.5 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
-                      <div className={cn('h-full bg-gradient-to-r transition-all', ch.ribbon)} style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
-                    </div>
+            <div className="flex-1 relative">
+              {/* 走在进度条上的小伙伴 */}
+              <div
+                className="absolute -top-5 z-10 pointer-events-none transition-[left] duration-700 ease-out"
+                style={{ left: `calc(${progressPct}% - 14px)` }}
+              >
+                <div className="relative flex flex-col items-center">
+                  {/* 气泡：百分比 */}
+                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-white shadow-md border border-emerald-200 text-[9px] font-extrabold text-emerald-600 tabular-nums whitespace-nowrap leading-none">
+                    {progressPct}%
                   </div>
-                );
-              })}
+                  {/* 走路的小角色 */}
+                  <div
+                    className="text-[18px] leading-none drop-shadow-[0_2px_3px_rgba(16,185,129,0.45)] animate-[mascot-walk_1.2s_ease-in-out_infinite]"
+                    aria-hidden
+                  >
+                    {progressPct >= 100 ? '🏆' : progressPct >= 75 ? '🏃' : progressPct >= 25 ? '🚶' : '🐣'}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-1">
+                {chapters.map((ch, ci) => {
+                  const chImpl = ch.stages.filter(s => !s.comingSoon).length;
+                  const chDone = ch.stages.filter(s => statuses[s.id] === 'done').length;
+                  const pct = chImpl === 0 ? 0 : Math.round((chDone / chImpl) * 100);
+                  const isCurrent = activeEntry?.ci === ci;
+                  return (
+                    <div key={ch.num} className="flex-1 min-w-0">
+                      <div className={cn('h-2 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
+                        <div className={cn('h-full bg-gradient-to-r transition-all', ch.ribbon)} style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
             <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">{doneCount}/{implementedTotal} · {progressPct}%</span>
           </div>
