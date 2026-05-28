@@ -338,7 +338,6 @@ export default function CareerMap() {
                 <div className="flex items-center gap-1.5 flex-wrap">
                   <span className="text-[10px] font-bold tracking-[0.18em] opacity-90 uppercase">推荐 · 第{['一','二','三','四'][nextRec.ci]}章 · 第 {nextRec.si + 1} 关</span>
                   {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/25 backdrop-blur">敬请期待</span>}
-                  {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/25 backdrop-blur">敬请期待</span>}
                 </div>
                 <h2 className="text-lg font-extrabold mt-1.5 leading-tight">{recHeadline}</h2>
                 <p className="text-sm font-bold opacity-95 mt-1">下一关：{nextRec.stage.title}</p>
