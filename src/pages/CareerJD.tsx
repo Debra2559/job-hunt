@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, AlertCircle, ExternalLink, Briefcase, ScrollText, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertCircle, ExternalLink, Briefcase, ScrollText, Sparkles, Clock, ThumbsUp, ThumbsDown, MessageCircle, Video, Image as ImageIcon, Loader2, RefreshCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { SELECTED_JOBS_LS_KEY } from './CareerRecommend';
+import { supabase } from '@/integrations/supabase/client';
 
 type PickedJob = {
   title: string;
@@ -33,6 +34,28 @@ const PLATFORMS = [
   { name: '拉勾', color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100', build: (q: string) => `https://www.lagou.com/wn/jobs?kd=${encodeURIComponent(q)}` },
   { name: '智联招聘', color: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100', build: (q: string) => `https://sou.zhaopin.com/?kw=${encodeURIComponent(q)}` },
 ];
+
+// 社媒「岗位日常 / 评价 / 视频图片」召回入口
+const SOCIAL = [
+  { name: '小红书', emoji: '📕', desc: '真实日常 & 吐槽', color: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100', build: (q: string) => `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(q + ' 日常')}` },
+  { name: 'B站', emoji: '📺', desc: '工作 Vlog & 拆解', color: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100', build: (q: string) => `https://search.bilibili.com/all?keyword=${encodeURIComponent(q + ' 一天')}` },
+  { name: '知乎', emoji: '💡', desc: '深度问答 & 经验', color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100', build: (q: string) => `https://www.zhihu.com/search?type=content&q=${encodeURIComponent(q + ' 是什么样的体验')}` },
+  { name: '抖音', emoji: '🎵', desc: '短视频职场', color: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 hover:bg-fuchsia-100', build: (q: string) => `https://www.douyin.com/search/${encodeURIComponent(q + ' 日常')}` },
+  { name: '脉脉', emoji: '🪪', desc: '在职员工真实声音', color: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100', build: (q: string) => `https://maimai.cn/web/search_center?type=feed&query=${encodeURIComponent(q)}` },
+  { name: '微博', emoji: '🌐', desc: '行业热点 & 风评', color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', build: (q: string) => `https://s.weibo.com/weibo?q=${encodeURIComponent(q)}` },
+];
+
+type JobInsight = {
+  tagline?: string;
+  dailyRoutine?: { time: string; activity: string }[];
+  pros?: string[];
+  cons?: string[];
+  voices?: { platform: string; quote: string; stance: '正面' | '中性' | '反面' }[];
+  growthMyth?: string;
+  hashtags?: string[];
+};
+
+const INSIGHT_LS_PREFIX = 'career:insight:v1:';
 
 export default function CareerJD() {
   const [picked, setPicked] = useState<PickedJob[]>([]);
