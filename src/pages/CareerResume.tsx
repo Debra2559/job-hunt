@@ -8,6 +8,7 @@ import Ch2PageShell from '@/components/career/Ch2PageShell';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { streamCh2 } from '@/lib/ch2Stream';
+import JobContextBanner from '@/components/career/JobContextBanner';
 
 const QUESTIONS = [
   { key: 'basic', label: '基本信息', placeholder: '姓名 / 学校专业 / 年级 / 联系方式 / 求职方向（写多少都行）' },
@@ -116,7 +117,12 @@ export default function CareerResume() {
         )
       }
     >
+      <JobContextBanner
+        gradient="from-sky-400 via-cyan-500 to-blue-500"
+        hint="设定目标岗位后，AI 写简历会按这个方向定关键词与项目侧重。"
+      />
       <div className="space-y-3 mb-6">
+
         {QUESTIONS.map((q, i) => (
           <div key={q.key} className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur p-4 shadow-sm">
             <div className="flex items-center gap-2 mb-2">

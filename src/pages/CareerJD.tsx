@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, AlertCircle, ExternalLink, Briefcase, ScrollText, Sparkles, Clock, ThumbsUp, ThumbsDown, MessageCircle, Video, Image as ImageIcon, Loader2, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, Briefcase, ScrollText, Sparkles, Clock, ThumbsUp, ThumbsDown, MessageCircle, Video, Image as ImageIcon, Loader2, RefreshCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { SELECTED_JOBS_LS_KEY } from './CareerRecommend';
+import JobPrereqInline from '@/components/career/JobPrereqInline';
 import { supabase } from '@/integrations/supabase/client';
 
 type PickedJob = {
@@ -130,17 +131,23 @@ export default function CareerJD() {
 
   if (picked.length === 0) {
     return (
-      <div className="map-aurora min-h-screen bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100 flex items-center justify-center px-6">
-        <div className="max-w-md w-full bg-white/85 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_24px_60px_-20px_rgba(16,185,129,0.35)] p-8 text-center space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-100 flex items-center justify-center">
-            <AlertCircle className="w-7 h-7 text-amber-600" />
-          </div>
-          <h2 className="text-lg font-bold">还没选过感兴趣的岗位</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">先去第 2 关「岗位推荐」挑选 1 个或多个你感兴趣的方向，再回来查看真实在招与项目要求。</p>
-          <Link to="/career/recommend" className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white font-semibold shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)]">
-            去挑选岗位 <ArrowRight className="w-4 h-4" />
+      <div className="map-aurora min-h-screen bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
+        <header className="sticky top-0 z-20 border-b border-white/40 backdrop-blur-2xl bg-white/65 px-4 py-3 flex items-center gap-3">
+          <Link to="/" className="shrink-0 w-9 h-9 rounded-2xl hover:bg-emerald-100/70 flex items-center justify-center transition-colors" title="返回闯关地图">
+            <ArrowLeft className="w-4 h-4 text-emerald-700" />
           </Link>
-        </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm sm:text-base font-bold leading-tight aurora-text">第一章 · 第 3 关 · 岗位 JD 汇总</h1>
+            <p className="text-[11px] text-muted-foreground truncate">先告诉我你想冲哪个岗位，再帮你汇总真实在招</p>
+          </div>
+        </header>
+        <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6">
+          <JobPrereqInline
+            title="还没选过感兴趣的岗位"
+            subtitle="选一个目标方向，这一关就能立刻给你汇总真实在招与项目要求。"
+            onSaved={() => setPicked(readPicked())}
+          />
+        </main>
       </div>
     );
   }
