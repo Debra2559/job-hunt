@@ -10,7 +10,8 @@ import CareerJD from "./pages/CareerJD";
 import CareerResume from "./pages/CareerResume";
 import CareerTips from "./pages/CareerTips";
 import CareerCompany from "./pages/CareerCompany";
-import CareerAgent from "./pages/CareerAgent";
+import AssistantHub from "./pages/AssistantHub";
+import FloatingAssistant from "./components/career/FloatingAssistant";
 import NotFound from "./pages/NotFound";
 import Fireworks from "./components/Fireworks";
 
