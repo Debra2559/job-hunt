@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 
 const STORAGE_KEY = 'quest:skip:v1';
 
-export type ChapterId = 'ch1' | 'ch2' | 'ch3' | 'ch4';
+export type ChapterId = 'ch1' | 'ch2' | 'ch3' | 'ch4' | 'ch5' | 'ch6' | 'ch7';
 
 export type Ch1SkipData = {
   positions: string[];    // 倾向岗位
@@ -23,7 +23,11 @@ export type SkipPayload = {
   ch2?: Ch2SkipData;
   ch3?: Ch3SkipData;
   ch4?: Record<string, never>;
+  ch5?: Record<string, never>;
+  ch6?: Record<string, never>;
+  ch7?: Record<string, never>;
 };
+
 
 function read(): SkipPayload {
   try {
