@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
-import { ArrowLeft, Send, ExternalLink, RotateCcw, X, Eye, Code, Copy, Download, FileText, GraduationCap, Briefcase, Plane, Compass, Target, Lightbulb, Sparkles, Rocket, Check } from 'lucide-react';
+import { ArrowLeft, Send, ExternalLink, RotateCcw, X, FileText, GraduationCap, Briefcase, Plane, Compass, Target, Lightbulb, Sparkles, Rocket, Check, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
