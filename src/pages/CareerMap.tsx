@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, BrainCircuit, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight } from 'lucide-react';
+import { Compass, BrainCircuit, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight, Briefcase, CalendarCheck2, Handshake, GraduationCap, Users, Presentation, ShieldCheck, TrendingUp, Coins, GitBranch, Trophy, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
