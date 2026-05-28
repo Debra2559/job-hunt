@@ -54,8 +54,8 @@ const chapters: Chapter[] = [
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
       { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
-      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Crosshair, emoji: '🎯', to: '/career', priority: 'P0' },
-      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: Newspaper, emoji: '🔍', to: '/career', priority: 'P0' },
+      { id: 'recommend', title: '岗位推荐', desc: '基于报告挑选感兴趣方向', icon: Crosshair, emoji: '🎯', to: '/career/recommend', priority: 'P0' },
+      { id: 'jd', title: '岗位 JD 汇总', desc: 'AI 汇集真实在招与项目要求', icon: Newspaper, emoji: '🔍', to: '/career/jd', priority: 'P0' },
     ],
   },
   {
