@@ -348,7 +348,7 @@ export default function Career() {
               const sources = webSources.get(i);
               const displayContent = msg.role === 'assistant' ? getDisplayContent(msg.content) : msg.content;
               const isLastAssistant = msg.role === 'assistant' && i === messages.length - 1 && !isLoading;
-              const options = isLastAssistant ? parseOptions(msg.content) : [];
+              const options = isLastAssistant && !reportData ? parseOptions(displayContent) : [];
 
               return (
                 <div key={i} className="animate-fade-in">
