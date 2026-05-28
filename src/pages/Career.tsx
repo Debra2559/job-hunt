@@ -282,7 +282,14 @@ export default function Career() {
     setTimeout(() => autoGreet(), 100);
   };
 
-  const getDisplayContent = (content: string) => content.replace(/```career-report[\s\S]*?```/g, '').trim();
+  // 移除已完成的 ```career-report``` 块；若仍在流式生成（已开启但未闭合），整段移除等待状态另行展示
+  const getDisplayContent = (content: string) =>
+    content
+      .replace(/```career-report[\s\S]*?```/g, '')
+      .replace(/```career-report[\s\S]*$/, '')
+      .trim();
+  const isReportStreaming = (content: string) =>
+    /```career-report/.test(content) && !/```career-report[\s\S]*?```/.test(content);
 
   const markdownComponents = {
     a: ({ href, children, ...props }: any) => (
