@@ -48,13 +48,13 @@ export default function Ch2PageShell({
         </div>
       </header>
 
-      <main className="relative max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-32">
+      <main className="relative max-w-3xl mx-auto px-4 sm:px-6 py-6 pb-40 sm:pb-32">
         {children}
       </main>
 
       {footer && (
-        <div className="fixed bottom-0 left-0 right-0 z-20 px-4 py-3 backdrop-blur-2xl bg-white/75 border-t border-white/40">
-          <div className="max-w-3xl mx-auto flex items-center gap-3">
+        <div className="fixed bottom-0 left-0 right-0 z-20 px-3 sm:px-4 py-2.5 sm:py-3 backdrop-blur-2xl bg-white/75 border-t border-white/40">
+          <div className="max-w-3xl mx-auto flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
             {footer}
           </div>
         </div>
