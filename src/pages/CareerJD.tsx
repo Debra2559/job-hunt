@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, AlertCircle, ExternalLink, Briefcase, ScrollText, Sparkles } from 'lucide-react';
+import { ArrowLeft, ArrowRight, AlertCircle, ExternalLink, Briefcase, ScrollText, Sparkles, Clock, ThumbsUp, ThumbsDown, MessageCircle, Video, Image as ImageIcon, Loader2, RefreshCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { SELECTED_JOBS_LS_KEY } from './CareerRecommend';
+import { supabase } from '@/integrations/supabase/client';
 
 type PickedJob = {
   title: string;
@@ -34,6 +35,28 @@ const PLATFORMS = [
   { name: '智联招聘', color: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100', build: (q: string) => `https://sou.zhaopin.com/?kw=${encodeURIComponent(q)}` },
 ];
 
+// 社媒「岗位日常 / 评价 / 视频图片」召回入口
+const SOCIAL = [
+  { name: '小红书', emoji: '📕', desc: '真实日常 & 吐槽', color: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100', build: (q: string) => `https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(q + ' 日常')}` },
+  { name: 'B站', emoji: '📺', desc: '工作 Vlog & 拆解', color: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100', build: (q: string) => `https://search.bilibili.com/all?keyword=${encodeURIComponent(q + ' 一天')}` },
+  { name: '知乎', emoji: '💡', desc: '深度问答 & 经验', color: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100', build: (q: string) => `https://www.zhihu.com/search?type=content&q=${encodeURIComponent(q + ' 是什么样的体验')}` },
+  { name: '抖音', emoji: '🎵', desc: '短视频职场', color: 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200 hover:bg-fuchsia-100', build: (q: string) => `https://www.douyin.com/search/${encodeURIComponent(q + ' 日常')}` },
+  { name: '脉脉', emoji: '🪪', desc: '在职员工真实声音', color: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100', build: (q: string) => `https://maimai.cn/web/search_center?type=feed&query=${encodeURIComponent(q)}` },
+  { name: '微博', emoji: '🌐', desc: '行业热点 & 风评', color: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100', build: (q: string) => `https://s.weibo.com/weibo?q=${encodeURIComponent(q)}` },
+];
+
+type JobInsight = {
+  tagline?: string;
+  dailyRoutine?: { time: string; activity: string }[];
+  pros?: string[];
+  cons?: string[];
+  voices?: { platform: string; quote: string; stance: '正面' | '中性' | '反面' }[];
+  growthMyth?: string;
+  hashtags?: string[];
+};
+
+const INSIGHT_LS_PREFIX = 'career:insight:v1:';
+
 export default function CareerJD() {
   const [picked, setPicked] = useState<PickedJob[]>([]);
   const [activeIdx, setActiveIdx] = useState(0);
@@ -41,6 +64,9 @@ export default function CareerJD() {
   const { markDone, isDone } = useQuestProgress();
   const { onStageCompleted } = useGameProgress();
   const [completed, setCompleted] = useState(false);
+  const [insights, setInsights] = useState<Record<string, JobInsight>>({});
+  const [insightLoading, setInsightLoading] = useState<Record<string, boolean>>({});
+  const [insightError, setInsightError] = useState<Record<string, string>>({});
 
   useEffect(() => {
     setPicked(readPicked());
@@ -48,6 +74,45 @@ export default function CareerJD() {
   }, [isDone]);
 
   const active = picked[activeIdx];
+
+  // 拉取当前岗位的"岗位画像"（带 localStorage 缓存）
+  useEffect(() => {
+    if (!active) return;
+    const key = active.title;
+    if (insights[key] || insightLoading[key]) return;
+    const cacheKey = INSIGHT_LS_PREFIX + key;
+    try {
+      const cached = localStorage.getItem(cacheKey);
+      if (cached) {
+        setInsights(prev => ({ ...prev, [key]: JSON.parse(cached) }));
+        return;
+      }
+    } catch { /* noop */ }
+    fetchInsight(key, { category: active.category, skills: active.skills });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active?.title]);
+
+  const fetchInsight = async (title: string, ctx: { category?: string; skills?: string[] }, force = false) => {
+    setInsightLoading(prev => ({ ...prev, [title]: true }));
+    setInsightError(prev => ({ ...prev, [title]: '' }));
+    try {
+      if (force) {
+        try { localStorage.removeItem(INSIGHT_LS_PREFIX + title); } catch { /* noop */ }
+      }
+      const { data, error } = await supabase.functions.invoke('job-insights', {
+        body: { title, category: ctx.category, skills: ctx.skills },
+      });
+      if (error) throw error;
+      const insight = (data as { insight?: JobInsight })?.insight || {};
+      setInsights(prev => ({ ...prev, [title]: insight }));
+      try { localStorage.setItem(INSIGHT_LS_PREFIX + title, JSON.stringify(insight)); } catch { /* noop */ }
+    } catch (e) {
+      setInsightError(prev => ({ ...prev, [title]: (e as Error).message || '加载失败' }));
+    } finally {
+      setInsightLoading(prev => ({ ...prev, [title]: false }));
+    }
+  };
+
 
   const handleSelectJob = (i: number) => {
     setActiveIdx(i);
@@ -164,7 +229,82 @@ export default function CareerJD() {
               </div>
             </div>
 
-            {/* 技能 & 项目要求 */}
+            {/* 岗位画像（AI 生成：一天日常 + 网友声音 + 爽点/累点） */}
+            <JobInsightCard
+              title={active.title}
+              insight={insights[active.title]}
+              loading={!!insightLoading[active.title]}
+              error={insightError[active.title]}
+              onRetry={() => fetchInsight(active.title, { category: active.category, skills: active.skills }, true)}
+            />
+
+            {/* 去社媒看真实日常 / 视频 / 图片 */}
+            <div className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur-sm p-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-rose-100 flex items-center justify-center">
+                  <MessageCircle className="w-4 h-4 text-rose-600" />
+                </div>
+                <h3 className="font-bold">去社媒看真实日常</h3>
+              </div>
+              <p className="text-xs text-muted-foreground">小红书的吐槽、B站的 Vlog、知乎的深度问答、抖音短视频…一键带话题搜索</p>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {SOCIAL.map(s => (
+                  <a
+                    key={s.name}
+                    href={s.build(active.title)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cn('group flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-xs font-semibold transition-colors', s.color)}
+                  >
+                    <span className="text-lg leading-none">{s.emoji}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1">
+                        <span className="truncate">{s.name}</span>
+                        <ExternalLink className="w-3 h-3 opacity-60 group-hover:opacity-100" />
+                      </div>
+                      <div className="text-[10px] font-normal opacity-75 truncate">{s.desc}</div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+
+              {/* 视频 / 图片专项搜索 */}
+              <div className="pt-1 grid grid-cols-2 gap-2">
+                <a
+                  href={`https://search.bilibili.com/video?keyword=${encodeURIComponent(active.title + ' 工作日常')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-sky-500/10 text-sky-700 border border-sky-300/40 hover:bg-sky-500/15"
+                >
+                  <Video className="w-3.5 h-3.5" /> 视频：B站「{active.title} 工作日常」
+                </a>
+                <a
+                  href={`https://image.baidu.com/search/index?tn=baiduimage&word=${encodeURIComponent(active.title + ' 工作环境')}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-emerald-500/10 text-emerald-700 border border-emerald-300/40 hover:bg-emerald-500/15"
+                >
+                  <ImageIcon className="w-3.5 h-3.5" /> 图片：「{active.title} 工作环境」
+                </a>
+              </div>
+
+              {insights[active.title]?.hashtags && insights[active.title]!.hashtags!.length > 0 && (
+                <div className="pt-1">
+                  <p className="text-[11px] text-muted-foreground mb-1.5">💡 推荐搜索话题</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {insights[active.title]!.hashtags!.map((h, i) => (
+                      <a
+                        key={i}
+                        href={`https://www.xiaohongshu.com/search_result?keyword=${encodeURIComponent(h)}`}
+                        target="_blank" rel="noopener noreferrer"
+                        className="text-[11px] px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100"
+                      >
+                        #{h}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
             <div className="rounded-2xl border border-white/70 bg-white/85 backdrop-blur-sm p-5 space-y-4">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 rounded-xl bg-sky-100 flex items-center justify-center">
@@ -245,3 +385,127 @@ function buildProjectIdeas(job: PickedJob): string[] {
     `准备一份 STAR 法则故事卡，匹配 JD 中常见的 3-5 条任职要求`,
   ];
 }
+
+// ===== 岗位画像卡：AI 生成的一天日常 + 爽点累点 + 网友声音 =====
+function JobInsightCard({
+  title, insight, loading, error, onRetry,
+}: {
+  title: string;
+  insight?: JobInsight;
+  loading: boolean;
+  error?: string;
+  onRetry: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-white/70 bg-gradient-to-br from-violet-50/80 via-white/85 to-rose-50/70 backdrop-blur-sm p-5 space-y-4">
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="w-8 h-8 rounded-xl bg-violet-100 flex items-center justify-center shrink-0">
+            <Sparkles className="w-4 h-4 text-violet-700" />
+          </div>
+          <div className="min-w-0">
+            <h3 className="font-bold leading-tight">岗位真实画像</h3>
+            {insight?.tagline && <p className="text-[11px] text-violet-700 font-medium truncate">{insight.tagline}</p>}
+          </div>
+        </div>
+        {!loading && (insight || error) && (
+          <button onClick={onRetry} className="text-[11px] text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+            <RefreshCcw className="w-3 h-3" /> 重新生成
+          </button>
+        )}
+      </div>
+
+      {loading && (
+        <div className="flex items-center gap-2 text-xs text-muted-foreground py-8 justify-center">
+          <Loader2 className="w-4 h-4 animate-spin" /> 正在生成「{title}」的真实画像…
+        </div>
+      )}
+
+      {error && !loading && (
+        <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-xl px-3 py-2">
+          画像加载失败：{error}
+        </div>
+      )}
+
+      {insight && !loading && (
+        <>
+          {/* 一天日常时间线 */}
+          {insight.dailyRoutine && insight.dailyRoutine.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <Clock className="w-3.5 h-3.5 text-violet-600" /> 这份工作的一天
+              </p>
+              <ol className="relative border-l-2 border-violet-200/80 pl-4 space-y-2">
+                {insight.dailyRoutine.map((d, i) => (
+                  <li key={i} className="relative">
+                    <span className="absolute -left-[21px] top-1 w-3 h-3 rounded-full bg-violet-400 border-2 border-white shadow-sm" />
+                    <div className="text-[11px] text-violet-700 font-bold tabular-nums">{d.time}</div>
+                    <div className="text-sm text-foreground leading-relaxed">{d.activity}</div>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {/* 爽点 / 累点 */}
+          {(insight.pros?.length || insight.cons?.length) && (
+            <div className="grid sm:grid-cols-2 gap-3">
+              {insight.pros && insight.pros.length > 0 && (
+                <div className="rounded-xl bg-emerald-50/80 border border-emerald-200 p-3">
+                  <p className="text-xs font-bold text-emerald-700 mb-1.5 flex items-center gap-1"><ThumbsUp className="w-3.5 h-3.5" /> 爽点</p>
+                  <ul className="space-y-1 text-sm text-foreground">
+                    {insight.pros.map((p, i) => <li key={i} className="flex gap-1.5"><span className="text-emerald-500">+</span>{p}</li>)}
+                  </ul>
+                </div>
+              )}
+              {insight.cons && insight.cons.length > 0 && (
+                <div className="rounded-xl bg-rose-50/80 border border-rose-200 p-3">
+                  <p className="text-xs font-bold text-rose-700 mb-1.5 flex items-center gap-1"><ThumbsDown className="w-3.5 h-3.5" /> 累点 & 吐槽</p>
+                  <ul className="space-y-1 text-sm text-foreground">
+                    {insight.cons.map((c, i) => <li key={i} className="flex gap-1.5"><span className="text-rose-500">−</span>{c}</li>)}
+                  </ul>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 网友声音 */}
+          {insight.voices && insight.voices.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-foreground mb-2 flex items-center gap-1.5">
+                <MessageCircle className="w-3.5 h-3.5 text-rose-500" /> 网友是怎么说的
+              </p>
+              <div className="space-y-2">
+                {insight.voices.map((v, i) => {
+                  const stanceColor = v.stance === '正面'
+                    ? 'border-emerald-200 bg-emerald-50/60'
+                    : v.stance === '反面'
+                      ? 'border-rose-200 bg-rose-50/60'
+                      : 'border-slate-200 bg-slate-50/60';
+                  return (
+                    <div key={i} className={cn('rounded-xl border px-3 py-2 text-sm leading-relaxed', stanceColor)}>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/70 text-foreground">{v.platform}</span>
+                        <span className="text-[10px] text-muted-foreground">{v.stance}</span>
+                      </div>
+                      <p className="text-foreground/90">"{v.quote}"</p>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {insight.growthMyth && (
+            <div className="rounded-xl bg-amber-50/80 border border-amber-200 px-3 py-2 text-sm text-foreground">
+              <span className="font-bold text-amber-700 mr-1">💡 常见误解：</span>{insight.growthMyth}
+            </div>
+          )}
+
+          <p className="text-[10px] text-muted-foreground text-right">内容由 AI 基于公开信息生成，仅供参考</p>
+        </>
+      )}
+    </div>
+  );
+}
+
