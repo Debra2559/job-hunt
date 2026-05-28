@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, Check, Sparkles, Briefcase, Target, AlertCircle } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Sparkles, Target, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
