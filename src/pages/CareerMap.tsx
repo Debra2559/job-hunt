@@ -106,6 +106,58 @@ const chapters: Chapter[] = [
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
+  // ===== 拿下 Offer 是新征程的起点 =====
+  {
+    num: '05',
+    title: '入职适应',
+    subtitle: 'Offer 不是终点,是新故事的开始',
+    emoji: '🌅',
+    nodeBg: 'from-amber-400 via-orange-400 to-rose-400',
+    nodeHalo: 'bg-amber-300/60',
+    ribbon: 'from-amber-400 to-orange-500',
+    ribbonShadow: 'shadow-amber-300/50',
+    scenery: ['🌻', '☀️', '🍞', '🪴', '📋'],
+    stages: [
+      { id: 'onboard-prep', title: '背调 & 入职准备', desc: '材料清单、社保转移、报到流程', icon: Briefcase, emoji: '💼', comingSoon: true, priority: 'P0' },
+      { id: 'plan-90', title: '30 / 60 / 90 天计划', desc: 'AI 帮你拟定上手节奏与里程碑', icon: CalendarCheck2, emoji: '📅', comingSoon: true, priority: 'P0' },
+      { id: 'first-week', title: '第一周破冰', desc: 'leader / 同事 / 上下游 自我介绍', icon: Handshake, emoji: '🤝', comingSoon: true, priority: 'P1' },
+      { id: 'probation', title: '转正答辩', desc: '复盘亮点、STAR/金字塔输出', icon: GraduationCap, emoji: '🎓', comingSoon: true, priority: 'P0' },
+    ],
+  },
+  {
+    num: '06',
+    title: '职场文化生存',
+    subtitle: '把规则摸清,把自己保护好',
+    emoji: '🛡️',
+    nodeBg: 'from-indigo-400 via-violet-500 to-purple-500',
+    nodeHalo: 'bg-indigo-300/60',
+    ribbon: 'from-indigo-400 to-purple-500',
+    ribbonShadow: 'shadow-indigo-300/50',
+    scenery: ['📚', '🫧', '🌙', '🪞', '🗝️'],
+    stages: [
+      { id: 'communication', title: '沟通礼仪 & 汇报', desc: '邮件、IM、周报的人话模板', icon: MessagesSquare, emoji: '✉️', comingSoon: true, priority: 'P0' },
+      { id: 'collab', title: '跨部门协作', desc: '推不动事情时该怎么办', icon: Users, emoji: '👥', comingSoon: true, priority: 'P0' },
+      { id: 'meeting', title: '高效会议', desc: '开会发言、控场、纪要的套路', icon: Presentation, emoji: '🗣️', comingSoon: true, priority: 'P1' },
+      { id: 'anti-pua', title: '反 PUA 自保', desc: '识别 PUA 话术,保护自己的边界', icon: ShieldCheck, emoji: '🛡️', comingSoon: true, priority: 'P0' },
+    ],
+  },
+  {
+    num: '07',
+    title: '长期成长',
+    subtitle: '从打工人到自己的 CEO',
+    emoji: '🌳',
+    nodeBg: 'from-emerald-400 via-lime-500 to-yellow-500',
+    nodeHalo: 'bg-emerald-300/60',
+    ribbon: 'from-emerald-500 to-yellow-500',
+    ribbonShadow: 'shadow-emerald-300/50',
+    scenery: ['🌳', '🪙', '🧭', '🍀', '🌟'],
+    stages: [
+      { id: 'review', title: '绩效面谈 & OKR', desc: '把价值讲清楚,把目标对齐准', icon: TrendingUp, emoji: '📈', comingSoon: true, priority: 'P0' },
+      { id: 'negotiate', title: '加薪 & 跳槽谈薪', desc: '基于市场行情的话术与底牌', icon: Coins, emoji: '💰', comingSoon: true, priority: 'P0' },
+      { id: 'pathing', title: 'M / P 双通道', desc: '管理线还是专业线,怎么选路', icon: GitBranch, emoji: '🧭', comingSoon: true, priority: 'P1' },
+    ],
+  },
+
 ];
 
 
