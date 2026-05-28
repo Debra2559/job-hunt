@@ -7,6 +7,7 @@ import Ch2PageShell from '@/components/career/Ch2PageShell';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import { supabase } from '@/integrations/supabase/client';
+import JobContextBanner from '@/components/career/JobContextBanner';
 
 type CompanyData = {
   tagline?: string;
