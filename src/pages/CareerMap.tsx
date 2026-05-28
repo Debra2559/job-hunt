@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward } from 'lucide-react';
+import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
@@ -9,7 +9,10 @@ import { useChapterSkip, type ChapterId, type SkipPayload } from '@/hooks/useCha
 import ChapterSkipDialog from '@/components/career/ChapterSkipDialog';
 import PlayerHub from '@/components/career/PlayerHub';
 import { toast } from '@/hooks/use-toast';
-import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 type StageStatus = 'done' | 'active' | 'available' | 'locked';
 
