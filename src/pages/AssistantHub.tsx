@@ -1,22 +1,86 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Check, Sparkles, BookOpen, MessageCircle } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowLeft, Check, Sparkles, BookOpen, MessageCircle, Wand2, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
 import { ASSISTANTS, type Assistant } from '@/data/assistants';
 import { useAssistant } from '@/hooks/useAssistant';
+import { useQuestProgress } from '@/hooks/useQuestProgress';
+import { useGameProgress } from '@/hooks/useGameProgress';
+import { SELECTED_JOBS_LS_KEY } from './CareerRecommend';
+
+type PickedJob = { title: string; category?: string; skills?: string[] };
+
+function readSelectedJobs(): PickedJob[] {
+  try {
+    const raw = localStorage.getItem(SELECTED_JOBS_LS_KEY);
+    if (!raw) return [];
+    const arr = JSON.parse(raw);
+    return Array.isArray(arr) ? arr : [];
+  } catch { return []; }
+}
+
+// 关键词 → 助理 id 的匹配表，按优先级判断
+const KEYWORD_MAP: Array<{ id: string; keywords: string[] }> = [
+  { id: 'pm',        keywords: ['产品经理', '产品', 'PM', 'product'] },
+  { id: 'frontend',  keywords: ['前端', 'frontend', 'react', 'vue', 'web', '客户端', '工程师', '研发', '开发'] },
+  { id: 'data',      keywords: ['数据分析', '数据', '分析师', 'data', 'analyst', 'bi'] },
+  { id: 'operator',  keywords: ['运营', '增长', 'operation', 'growth', '内容', '社群', '用户运营'] },
+  { id: 'marketing', keywords: ['市场', '品牌', '营销', 'marketing', 'brand', '公关', 'pr'] },
+  { id: 'hr',        keywords: ['hr', '人力', '招聘', 'hrbp', '人事', '组织'] },
+  { id: 'designer',  keywords: ['设计', 'ui', 'ux', 'designer', '视觉', '交互'] },
+  { id: 'finance',   keywords: ['财务', '金融', '投行', '会计', 'cfa', 'cpa', '券商', '基金', '投资', 'finance'] },
+];
+
+function matchAssistantId(jobs: PickedJob[]): string | null {
+  if (jobs.length === 0) return null;
+  const haystack = jobs
+    .flatMap(j => [j.title, j.category, ...(j.skills || [])])
+    .filter(Boolean)
+    .join(' ')
+    .toLowerCase();
+  // 计数得分，取得分最高的
+  let best: { id: string; score: number } | null = null;
+  for (const row of KEYWORD_MAP) {
+    let score = 0;
+    for (const kw of row.keywords) {
+      if (haystack.includes(kw.toLowerCase())) score += 1;
+    }
+    if (score > 0 && (!best || score > best.score)) best = { id: row.id, score };
+  }
+  return best?.id ?? null;
+}
 
 export default function AssistantHub() {
+  const navigate = useNavigate();
   const { assistant: claimed, claim, release } = useAssistant();
+  const { markDone, completed } = useQuestProgress();
+  const { onStageCompleted } = useGameProgress();
+
+  const [jobs] = useState<PickedJob[]>(() => readSelectedJobs());
+  const recommendedId = useMemo(() => matchAssistantId(jobs), [jobs]);
+  const recommended: Assistant | null = recommendedId ? (ASSISTANTS.find(a => a.id === recommendedId) || null) : null;
+
   const [previewId, setPreviewId] = useState<string | null>(null);
   const preview: Assistant | null = previewId
     ? ASSISTANTS.find(a => a.id === previewId) || null
-    : (claimed || ASSISTANTS[0]);
+    : (claimed || recommended || ASSISTANTS[0]);
+
+  // 已认领过则自动完成关卡（兼容老用户）
+  useEffect(() => {
+    if (claimed && !completed.includes('claim_assistant')) {
+      markDone('claim_assistant');
+      onStageCompleted('claim_assistant');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [claimed]);
 
   const handleClaim = (id: string) => {
     claim(id);
     const a = ASSISTANTS.find(x => x.id === id)!;
+    markDone('claim_assistant');
+    onStageCompleted('claim_assistant');
     toast({
       title: `✨ 已认领 ${a.name}`,
       description: `${a.role}已悬浮在右下角，随时可以聊。`,
@@ -24,6 +88,7 @@ export default function AssistantHub() {
   };
 
   const isClaimed = (id: string) => claimed?.id === id;
+  const others = ASSISTANTS.filter(a => a.id !== recommended?.id);
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-violet-50 via-fuchsia-50 to-rose-50">
@@ -36,7 +101,7 @@ export default function AssistantHub() {
 
       <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/65 border-b border-white/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link to="/" className="w-9 h-9 rounded-xl bg-white/80 border border-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all">
+          <Link to="/career/map" className="w-9 h-9 rounded-xl bg-white/80 border border-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all">
             <ArrowLeft className="w-4 h-4" />
           </Link>
           <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl bg-gradient-to-br from-violet-400 via-purple-500 to-fuchsia-500 shadow-lg">
@@ -44,7 +109,7 @@ export default function AssistantHub() {
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm sm:text-base font-bold leading-tight">认领你的专属 AI 助理</h1>
-            <p className="text-[11px] text-muted-foreground">已吸收行业经典内容，认领后悬浮在屏幕，随时可聊</p>
+            <p className="text-[11px] text-muted-foreground">已根据你选的岗位匹配好一位，一键认领即可</p>
           </div>
           {claimed && (
             <button
@@ -58,21 +123,74 @@ export default function AssistantHub() {
       </header>
 
       <main className="relative max-w-5xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6">
-        {/* ===== left: assistant gallery ===== */}
         <section>
-          <div className="rounded-3xl bg-gradient-to-br from-violet-100/80 via-white to-fuchsia-50/80 border border-white/70 backdrop-blur p-5 mb-5 shadow-sm">
-            <div className="flex items-center gap-2 mb-1.5">
-              <Sparkles className="w-4 h-4 text-violet-600" />
-              <h2 className="font-bold">8 位「行业老师傅」AI 助理</h2>
+          {/* ===== 推荐区：根据已选岗位匹配 ===== */}
+          {recommended ? (
+            <div className={cn(
+              'relative rounded-3xl p-5 mb-5 text-white overflow-hidden shadow-xl bg-gradient-to-br',
+              recommended.gradient,
+            )}>
+              <div className="absolute -top-8 -right-8 text-[120px] opacity-15 select-none">{recommended.emoji}</div>
+              <div className="relative">
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-bold mb-3">
+                  <Wand2 className="w-3 h-3" /> 已根据你选的「{jobs[0]?.title || '岗位'}{jobs.length > 1 ? ` 等 ${jobs.length} 个方向` : ''}」匹配
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-16 h-16 rounded-2xl bg-white/25 backdrop-blur flex items-center justify-center text-3xl shadow-inner shrink-0">
+                    {recommended.emoji}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h2 className="font-extrabold text-xl leading-tight">{recommended.name}</h2>
+                    <p className="text-[12px] opacity-95 font-semibold">{recommended.role} · 你的专属 AI 学长</p>
+                    <p className="text-[12px] mt-1 opacity-95 line-clamp-2 leading-relaxed">{recommended.tagline}</p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mt-3">
+                  {recommended.expertise.slice(0, 4).map(e => (
+                    <span key={e} className="text-[11px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-medium">{e}</span>
+                  ))}
+                </div>
+                <Button
+                  onClick={() => handleClaim(recommended.id)}
+                  disabled={isClaimed(recommended.id)}
+                  className={cn(
+                    'mt-4 w-full h-11 rounded-2xl font-bold bg-white text-foreground hover:bg-white/90 shadow-lg',
+                    isClaimed(recommended.id) && 'opacity-80',
+                  )}
+                >
+                  {isClaimed(recommended.id) ? (
+                    <><Check className="w-4 h-4 mr-1" /> 已认领，去右下角找它</>
+                  ) : (
+                    <><Sparkles className="w-4 h-4 mr-1" /> 一键认领 {recommended.name}</>
+                  )}
+                </Button>
+              </div>
             </div>
-            <p className="text-[13px] text-foreground/75 leading-relaxed">
-              每位助理都已经被「投喂」过该领域的经典书籍、行业访谈、KOL 视频与头部公司公开内容。
-              认领后会以小球形式悬浮在右下角，点开就能像问学长学姐一样聊任何专业问题。
-            </p>
+          ) : (
+            <div className="rounded-3xl bg-gradient-to-br from-violet-100/80 via-white to-fuchsia-50/80 border border-white/70 backdrop-blur p-5 mb-5 shadow-sm">
+              <div className="flex items-center gap-2 mb-1.5">
+                <Sparkles className="w-4 h-4 text-violet-600" />
+                <h2 className="font-bold">先去选个岗位，回来给你智能匹配</h2>
+              </div>
+              <p className="text-[13px] text-foreground/75 leading-relaxed mb-3">
+                完成「岗位推荐」后，我们会根据你选的方向自动给你挑一位最对口的 AI 学长。也可以先在下方手动挑一位。
+              </p>
+              <Button onClick={() => navigate('/career/recommend')} className="rounded-xl bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white">
+                去选岗位 <ArrowRight className="w-4 h-4 ml-1" />
+              </Button>
+            </div>
+          )}
+
+          {/* ===== 其他方向 ===== */}
+          <div className="flex items-center gap-2 mb-2.5 mt-1">
+            <h3 className="text-[12px] font-bold tracking-[0.18em] text-muted-foreground uppercase">
+              {recommended ? '其他方向也可以认领' : '所有 AI 学长'}
+            </h3>
+            <div className="flex-1 h-px bg-border/60" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            {ASSISTANTS.map((a) => {
+            {(recommended ? others : ASSISTANTS).map((a) => {
               const active = (preview?.id === a.id);
               const claimedThis = isClaimed(a.id);
               return (
@@ -110,7 +228,7 @@ export default function AssistantHub() {
           </div>
         </section>
 
-        {/* ===== right: detail panel ===== */}
+        {/* ===== 详情面板 ===== */}
         {preview && (
           <aside className="lg:sticky lg:top-[80px] self-start h-fit rounded-3xl bg-white/90 backdrop-blur border border-white/70 shadow-xl overflow-hidden">
             <div className={cn('p-5 text-white bg-gradient-to-br', preview.gradient)}>
