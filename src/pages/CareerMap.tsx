@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight } from 'lucide-react';
+import { Compass, BrainCircuit, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
@@ -53,9 +53,9 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-emerald-300/50',
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
-      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: Compass, emoji: '🧠', to: '/career', priority: 'P0' },
-      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Target, emoji: '🎯', to: '/career', priority: 'P0' },
-      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: FileSearch, emoji: '🔍', to: '/career', priority: 'P0' },
+      { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
+      { id: 'recommend', title: '岗位推荐', desc: '基于你的画像智能匹配', icon: Crosshair, emoji: '🎯', to: '/career', priority: 'P0' },
+      { id: 'jd', title: '岗位 JD 汇总', desc: '一键跳转查看真实在招岗位', icon: Newspaper, emoji: '🔍', to: '/career', priority: 'P0' },
     ],
   },
   {
@@ -69,10 +69,10 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-sky-300/50',
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
-      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: FileText, emoji: '📝', comingSoon: true, priority: 'P0' },
+      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', comingSoon: true, priority: 'P0' },
       { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, emoji: '💡', comingSoon: true, priority: 'P0' },
       { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', comingSoon: true, priority: 'P1' },
-      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: Bot, emoji: '🤖', comingSoon: true, priority: 'P0' },
+      { id: 'agent', title: '训练专属 Agent', desc: '吸收播客 / 社媒 / 书籍经验', icon: BotMessageSquare, emoji: '🤖', comingSoon: true, priority: 'P0' },
     ],
   },
   {
@@ -86,9 +86,9 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-violet-300/50',
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
-      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Sparkles, emoji: '✨', comingSoon: true, priority: 'P0' },
-      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: Send, emoji: '📮', comingSoon: true, priority: 'P0' },
-      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: Scissors, emoji: '✂️', comingSoon: true, priority: 'P1' },
+      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Rocket, emoji: '✨', comingSoon: true, priority: 'P0' },
+      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: MailPlus, emoji: '📮', comingSoon: true, priority: 'P0' },
+      { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: ScissorsLineDashed, emoji: '✂️', comingSoon: true, priority: 'P1' },
     ],
   },
   {
@@ -102,7 +102,7 @@ const chapters: Chapter[] = [
     ribbonShadow: 'shadow-rose-300/50',
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
-      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessageSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
+      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessagesSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
@@ -191,20 +191,32 @@ export default function CareerMap() {
 
   const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
 
-  // 直接跳到指定关卡：把它之前所有未完成的「已实现」关卡标记完成
+  // 直接跳到指定关卡：把它之前所有未完成的关卡（含敬请期待）标记完成，支持跨章节
   const stagesToSkipBefore = (stageId: string) => {
     const flat = chapters.flatMap(c => c.stages);
     const idx = flat.findIndex(s => s.id === stageId);
     if (idx < 0) return [] as string[];
-    return flat.slice(0, idx).filter(s => !s.comingSoon && !completed.includes(s.id)).map(s => s.id);
+    return flat.slice(0, idx).filter(s => !completed.includes(s.id)).map(s => s.id);
   };
 
   const confirmStageSkip = () => {
     if (!stageSkipTarget) return;
     const ids = stagesToSkipBefore(stageSkipTarget.stageId);
     ids.forEach(id => markDone(id));
-    toast({ title: `已跳到「${stageSkipTarget.stageTitle}」`, description: `跳过了前面 ${ids.length} 关，可直接开始这一关` });
     const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
+    // 若目标为敬请期待，同时标记目标本身已"预览通过"，方便继续向后推进
+    if (targetStage?.comingSoon && !completed.includes(targetStage.id)) {
+      markDone(targetStage.id);
+    }
+    const chaptersCrossed = new Set(
+      chapters.flatMap(c => c.stages.filter(s => ids.includes(s.id)).map(() => c.num))
+    ).size;
+    toast({
+      title: `已跳到「${stageSkipTarget.stageTitle}」`,
+      description: chaptersCrossed > 1
+        ? `跨越 ${chaptersCrossed} 个章节，跳过了 ${ids.length} 关`
+        : `跳过了前面 ${ids.length} 关`,
+    });
     setStageSkipTarget(null);
     if (targetStage?.to) navigate(targetStage.to);
   };
@@ -394,10 +406,10 @@ export default function CareerMap() {
                     <FastForward className="w-2.5 h-2.5" strokeWidth={3} />已跳过
                   </span>
                 )}
-                {!chComplete && chImpl > 0 && (
+                {!chComplete && (
                   <button
                     onClick={() => setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji })}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-foreground text-[10px] font-bold hover:scale-105 active:scale-95 transition-all border border-border/40 shadow-sm"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-foreground text-[10px] font-bold hover:scale-105 active:scale-95 transition-all border border-border/40 shadow-sm whitespace-nowrap"
                   >
                     <FastForward className="w-2.5 h-2.5" strokeWidth={2.8} />跳过本章
                   </button>
@@ -516,14 +528,14 @@ export default function CareerMap() {
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2.5 max-w-[150px] sm:max-w-[180px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
+                          'mx-2.5 w-[170px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
                           isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>
-                          <p className={cn('text-[12px] sm:text-[13px] font-bold leading-tight font-display-aurora', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
+                          <p className={cn('text-[12px] sm:text-[13px] font-bold leading-snug font-display-aurora break-words', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
                             {st.title}
                           </p>
-                          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
+                          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5 break-words">
                             {isLocked && !st.comingSoon ? '完成上一关后开启' : st.desc}
                           </p>
                           <div className={cn('flex items-center gap-1 mt-1 flex-wrap', labelLeft ? 'justify-start' : 'justify-end')}>
@@ -535,15 +547,16 @@ export default function CareerMap() {
                             )}
                             {st.comingSoon && <span className="text-[9px] px-1 py-0.5 rounded font-bold bg-slate-100 text-slate-500">敬请期待</span>}
                           </div>
-                          {isLocked && !st.comingSoon && (
+                          {isLocked && (
                             <button
                               onClick={() => setStageSkipTarget({ stageId: st.id, stageTitle: st.title, ci, si })}
                               className={cn(
-                                'mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all bg-gradient-to-r',
+                                'mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all bg-gradient-to-r whitespace-nowrap',
                                 ch.ribbon,
                               )}
                             >
-                              <ChevronsRight className="w-3 h-3" strokeWidth={3} />跳到这关
+                              <ChevronsRight className="w-3 h-3" strokeWidth={3} />
+                              {st.comingSoon ? '跳过到这关' : '跳到这关'}
                             </button>
                           )}
                         </div>
