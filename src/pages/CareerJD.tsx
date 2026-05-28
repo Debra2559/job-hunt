@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, ArrowRight, AlertCircle, ExternalLink, Briefcase, ScrollText, Sparkles, Clock, ThumbsUp, ThumbsDown, MessageCircle, Video, Image as ImageIcon, Loader2, RefreshCcw } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, Briefcase, ScrollText, Sparkles, Clock, ThumbsUp, ThumbsDown, MessageCircle, Video, Image as ImageIcon, Loader2, RefreshCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
