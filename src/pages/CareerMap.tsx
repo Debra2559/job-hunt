@@ -191,6 +191,24 @@ export default function CareerMap() {
 
   const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
 
+  // 直接跳到指定关卡：把它之前所有未完成的「已实现」关卡标记完成
+  const stagesToSkipBefore = (stageId: string) => {
+    const flat = chapters.flatMap(c => c.stages);
+    const idx = flat.findIndex(s => s.id === stageId);
+    if (idx < 0) return [] as string[];
+    return flat.slice(0, idx).filter(s => !s.comingSoon && !completed.includes(s.id)).map(s => s.id);
+  };
+
+  const confirmStageSkip = () => {
+    if (!stageSkipTarget) return;
+    const ids = stagesToSkipBefore(stageSkipTarget.stageId);
+    ids.forEach(id => markDone(id));
+    toast({ title: `已跳到「${stageSkipTarget.stageTitle}」`, description: `跳过了前面 ${ids.length} 关，可直接开始这一关` });
+    const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
+    setStageSkipTarget(null);
+    if (targetStage?.to) navigate(targetStage.to);
+  };
+
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
       {/* 远景：山峦 SVG */}
