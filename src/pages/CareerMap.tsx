@@ -524,14 +524,14 @@ export default function CareerMap() {
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2.5 max-w-[150px] sm:max-w-[180px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
+                          'mx-2.5 w-[170px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
                           isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>
-                          <p className={cn('text-[12px] sm:text-[13px] font-bold leading-tight font-display-aurora', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
+                          <p className={cn('text-[12px] sm:text-[13px] font-bold leading-snug font-display-aurora break-words', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
                             {st.title}
                           </p>
-                          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5 line-clamp-2">
+                          <p className="text-[10px] text-muted-foreground leading-snug mt-0.5 break-words">
                             {isLocked && !st.comingSoon ? '完成上一关后开启' : st.desc}
                           </p>
                           <div className={cn('flex items-center gap-1 mt-1 flex-wrap', labelLeft ? 'justify-start' : 'justify-end')}>
