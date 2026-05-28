@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Career from "./pages/Career";
 import CareerMap from "./pages/CareerMap";
 import NotFound from "./pages/NotFound";
+import Fireworks from "./components/Fireworks";
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <Fireworks />
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<CareerMap />} />

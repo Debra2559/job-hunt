@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { fireFireworks } from '@/components/Fireworks';
 
 const STORAGE_KEY = 'quest:game:v1';
 
@@ -187,16 +188,27 @@ export function useGameProgress() {
       }
       // 章节通关判定
       const chapterAwarded = [...s.chapterAwarded];
+      let chapterCleared: string | null = null;
       for (const [chId, stages] of Object.entries(CHAPTER_STAGES)) {
         if (chapterAwarded.includes(chId)) continue;
         const allDone = stages.every(id => stageAwarded.includes(id));
         if (allDone) {
           chapterAwarded.push(chId);
+          chapterCleared = chId;
           xp += 250;
           const bId = CHAPTER_BADGE[chId];
           if (bId && !badges.includes(bId)) badges = [...badges, bId];
         }
       }
+      // 烟花庆祝（延迟到下一帧，避免在 setState 期间触发副作用）
+      setTimeout(() => {
+        if (chapterCleared) {
+          const badgeId = CHAPTER_BADGE[chapterCleared];
+          fireFireworks({ intensity: 'mega', message: `${BADGES[badgeId].name} · 章节通关！` });
+        } else {
+          fireFireworks({ intensity: 'normal', message: '关卡通关 +60 XP' });
+        }
+      }, 0);
       // daily 任务推进
       const dp = { ...s.daily.progress };
       dp.complete_stage = Math.min((dp.complete_stage || 0) + 1, DAILY_TASKS.complete_stage.target);
