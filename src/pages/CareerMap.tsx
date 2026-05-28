@@ -615,6 +615,28 @@ export default function CareerMap() {
           onConfirm={handleSkipConfirm}
         />
       )}
+
+      <AlertDialog open={!!stageSkipTarget} onOpenChange={(o) => { if (!o) setStageSkipTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ChevronsRight className="w-5 h-5 text-emerald-500" />
+              直接跳到「{stageSkipTarget?.stageTitle}」？
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs leading-relaxed">
+              将会把前面 <b className="text-foreground">{stageSkipTarget ? stagesToSkipBefore(stageSkipTarget.stageId).length : 0}</b> 关标记为完成，并直接进入这一关。
+              <br />
+              <span className="text-amber-600">注意：跳过的关卡不会获得通关 XP 与首通奖励。</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>再想想</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStageSkip} className="bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white">
+              确认跳过
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
