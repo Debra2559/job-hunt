@@ -483,13 +483,14 @@ export default function CareerMap() {
                             {!isLocked && (
                               <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/70 blur-[2px] rotate-[-20deg] pointer-events-none" />
                             )}
-                            {/* 内容 emoji / lock */}
+                            {/* 内容图标 / lock */}
                             {isLocked ? (
                               <Lock className="w-7 h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
-                              <span className="text-[34px] sm:text-[38px] leading-none drop-shadow-sm select-none">
-                                {st.emoji}
-                              </span>
+                              <st.icon
+                                className="w-9 h-9 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]"
+                                strokeWidth={2.2}
+                              />
                             )}
                             {/* 序号徽章 */}
                             <span className={cn(
