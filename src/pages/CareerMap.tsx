@@ -482,12 +482,12 @@ export default function CareerMap() {
                   const isDone = status === 'done';
                   const isActive = status === 'active';
                   const node = nodes[si];
-                  const labelLeft = isMobile ? false : node.x < 50;
+                  const labelLeft = node.x < 50; // 节点在左侧时，名片放在右边（labelLeft 指名片在左侧的位置）
                   return (
                     <div
                       key={st.id}
                       className="absolute"
-                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: isMobile ? 'translate(0, -50%)' : 'translate(-50%, -50%)' }}
+                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: 'translate(-50%, -50%)' }}
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         {/* 软糖式 emoji 节点 */}
@@ -502,7 +502,7 @@ export default function CareerMap() {
                             onClick={() => !isLocked && st.to && navigate(st.to)}
                             disabled={isLocked || !st.to}
                             className={cn(
-                              'relative w-[76px] h-[76px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
+                              'relative w-[68px] h-[68px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
                               'border-[5px] border-white',
                               isLocked
                                 ? 'bg-gradient-to-br from-slate-100 to-slate-200 cursor-not-allowed'
@@ -522,24 +522,24 @@ export default function CareerMap() {
                             )}
                             {/* 内容图标 / lock */}
                             {isLocked ? (
-                              <Lock className="w-7 h-7 text-slate-400" strokeWidth={2.4} />
+                              <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
                               <st.icon
-                                className="w-9 h-9 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]"
+                                className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]"
                                 strokeWidth={2.2}
                               />
                             )}
                             {/* 序号徽章 */}
                             <span className={cn(
-                              'absolute -top-2 -left-2 w-7 h-7 rounded-full bg-white text-foreground text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-white font-display-aurora',
+                              'absolute -top-2 -left-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-foreground text-[11px] sm:text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-white font-display-aurora',
                               isLocked && 'opacity-70'
                             )}>
                               {si + 1}
                             </span>
                             {/* 完成 */}
                             {isDone && (
-                              <span className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow border-2 border-white">
-                                <Check className="w-4 h-4" strokeWidth={3.5} />
+                              <span className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow border-2 border-white">
+                                <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3.5} />
                               </span>
                             )}
                             {/* GO 标签 */}
@@ -553,8 +553,12 @@ export default function CareerMap() {
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2.5 w-[55vw] max-w-[200px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
-                          isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
+                          'mx-2 sm:mx-2.5 w-[44vw] max-w-[180px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border transition-all',
+                          isLocked
+                            ? 'bg-white/35 border-white/40 shadow-[0_4px_12px_-3px_rgba(0,0,0,0.05)]'
+                            : isActive
+                              ? 'bg-white/85 border-white shadow-[0_8px_20px_-4px_rgba(16,185,129,0.25)]'
+                              : 'bg-white/70 border-white/60 shadow-[0_4px_12px_-3px_rgba(0,0,0,0.08)]',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>
                           <p className={cn('text-[12px] sm:text-[13px] font-bold leading-snug font-display-aurora break-words', isLocked ? 'text-muted-foreground' : 'text-foreground')}>
@@ -584,6 +588,7 @@ export default function CareerMap() {
                   );
                 })}
               </div>
+
 
               {/* 章节衔接装饰 */}
               {ci < chapters.length - 1 && (
