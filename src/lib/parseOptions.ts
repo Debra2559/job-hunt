@@ -30,11 +30,10 @@ const isDev = (() => {
 
 // Return the reason a line looks like a question/prompt rather than an option, or null.
 function questionReason(text: string): FilterReason | null {
-  if (text.length > 35) return 'too-long';
-  if (/[?？]/.test(text)) return 'has-question-mark';
+  if (text.length > 200) return 'too-long';
+  if (/[?？]$/.test(text)) return 'has-question-mark';
   if (/[:：]\s*$/.test(text)) return 'ends-with-colon';
-  if (/[:：].*[\u4e00-\u9fa5]/.test(text)) return 'colon-followed-by-chinese';
-  if (/(想法是|打算|请选择|你目前|你的)/.test(text)) return 'prompt-keyword';
+  if (/(请选择以下|你目前的想法是|你的想法是是什么|请回答)/.test(text)) return 'prompt-keyword';
   return null;
 }
 
