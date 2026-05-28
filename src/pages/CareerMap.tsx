@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward } from 'lucide-react';
+import { Compass, Target, FileSearch, FileText, Lightbulb, Building2, Bot, Sparkles, Send, Scissors, MessageSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
@@ -9,7 +9,10 @@ import { useChapterSkip, type ChapterId, type SkipPayload } from '@/hooks/useCha
 import ChapterSkipDialog from '@/components/career/ChapterSkipDialog';
 import PlayerHub from '@/components/career/PlayerHub';
 import { toast } from '@/hooks/use-toast';
-import aiTeacherAvatar from '@/assets/ai-teacher-avatar.png';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 
 type StageStatus = 'done' | 'active' | 'available' | 'locked';
 
@@ -44,8 +47,8 @@ const chapters: Chapter[] = [
     title: '认识自己',
     subtitle: '搞清楚我是谁、我适合什么',
     emoji: '🧭',
-    nodeBg: 'from-emerald-200 via-teal-200 to-cyan-200',
-    nodeHalo: 'bg-emerald-300/50',
+    nodeBg: 'from-emerald-400 via-teal-500 to-cyan-500',
+    nodeHalo: 'bg-emerald-300/60',
     ribbon: 'from-emerald-400 to-teal-500',
     ribbonShadow: 'shadow-emerald-300/50',
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
@@ -60,8 +63,8 @@ const chapters: Chapter[] = [
     title: '准备出发',
     subtitle: '梳理经历,打磨简历,弹药上膛',
     emoji: '🎒',
-    nodeBg: 'from-sky-200 via-cyan-200 to-blue-200',
-    nodeHalo: 'bg-sky-300/50',
+    nodeBg: 'from-sky-400 via-cyan-500 to-blue-500',
+    nodeHalo: 'bg-sky-300/60',
     ribbon: 'from-sky-400 to-cyan-500',
     ribbonShadow: 'shadow-sky-300/50',
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
@@ -77,8 +80,8 @@ const chapters: Chapter[] = [
     title: '投递闯关',
     subtitle: '让对的机会主动找到你',
     emoji: '🚀',
-    nodeBg: 'from-violet-200 via-purple-200 to-fuchsia-200',
-    nodeHalo: 'bg-violet-300/50',
+    nodeBg: 'from-violet-400 via-purple-500 to-fuchsia-500',
+    nodeHalo: 'bg-violet-300/60',
     ribbon: 'from-violet-400 to-fuchsia-500',
     ribbonShadow: 'shadow-violet-300/50',
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
@@ -93,8 +96,8 @@ const chapters: Chapter[] = [
     title: '面试通关',
     subtitle: '在镜头前从容做自己',
     emoji: '👑',
-    nodeBg: 'from-rose-200 via-pink-200 to-orange-200',
-    nodeHalo: 'bg-rose-300/50',
+    nodeBg: 'from-rose-400 via-pink-500 to-orange-500',
+    nodeHalo: 'bg-rose-300/60',
     ribbon: 'from-rose-400 to-orange-500',
     ribbonShadow: 'shadow-rose-300/50',
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
@@ -134,6 +137,7 @@ export default function CareerMap() {
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
   const { skipData, saveSkip, resetSkip } = useChapterSkip();
   const [skipTarget, setSkipTarget] = useState<{ id: ChapterId; title: string; emoji: string } | null>(null);
+  const [stageSkipTarget, setStageSkipTarget] = useState<{ stageId: string; stageTitle: string; ci: number; si: number } | null>(null);
 
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
 
@@ -187,6 +191,24 @@ export default function CareerMap() {
 
   const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
 
+  // 直接跳到指定关卡：把它之前所有未完成的「已实现」关卡标记完成
+  const stagesToSkipBefore = (stageId: string) => {
+    const flat = chapters.flatMap(c => c.stages);
+    const idx = flat.findIndex(s => s.id === stageId);
+    if (idx < 0) return [] as string[];
+    return flat.slice(0, idx).filter(s => !s.comingSoon && !completed.includes(s.id)).map(s => s.id);
+  };
+
+  const confirmStageSkip = () => {
+    if (!stageSkipTarget) return;
+    const ids = stagesToSkipBefore(stageSkipTarget.stageId);
+    ids.forEach(id => markDone(id));
+    toast({ title: `已跳到「${stageSkipTarget.stageTitle}」`, description: `跳过了前面 ${ids.length} 关，可直接开始这一关` });
+    const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
+    setStageSkipTarget(null);
+    if (targetStage?.to) navigate(targetStage.to);
+  };
+
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
       {/* 远景：山峦 SVG */}
@@ -216,8 +238,9 @@ export default function CareerMap() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/65 border-b border-white/40">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="relative w-9 h-9 rounded-2xl overflow-hidden bg-gradient-to-br from-primary/20 to-accent/40 shrink-0">
-            <img src={aiTeacherAvatar} alt="" className="w-full h-full object-cover" />
+          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-300 via-teal-400 to-cyan-400 shadow-[0_8px_20px_-6px_rgba(20,184,166,0.55),inset_0_2px_0_rgba(255,255,255,0.55)]">
+            <Compass className="w-5 h-5 text-white drop-shadow-sm" strokeWidth={2.4} />
+            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-300 border-2 border-white" />
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
@@ -281,8 +304,8 @@ export default function CareerMap() {
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
             <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
             <div className="relative flex items-start gap-4">
-              <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 text-foreground flex items-center justify-center shadow-lg text-3xl">
-                <span>{nextRec.stage.emoji}</span>
+              <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-lg">
+                <nextRec.stage.icon className="w-8 h-8 text-foreground/90" strokeWidth={2.2} />
                 <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-foreground text-[10px] font-extrabold border border-white shadow-sm">{nextRec.si + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
@@ -460,13 +483,14 @@ export default function CareerMap() {
                             {!isLocked && (
                               <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/70 blur-[2px] rotate-[-20deg] pointer-events-none" />
                             )}
-                            {/* 内容 emoji / lock */}
+                            {/* 内容图标 / lock */}
                             {isLocked ? (
                               <Lock className="w-7 h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
-                              <span className="text-[34px] sm:text-[38px] leading-none drop-shadow-sm select-none">
-                                {st.emoji}
-                              </span>
+                              <st.icon
+                                className="w-9 h-9 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]"
+                                strokeWidth={2.2}
+                              />
                             )}
                             {/* 序号徽章 */}
                             <span className={cn(
@@ -511,6 +535,17 @@ export default function CareerMap() {
                             )}
                             {st.comingSoon && <span className="text-[9px] px-1 py-0.5 rounded font-bold bg-slate-100 text-slate-500">敬请期待</span>}
                           </div>
+                          {isLocked && !st.comingSoon && (
+                            <button
+                              onClick={() => setStageSkipTarget({ stageId: st.id, stageTitle: st.title, ci, si })}
+                              className={cn(
+                                'mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all bg-gradient-to-r',
+                                ch.ribbon,
+                              )}
+                            >
+                              <ChevronsRight className="w-3 h-3" strokeWidth={3} />跳到这关
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -580,6 +615,28 @@ export default function CareerMap() {
           onConfirm={handleSkipConfirm}
         />
       )}
+
+      <AlertDialog open={!!stageSkipTarget} onOpenChange={(o) => { if (!o) setStageSkipTarget(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ChevronsRight className="w-5 h-5 text-emerald-500" />
+              直接跳到「{stageSkipTarget?.stageTitle}」？
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-xs leading-relaxed">
+              将会把前面 <b className="text-foreground">{stageSkipTarget ? stagesToSkipBefore(stageSkipTarget.stageId).length : 0}</b> 关标记为完成，并直接进入这一关。
+              <br />
+              <span className="text-amber-600">注意：跳过的关卡不会获得通关 XP 与首通奖励。</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>再想想</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmStageSkip} className="bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white">
+              确认跳过
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
