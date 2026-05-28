@@ -304,8 +304,8 @@ export default function CareerMap() {
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
             <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
             <div className="relative flex items-start gap-4">
-              <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 text-foreground flex items-center justify-center shadow-lg text-3xl">
-                <span>{nextRec.stage.emoji}</span>
+              <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-lg">
+                <nextRec.stage.icon className="w-8 h-8 text-foreground/90" strokeWidth={2.2} />
                 <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-foreground text-[10px] font-extrabold border border-white shadow-sm">{nextRec.si + 1}</span>
               </div>
               <div className="flex-1 min-w-0">
