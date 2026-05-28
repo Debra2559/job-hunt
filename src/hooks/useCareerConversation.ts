@@ -25,6 +25,8 @@ export function useCareerConversation(userId: string | undefined) {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const assistantContentRef = useRef('');
+  const hasGreeted = useRef(readLocal().length > 0);
+
 
   // 任何 messages 变化都同步到 localStorage，保证刷新后恢复
   useEffect(() => {
