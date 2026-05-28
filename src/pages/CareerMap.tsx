@@ -481,12 +481,12 @@ export default function CareerMap() {
                   const isDone = status === 'done';
                   const isActive = status === 'active';
                   const node = nodes[si];
-                  const labelLeft = node.x < 50;
+                  const labelLeft = isMobile ? false : node.x < 50;
                   return (
                     <div
                       key={st.id}
                       className="absolute"
-                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: 'translate(-50%, -50%)' }}
+                      style={{ left: `${node.x}%`, top: `${node.y}px`, transform: isMobile ? 'translate(0, -50%)' : 'translate(-50%, -50%)' }}
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         {/* 软糖式 emoji 节点 */}
