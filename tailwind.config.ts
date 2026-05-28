@@ -132,6 +132,10 @@ export default {
           "0%, 80%, 100%": { transform: "translateY(0)" },
           "40%": { transform: "translateY(-6px)" },
         },
+        "mascot-walk": {
+          "0%, 100%": { transform: "translateY(0) rotate(-4deg)" },
+          "50%": { transform: "translateY(-3px) rotate(4deg)" },
+        },
         "soundwave": {
           "0%, 100%": { height: "40%" },
           "50%": { height: "100%" },
