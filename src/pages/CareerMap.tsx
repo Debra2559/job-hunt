@@ -552,7 +552,7 @@ export default function CareerMap() {
 
                         {/* 关卡名片 */}
                         <div className={cn(
-                          'mx-2.5 w-[170px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
+                          'mx-2.5 w-[55vw] max-w-[200px] sm:w-[200px] rounded-2xl px-3 py-2 backdrop-blur-md border shadow-[0_4px_12px_-3px_rgba(0,0,0,0.1)] transition-all',
                           isLocked ? 'bg-white/60 border-white/70 opacity-85' : 'bg-white/95 border-white',
                           labelLeft ? 'text-left' : 'text-right'
                         )}>
