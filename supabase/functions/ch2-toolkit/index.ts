@@ -17,6 +17,27 @@ const PROMPTS: Record<Exclude<Mode, "assistant">, string> = {
 - 不要编造任何用户没提供的事实，缺失就写「（待补充：xxx）」
 - 末尾追加一段 \`## 💡 简历医生点评\`，给出 3 条具体改进建议`,
 
+  "resume-structured": `你是一位顶级简历教练。基于用户给到的"原始素材"（可能是上传简历的纯文本，也可能是描述性的自然语言），输出一份**面向校招**的结构化中文简历 JSON。
+
+严格按此 schema 输出（缺失字段填空字符串或空数组，不要省略键）：
+{
+  "basic": { "name": "", "school": "", "major": "", "grade": "", "phone": "", "email": "", "target": "" },
+  "education": [ { "school": "", "period": "", "degree": "", "gpa": "", "extra": "" } ],
+  "experience": [ { "company": "", "role": "", "period": "", "bullets": [""] } ],
+  "projects":   [ { "name": "",    "role": "", "period": "", "bullets": [""] } ],
+  "campus":     [ { "org": "",     "role": "", "period": "", "bullets": [""] } ],
+  "skills": [""],
+  "certs": [""],
+  "selfEval": ""
+}
+
+要求：
+- 实习 / 项目 / 校园经历的 bullets 使用 **STAR + 量化**，动词开头（主导 / 推动 / 沉淀 / 复盘 / 落地…），每条 1 行，30-60 字。
+- 不要编造用户没提供的事实；缺失就留空字符串或空数组。
+- 描述模糊时，用「待补充：xxx」占位提示用户。
+- target 填一个具体的求职岗位方向。
+- 只输出 JSON，不要任何解释、Markdown 或代码块。`,
+
   tips: `你是一位陪伴过 1000+ 应届生上岸的求职 mentor。回答任何求职细节问题时：
 - 第一句话直接给结论
 - 用「✅ 这样做 / ❌ 别这样做」对比展示
