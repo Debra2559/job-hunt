@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import type { CareerReportData } from '@/components/career/CareerReport';
+import JobPrereqInline from '@/components/career/JobPrereqInline';
 
 const REPORT_LS_KEY = 'career:report:v1';
 export const SELECTED_JOBS_LS_KEY = 'career:selected_jobs:v1';
@@ -77,17 +78,38 @@ export default function CareerRecommend() {
 
   if (!report) {
     return (
-      <div className="map-aurora min-h-screen bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100 flex items-center justify-center px-6">
-        <div className="max-w-md w-full bg-white/85 backdrop-blur-xl rounded-3xl border border-white/60 shadow-[0_24px_60px_-20px_rgba(16,185,129,0.35)] p-8 text-center space-y-4">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-amber-100 flex items-center justify-center">
-            <AlertCircle className="w-7 h-7 text-amber-600" />
-          </div>
-          <h2 className="text-lg font-bold">还没有职业规划报告</h2>
-          <p className="text-sm text-muted-foreground leading-relaxed">先完成第 1 关「性格 & 能力测评」生成你的专属报告，再来挑选感兴趣的岗位。</p>
-          <Link to="/career" className="inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-2xl bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-white font-semibold shadow-[0_10px_28px_-10px_rgba(16,185,129,0.55)]">
-            去做测评 <ArrowRight className="w-4 h-4" />
+      <div className="map-aurora min-h-screen bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
+        <header className="sticky top-0 z-20 border-b border-white/40 backdrop-blur-2xl bg-white/65 px-4 py-3 flex items-center gap-3">
+          <Link to="/" className="shrink-0 w-9 h-9 rounded-2xl hover:bg-emerald-100/70 flex items-center justify-center transition-colors" title="返回闯关地图">
+            <ArrowLeft className="w-4 h-4 text-emerald-700" />
           </Link>
-        </div>
+          <div className="min-w-0 flex-1">
+            <h1 className="text-sm sm:text-base font-bold leading-tight aurora-text">第一章 · 第 2 关 · 岗位推荐</h1>
+            <p className="text-[11px] text-muted-foreground truncate">🎯 还没有测评报告？先选一个目标岗位也能继续闯关</p>
+          </div>
+        </header>
+        <main className="max-w-2xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+          <div className="rounded-2xl border border-amber-200/70 bg-amber-50/70 backdrop-blur-sm p-4 flex gap-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+            <div className="min-w-0 text-sm leading-relaxed">
+              <p className="font-semibold text-amber-900">你跳过了第 1 关，还没有职业规划报告</p>
+              <p className="text-amber-800/80 text-xs mt-1">
+                可以在下面直接挑一个想冲的岗位继续闯关；或者
+                <Link to="/career" className="text-emerald-700 font-semibold hover:underline mx-1">去做测评</Link>
+                得到更精准的推荐。
+              </p>
+            </div>
+          </div>
+          <JobPrereqInline
+            title="先告诉我，你想冲哪个岗位？"
+            subtitle="选一个目标方向，第 2 关就算通关，可以进入下一步。"
+            onSaved={() => {
+              markDone('recommend');
+              onStageCompleted('recommend');
+              setTimeout(() => navigate('/career/jd'), 600);
+            }}
+          />
+        </main>
       </div>
     );
   }
