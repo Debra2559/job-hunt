@@ -498,11 +498,11 @@ export default function CareerMap() {
             disabled={nextRec.stage.comingSoon || !nextRec.stage.to}
             className={cn(
               'group relative w-full text-left rounded-3xl p-5 overflow-hidden transition-all duration-300',
-              'bg-gradient-to-br text-white shadow-[0_18px_50px_-18px_rgba(16,185,129,0.5)]',
-              nextRec.chapter.ribbon,
+              'text-white shadow-[0_18px_50px_-18px_rgba(16,185,129,0.5)]',
               !nextRec.stage.comingSoon && 'hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer',
               nextRec.stage.comingSoon && 'opacity-90 cursor-not-allowed'
             )}
+            style={{ backgroundImage: RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01'] }}
           >
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
             <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
