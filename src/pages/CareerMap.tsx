@@ -843,6 +843,16 @@ export default function CareerMap() {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs leading-relaxed">
               将会把前面 <b className="text-foreground">{stageSkipTarget ? stagesToSkipBefore(stageSkipTarget.stageId).length : 0}</b> 关标记为完成，并直接进入这一关。
+              {stageSkipTarget && (() => {
+                const tCh = chapters.find(c => c.stages.some(s => s.id === stageSkipTarget.stageId));
+                const q = tCh ? buildSkipQueue(chapterIdOf(tCh.num), false) : [];
+                return q.length > 0 ? (
+                  <>
+                    <br />
+                    <span className="text-emerald-700">下一步将依次补齐 {q.length} 个前置章节的关键材料（{q.map(x => x.title).join(' / ')}），AI 会用它们驱动后续关卡。</span>
+                  </>
+                ) : null;
+              })()}
               <br />
               <span className="text-amber-600">注意：跳过的关卡不会获得通关 XP 与首通奖励。</span>
             </AlertDialogDescription>
