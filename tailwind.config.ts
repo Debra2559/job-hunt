@@ -146,6 +146,23 @@ export default {
           "85%": { opacity: "1", transform: "translateY(0)" },
           "100%": { opacity: "0", transform: "translateY(-100%)" },
         },
+        "claim-burst": {
+          "0%": { opacity: "0", transform: "scale(0.6) translateY(0)" },
+          "30%": { opacity: "1", transform: "scale(1.1) translateY(-4px)" },
+          "100%": { opacity: "0", transform: "scale(1) translateY(-28px)" },
+        },
+        "ring-sweep": {
+          from: { strokeDashoffset: "var(--ring-from, 100)" },
+          to: { strokeDashoffset: "var(--ring-to, 0)" },
+        },
+        "progress-shimmer": {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(200%)" },
+        },
+        "pulse-ring": {
+          "0%": { transform: "scale(1)", opacity: "0.6" },
+          "100%": { transform: "scale(1.6)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
