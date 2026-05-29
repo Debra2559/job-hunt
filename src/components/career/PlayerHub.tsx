@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Trophy, Flame, Check, Backpack, Target, Package, Award } from 'lucide-react';
+import { Trophy, Flame, Check, Backpack, Target, Package, Award, Sparkles } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { BADGES, DAILY_TASKS, ITEMS, type BadgeId, type DailyTaskId, type ItemId } from '@/hooks/useGameProgress';
 import { toast } from '@/hooks/use-toast';
@@ -12,7 +13,36 @@ type Props = {
   onClaim: (id: DailyTaskId) => void;
 };
 
+// Circular progress ring for level
+function LevelRing({ level, pct, xp }: { level: number; pct: number; xp: number }) {
+  const radius = 32;
+  const circ = 2 * Math.PI * radius;
+  const offset = circ - (pct / 100) * circ;
+  return (
+    <div className="relative w-20 h-20 shrink-0">
+      <svg className="w-20 h-20 -rotate-90" viewBox="0 0 72 72">
+        <circle cx="36" cy="36" r={radius} className="stroke-muted" strokeWidth="5" fill="none" />
+        <circle
+          cx="36" cy="36" r={radius}
+          className="stroke-primary transition-[stroke-dashoffset] duration-700 ease-out"
+          strokeWidth="5"
+          strokeLinecap="round"
+          fill="none"
+          strokeDasharray={circ}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <span className="text-[9px] tracking-wider text-muted-foreground leading-none">LV</span>
+        <span className="text-lg font-bold text-foreground tabular-nums leading-tight">{level}</span>
+      </div>
+    </div>
+  );
+}
+
 export default function PlayerHub({ state, level, onUseItem, onClaim }: Props) {
+  const [burstTask, setBurstTask] = useState<DailyTaskId | null>(null);
+
   const itemList = (Object.keys(ITEMS) as ItemId[])
     .map(id => ({ id, count: state.items[id] || 0, ...ITEMS[id] }))
     .filter(x => x.count > 0);
@@ -24,6 +54,8 @@ export default function PlayerHub({ state, level, onUseItem, onClaim }: Props) {
 
   const handleClaim = (task: DailyTaskId) => {
     onClaim(task);
+    setBurstTask(task);
+    window.setTimeout(() => setBurstTask(prev => (prev === task ? null : prev)), 1000);
     const t = DAILY_TASKS[task];
     toast({
       title: `+${t.xp} XP${t.reward ? ` · +${t.reward.count} ${ITEMS[t.reward.item].emoji}` : ''}`,
@@ -60,29 +92,31 @@ export default function PlayerHub({ state, level, onUseItem, onClaim }: Props) {
           </SheetTitle>
         </SheetHeader>
 
-        {/* Player card */}
+        {/* Player card with level ring */}
         <div className="mx-6 mt-5 rounded-2xl bg-card border border-border/70 p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold text-base">
-                Lv{level.level}
-              </div>
-              <div>
+          <div className="flex items-center gap-4">
+            <LevelRing level={level.level} pct={level.pct} xp={state.xp} />
+            <div className="flex-1 min-w-0">
+              <div className="flex items-baseline justify-between gap-2">
                 <p className="text-sm font-semibold text-foreground">闯关者</p>
-                <p className="text-[11px] text-muted-foreground tabular-nums mt-0.5">{level.into} / {level.need} XP</p>
+                <p className="text-lg font-bold text-foreground tabular-nums leading-none">{state.xp}<span className="text-[10px] font-normal text-muted-foreground ml-1">XP</span></p>
+              </div>
+              <p className="text-[11px] text-muted-foreground tabular-nums mt-1.5">
+                距 Lv{level.level + 1} 还差 <span className="font-semibold text-foreground">{level.need - level.into}</span> XP
+              </p>
+              <div className="mt-2 relative h-1.5 rounded-full bg-muted overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-700 ease-out relative"
+                  style={{ width: `${level.pct}%` }}
+                >
+                  <div className="absolute inset-y-0 -inset-x-2 bg-gradient-to-r from-transparent via-primary-foreground/40 to-transparent animate-progress-shimmer" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4 mt-2.5 text-[11px] text-muted-foreground">
+                <span className="inline-flex items-center gap-1"><Trophy className="w-3 h-3" strokeWidth={2} />{state.badges.length} 徽章</span>
+                <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3" strokeWidth={2} />连签 {state.daily.streak} 天</span>
               </div>
             </div>
-            <div className="text-right">
-              <p className="text-lg font-bold text-foreground tabular-nums leading-none">{state.xp}</p>
-              <p className="text-[10px] text-muted-foreground mt-1 tracking-wider">TOTAL XP</p>
-            </div>
-          </div>
-          <div className="mt-4 h-1.5 rounded-full bg-muted overflow-hidden">
-            <div className="h-full bg-primary transition-all duration-500" style={{ width: `${level.pct}%` }} />
-          </div>
-          <div className="flex items-center gap-4 mt-3 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1"><Trophy className="w-3 h-3" strokeWidth={2} />{state.badges.length} 徽章</span>
-            <span className="inline-flex items-center gap-1"><Flame className="w-3 h-3" strokeWidth={2} />连签 {state.daily.streak} 天</span>
           </div>
         </div>
 
@@ -102,10 +136,11 @@ export default function PlayerHub({ state, level, onUseItem, onClaim }: Props) {
               const claimed = state.daily.claimed.includes(tid);
               const reachable = cur >= t.target;
               const pct = Math.min(100, Math.round((cur / t.target) * 100));
+              const isBursting = burstTask === tid;
               return (
                 <div key={tid} className={cn(
-                  'flex items-center gap-3 p-3.5 rounded-xl border transition-colors',
-                  claimed ? 'bg-muted/40 border-border/50' : 'bg-card border-border/70'
+                  'relative flex items-center gap-3 p-3.5 rounded-xl border transition-colors',
+                  claimed ? 'bg-muted/40 border-border/50' : reachable ? 'bg-card border-primary/40 shadow-[0_0_0_1px_hsl(var(--primary)/0.08)]' : 'bg-card border-border/70'
                 )}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -117,26 +152,52 @@ export default function PlayerHub({ state, level, onUseItem, onClaim }: Props) {
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-1">{t.desc}</p>
                     <div className="mt-2 flex items-center gap-2">
-                      <div className="flex-1 h-1 rounded-full bg-muted overflow-hidden">
-                        <div className={cn('h-full transition-all', claimed ? 'bg-muted-foreground/40' : 'bg-primary')} style={{ width: `${pct}%` }} />
+                      <div className="flex-1 relative h-1.5 rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={cn(
+                            'h-full transition-all duration-500 ease-out relative',
+                            claimed ? 'bg-muted-foreground/40' : reachable ? 'bg-primary' : 'bg-primary/70'
+                          )}
+                          style={{ width: `${pct}%` }}
+                        >
+                          {reachable && !claimed && (
+                            <div className="absolute inset-y-0 -inset-x-2 bg-gradient-to-r from-transparent via-primary-foreground/50 to-transparent animate-progress-shimmer" />
+                          )}
+                        </div>
                       </div>
-                      <span className="text-[10px] tabular-nums text-muted-foreground shrink-0">{cur}/{t.target}</span>
+                      <span className={cn(
+                        'text-[10px] tabular-nums shrink-0 font-medium',
+                        reachable && !claimed ? 'text-primary' : 'text-muted-foreground'
+                      )}>{cur}/{t.target}</span>
                     </div>
                   </div>
-                  <button
-                    onClick={() => handleClaim(tid)}
-                    disabled={!reachable || claimed}
-                    className={cn(
-                      'shrink-0 h-8 px-3 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1',
-                      claimed
-                        ? 'bg-transparent text-muted-foreground cursor-default'
-                        : reachable
-                          ? 'bg-primary text-primary-foreground hover:bg-primary/90'
-                          : 'bg-muted text-muted-foreground cursor-not-allowed'
+                  <div className="relative shrink-0">
+                    {reachable && !claimed && (
+                      <span className="pointer-events-none absolute inset-0 rounded-lg bg-primary/40 animate-pulse-ring" aria-hidden />
                     )}
-                  >
-                    {claimed ? <><Check className="w-3 h-3" strokeWidth={2.5} />已领</> : reachable ? '领取' : '进行中'}
-                  </button>
+                    <button
+                      onClick={() => handleClaim(tid)}
+                      disabled={!reachable || claimed}
+                      className={cn(
+                        'relative h-8 px-3 rounded-lg text-xs font-semibold transition-all inline-flex items-center gap-1',
+                        claimed
+                          ? 'bg-transparent text-muted-foreground cursor-default'
+                          : reachable
+                            ? 'bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95'
+                            : 'bg-muted text-muted-foreground cursor-not-allowed'
+                      )}
+                    >
+                      {claimed ? <><Check className="w-3 h-3" strokeWidth={2.5} />已领</> : reachable ? '领取' : '进行中'}
+                    </button>
+                    {isBursting && (
+                      <span
+                        className="pointer-events-none absolute left-1/2 -translate-x-1/2 -top-1 text-[11px] font-bold text-primary inline-flex items-center gap-0.5 animate-claim-burst"
+                        aria-hidden
+                      >
+                        <Sparkles className="w-3 h-3" strokeWidth={2.5} />+{t.xp}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -160,7 +221,7 @@ export default function PlayerHub({ state, level, onUseItem, onClaim }: Props) {
                     </div>
                     <button
                       onClick={() => handleUseItem(it.id)}
-                      className="shrink-0 h-8 px-3 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+                      className="shrink-0 h-8 px-3 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 active:scale-95 transition-all"
                     >
                       使用
                     </button>
