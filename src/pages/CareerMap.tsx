@@ -202,7 +202,9 @@ export default function CareerMap() {
   const { completed, markDone, reset } = useQuestProgress();
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
   const { skipData, saveSkip, resetSkip } = useChapterSkip();
-  const [skipTarget, setSkipTarget] = useState<{ id: ChapterId; title: string; emoji: string } | null>(null);
+  const [skipQueue, setSkipQueue] = useState<Array<{ id: ChapterId; title: string; emoji: string }> | null>(null);
+  // 跳过完成后的回调（标记 stage / 跳转）
+  const [skipAfter, setSkipAfter] = useState<null | (() => void)>(null);
   const [stageSkipTarget, setStageSkipTarget] = useState<{ stageId: string; stageTitle: string; ci: number; si: number } | null>(null);
 
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
@@ -246,16 +248,58 @@ export default function CareerMap() {
     }
   };
 
-  const handleSkipConfirm = (payload: SkipPayload[ChapterId]) => {
-    if (!skipTarget) return;
-    const stageIds = CHAPTER_STAGES[skipTarget.id] || [];
-    stageIds.forEach(id => markDone(id));
-    saveSkip(skipTarget.id, payload as any);
-    toast({ title: `已跳过「${skipTarget.title}」`, description: '本章关卡已标记完成，可继续推进下一章' });
-    setSkipTarget(null);
+  const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
+
+  // 章节是否已通关（所有非"敬请期待"关卡完成）
+  const isChapterComplete = (chId: ChapterId) => {
+    const ch = chapters.find(c => chapterIdOf(c.num) === chId);
+    if (!ch) return false;
+    const impl = ch.stages.filter(s => !s.comingSoon);
+    return impl.length > 0 && impl.every(s => completed.includes(s.id));
   };
 
-  const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
+  // 章节是否需要补材料（未通关 && 还没保存过 skip 材料 && 在 SkipPayload 中有 form）
+  const NEED_MATERIAL: Record<string, boolean> = { ch1: true, ch2: true, ch3: true };
+  const chapterNeedsMaterial = (chId: ChapterId) =>
+    !!NEED_MATERIAL[chId] && !skipData[chId] && !isChapterComplete(chId);
+
+  // 构建跳过队列：includeTarget=true 时把目标章节也加入末尾
+  const buildSkipQueue = (targetChId: ChapterId, includeTarget: boolean) => {
+    const targetIdx = chapters.findIndex(c => chapterIdOf(c.num) === targetChId);
+    if (targetIdx < 0) return [];
+    const queue: Array<{ id: ChapterId; title: string; emoji: string }> = [];
+    for (let i = 0; i < targetIdx; i++) {
+      const c = chapters[i];
+      const id = chapterIdOf(c.num);
+      if (chapterNeedsMaterial(id)) {
+        queue.push({ id, title: c.title, emoji: c.emoji });
+      }
+    }
+    if (includeTarget) {
+      const c = chapters[targetIdx];
+      const id = chapterIdOf(c.num);
+      if (chapterNeedsMaterial(id) || isChapterComplete(id) === false) {
+        // 目标章节如果还没完成，且有 form，则收集；没 form 也加入以走"无需材料"步骤
+        if (NEED_MATERIAL[id] && !skipData[id]) {
+          queue.push({ id, title: c.title, emoji: c.emoji });
+        }
+      }
+    }
+    return queue;
+  };
+
+  // 点击"跳过本章 N"
+  const requestSkipChapter = (chId: ChapterId, title: string, emoji: string) => {
+    const queue = buildSkipQueue(chId, true);
+    // 至少把目标章节本身也展示一次（即便没 form 也给 confirmation）
+    const finalQueue = queue.length > 0 ? queue : [{ id: chId, title, emoji }];
+    setSkipQueue(finalQueue);
+    setSkipAfter(() => () => {
+      const stageIds = CHAPTER_STAGES[chId] || [];
+      stageIds.forEach(id => markDone(id));
+      toast({ title: `已跳过「${title}」`, description: '本章关卡已标记完成，可继续推进下一章' });
+    });
+  };
 
   // 直接跳到指定关卡：把它之前所有未完成的关卡（含敬请期待）标记完成，支持跨章节
   const stagesToSkipBefore = (stageId: string) => {
@@ -265,12 +309,11 @@ export default function CareerMap() {
     return flat.slice(0, idx).filter(s => !completed.includes(s.id)).map(s => s.id);
   };
 
-  const confirmStageSkip = () => {
+  const runStageSkip = () => {
     if (!stageSkipTarget) return;
     const ids = stagesToSkipBefore(stageSkipTarget.stageId);
     ids.forEach(id => markDone(id));
     const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
-    // 若目标为敬请期待，同时标记目标本身已"预览通过"，方便继续向后推进
     if (targetStage?.comingSoon && !completed.includes(targetStage.id)) {
       markDone(targetStage.id);
     }
@@ -286,6 +329,54 @@ export default function CareerMap() {
     setStageSkipTarget(null);
     if (targetStage?.to) navigate(targetStage.to);
   };
+
+  const confirmStageSkip = () => {
+    if (!stageSkipTarget) return;
+    // 目标关卡所在章节
+    const targetCh = chapters.find(c => c.stages.some(s => s.id === stageSkipTarget.stageId));
+    if (!targetCh) { runStageSkip(); return; }
+    const targetChId = chapterIdOf(targetCh.num);
+    // 收集前置章节（不含目标章节本身）
+    const queue = buildSkipQueue(targetChId, false);
+    if (queue.length === 0) {
+      runStageSkip();
+      return;
+    }
+    // 关闭 AlertDialog，弹出材料向导
+    const pending = stageSkipTarget;
+    setStageSkipTarget(null);
+    setSkipQueue(queue);
+    setSkipAfter(() => () => {
+      // 恢复 target 上下文执行 stage skip
+      setStageSkipTarget(pending);
+      // 用微任务确保 state 更新后执行
+      setTimeout(() => {
+        const ids = stagesToSkipBefore(pending.stageId);
+        ids.forEach(id => markDone(id));
+        const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === pending.stageId);
+        if (targetStage?.comingSoon && !completed.includes(targetStage.id)) markDone(targetStage.id);
+        toast({ title: `已跳到「${pending.stageTitle}」`, description: `已跳过前面 ${ids.length} 关` });
+        setStageSkipTarget(null);
+        if (targetStage?.to) navigate(targetStage.to);
+      }, 0);
+    });
+  };
+
+  const handleSkipWizardConfirm = (results: Partial<SkipPayload>) => {
+    (Object.keys(results) as ChapterId[]).forEach(chId => {
+      const payload = (results as any)[chId];
+      saveSkip(chId, payload);
+      // 同时标记该章节所有关卡为完成
+      const stageIds = CHAPTER_STAGES[chId] || [];
+      stageIds.forEach(id => markDone(id));
+    });
+    const after = skipAfter;
+    setSkipQueue(null);
+    setSkipAfter(null);
+    if (after) after();
+  };
+
+
 
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
@@ -494,7 +585,7 @@ export default function CareerMap() {
                 )}
                 {!chComplete && (
                   <button
-                    onClick={() => setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji })}
+                    onClick={() => requestSkipChapter(chapterIdOf(ch.num), ch.title, ch.emoji)}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-foreground text-[10px] font-bold hover:scale-105 active:scale-95 transition-all border border-border/40 shadow-sm whitespace-nowrap"
                   >
                     <FastForward className="w-2.5 h-2.5" strokeWidth={2.8} />跳过本章
@@ -734,14 +825,12 @@ export default function CareerMap() {
         )}
       </div>
 
-      {skipTarget && (
+      {skipQueue && (
         <ChapterSkipDialog
-          open={!!skipTarget}
-          onOpenChange={(o) => { if (!o) setSkipTarget(null); }}
-          chapterId={skipTarget.id}
-          chapterTitle={skipTarget.title}
-          chapterEmoji={skipTarget.emoji}
-          onConfirm={handleSkipConfirm}
+          open={!!skipQueue}
+          onOpenChange={(o) => { if (!o) { setSkipQueue(null); setSkipAfter(null); } }}
+          chapters={skipQueue}
+          onConfirm={handleSkipWizardConfirm}
         />
       )}
 
@@ -754,6 +843,16 @@ export default function CareerMap() {
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs leading-relaxed">
               将会把前面 <b className="text-foreground">{stageSkipTarget ? stagesToSkipBefore(stageSkipTarget.stageId).length : 0}</b> 关标记为完成，并直接进入这一关。
+              {stageSkipTarget && (() => {
+                const tCh = chapters.find(c => c.stages.some(s => s.id === stageSkipTarget.stageId));
+                const q = tCh ? buildSkipQueue(chapterIdOf(tCh.num), false) : [];
+                return q.length > 0 ? (
+                  <>
+                    <br />
+                    <span className="text-emerald-700">下一步将依次补齐 {q.length} 个前置章节的关键材料（{q.map(x => x.title).join(' / ')}），AI 会用它们驱动后续关卡。</span>
+                  </>
+                ) : null;
+              })()}
               <br />
               <span className="text-amber-600">注意：跳过的关卡不会获得通关 XP 与首通奖励。</span>
             </AlertDialogDescription>
