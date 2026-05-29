@@ -587,7 +587,7 @@ export default function CareerMap() {
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/70 backdrop-blur border border-white text-[10px] font-bold tabular-nums text-foreground shadow-sm">
                     {chDone}/{chImpl}
                     <span className="w-10 h-1 rounded-full bg-muted overflow-hidden inline-block">
-                      <span className={cn('block h-full bg-gradient-to-r', ch.ribbon)} style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                      <span className="block h-full" style={{ width: `${(chDone / chImpl) * 100}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
                     </span>
                   </span>
                 )}
