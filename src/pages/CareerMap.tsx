@@ -202,7 +202,9 @@ export default function CareerMap() {
   const { completed, markDone, reset } = useQuestProgress();
   const { state: game, level, bumpDaily, claimDaily, useItem, resetGame } = useGameProgress();
   const { skipData, saveSkip, resetSkip } = useChapterSkip();
-  const [skipTarget, setSkipTarget] = useState<{ id: ChapterId; title: string; emoji: string } | null>(null);
+  const [skipQueue, setSkipQueue] = useState<Array<{ id: ChapterId; title: string; emoji: string }> | null>(null);
+  // 跳过完成后的回调（标记 stage / 跳转）
+  const [skipAfter, setSkipAfter] = useState<null | (() => void)>(null);
   const [stageSkipTarget, setStageSkipTarget] = useState<{ stageId: string; stageTitle: string; ci: number; si: number } | null>(null);
 
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
