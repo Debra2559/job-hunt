@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { useGameProgress } from '@/hooks/useGameProgress';
 import type { CareerReportData } from '@/components/career/CareerReport';
+import JobPrereqInline from '@/components/career/JobPrereqInline';
 
 const REPORT_LS_KEY = 'career:report:v1';
 export const SELECTED_JOBS_LS_KEY = 'career:selected_jobs:v1';
