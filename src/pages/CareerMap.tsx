@@ -585,7 +585,7 @@ export default function CareerMap() {
                 )}
                 {!chComplete && (
                   <button
-                    onClick={() => setSkipTarget({ id: chapterIdOf(ch.num), title: ch.title, emoji: ch.emoji })}
+                    onClick={() => requestSkipChapter(chapterIdOf(ch.num), ch.title, ch.emoji)}
                     className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white text-foreground text-[10px] font-bold hover:scale-105 active:scale-95 transition-all border border-border/40 shadow-sm whitespace-nowrap"
                   >
                     <FastForward className="w-2.5 h-2.5" strokeWidth={2.8} />跳过本章
