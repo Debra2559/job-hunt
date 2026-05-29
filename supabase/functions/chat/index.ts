@@ -522,7 +522,7 @@ ${fileContext}`;
               file_id: source.id,
               user_query: latestUserMessage.substring(0, 500),
               similarity: source.similarity,
-              user_id: auth.user?.id ?? null,
+              user_id: auth.userId ?? null,
             });
           } catch (e) {
             console.error('Error logging knowledge usage:', e);
