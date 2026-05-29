@@ -160,6 +160,17 @@ const chapters: Chapter[] = [
 
 ];
 
+// 每章 ribbon 的兜底内联渐变（防止生产构建 purge 掉动态 Tailwind 渐变类导致卡片变白）
+const RIBBON_CSS: Record<string, string> = {
+  '01': 'linear-gradient(135deg, #34d399 0%, #14b8a6 100%)',
+  '02': 'linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%)',
+  '03': 'linear-gradient(135deg, #a78bfa 0%, #e879f9 100%)',
+  '04': 'linear-gradient(135deg, #fb7185 0%, #f97316 100%)',
+  '05': 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
+  '06': 'linear-gradient(135deg, #818cf8 0%, #a855f7 100%)',
+  '07': 'linear-gradient(135deg, #10b981 0%, #eab308 100%)',
+};
+
 
 
 function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
@@ -467,7 +478,7 @@ export default function CareerMap() {
                   return (
                     <div key={ch.num} className="flex-1 min-w-0">
                       <div className={cn('h-2 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
-                        <div className={cn('h-full bg-gradient-to-r transition-all', ch.ribbon)} style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
+                        <div className="h-full transition-all" style={{ width: chImpl === 0 ? '0%' : `${pct}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
                       </div>
                     </div>
                   );
@@ -487,11 +498,11 @@ export default function CareerMap() {
             disabled={nextRec.stage.comingSoon || !nextRec.stage.to}
             className={cn(
               'group relative w-full text-left rounded-3xl p-5 overflow-hidden transition-all duration-300',
-              'bg-gradient-to-br text-white shadow-[0_18px_50px_-18px_rgba(16,185,129,0.5)]',
-              nextRec.chapter.ribbon,
+              'text-white shadow-[0_18px_50px_-18px_rgba(16,185,129,0.5)]',
               !nextRec.stage.comingSoon && 'hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer',
               nextRec.stage.comingSoon && 'opacity-90 cursor-not-allowed'
             )}
+            style={{ backgroundImage: RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01'] }}
           >
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
             <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
@@ -546,11 +557,13 @@ export default function CareerMap() {
             <section key={ch.num} className="relative animate-fade-in" style={{ animationDelay: `${ci * 80}ms` }}>
               {/* 章节 Ribbon 飘带 */}
               <div className="relative flex justify-center mb-2">
-                <div className={cn(
-                  'relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white',
-                  'bg-gradient-to-r shadow-lg',
-                  ch.ribbon, ch.ribbonShadow
-                )}>
+                <div
+                  className={cn(
+                    'relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white shadow-lg',
+                    ch.ribbonShadow
+                  )}
+                  style={{ backgroundImage: RIBBON_CSS[ch.num] }}
+                >
                   {/* 左圆章 */}
                   <span className="w-8 h-8 rounded-full bg-white/95 text-foreground flex items-center justify-center text-lg shadow-inner shrink-0">
                     {ch.emoji}
@@ -574,7 +587,7 @@ export default function CareerMap() {
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/70 backdrop-blur border border-white text-[10px] font-bold tabular-nums text-foreground shadow-sm">
                     {chDone}/{chImpl}
                     <span className="w-10 h-1 rounded-full bg-muted overflow-hidden inline-block">
-                      <span className={cn('block h-full bg-gradient-to-r', ch.ribbon)} style={{ width: `${(chDone / chImpl) * 100}%` }} />
+                      <span className="block h-full" style={{ width: `${(chDone / chImpl) * 100}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
                     </span>
                   </span>
                 )}
