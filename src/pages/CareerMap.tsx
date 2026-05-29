@@ -160,6 +160,17 @@ const chapters: Chapter[] = [
 
 ];
 
+// 每章 ribbon 的兜底内联渐变（防止生产构建 purge 掉动态 Tailwind 渐变类导致卡片变白）
+const RIBBON_CSS: Record<string, string> = {
+  '01': 'linear-gradient(135deg, #34d399 0%, #14b8a6 100%)',
+  '02': 'linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%)',
+  '03': 'linear-gradient(135deg, #a78bfa 0%, #e879f9 100%)',
+  '04': 'linear-gradient(135deg, #fb7185 0%, #f97316 100%)',
+  '05': 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
+  '06': 'linear-gradient(135deg, #818cf8 0%, #a855f7 100%)',
+  '07': 'linear-gradient(135deg, #10b981 0%, #eab308 100%)',
+};
+
 
 
 function computeStatuses(completed: Set<string>): Record<string, StageStatus> {
