@@ -478,7 +478,7 @@ export default function CareerMap() {
                   return (
                     <div key={ch.num} className="flex-1 min-w-0">
                       <div className={cn('h-2 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
-                        <div className={cn('h-full bg-gradient-to-r transition-all', ch.ribbon)} style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
+                        <div className="h-full transition-all" style={{ width: chImpl === 0 ? '0%' : `${pct}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
                       </div>
                     </div>
                   );
