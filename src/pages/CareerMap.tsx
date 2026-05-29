@@ -557,11 +557,13 @@ export default function CareerMap() {
             <section key={ch.num} className="relative animate-fade-in" style={{ animationDelay: `${ci * 80}ms` }}>
               {/* 章节 Ribbon 飘带 */}
               <div className="relative flex justify-center mb-2">
-                <div className={cn(
-                  'relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white',
-                  'bg-gradient-to-r shadow-lg',
-                  ch.ribbon, ch.ribbonShadow
-                )}>
+                <div
+                  className={cn(
+                    'relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white shadow-lg',
+                    ch.ribbonShadow
+                  )}
+                  style={{ backgroundImage: RIBBON_CSS[ch.num] }}
+                >
                   {/* 左圆章 */}
                   <span className="w-8 h-8 rounded-full bg-white/95 text-foreground flex items-center justify-center text-lg shadow-inner shrink-0">
                     {ch.emoji}
