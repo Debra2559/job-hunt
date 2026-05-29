@@ -740,7 +740,6 @@ export function generateCareerReportHTML(data: CareerReportData): string {
 </div>
 
 <div class="print-bar no-print">
-  <button class="print-btn secondary" onclick="window.print()">${icons.printer} 打印</button>
   <button class="print-btn primary" onclick="saveAsHTML()">${icons.download} 保存</button>
 </div>
 
