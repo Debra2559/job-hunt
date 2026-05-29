@@ -341,6 +341,7 @@ export type Database = {
           file_id: string | null
           id: string
           similarity: number | null
+          user_id: string | null
           user_query: string
         }
         Insert: {
@@ -349,6 +350,7 @@ export type Database = {
           file_id?: string | null
           id?: string
           similarity?: number | null
+          user_id?: string | null
           user_query: string
         }
         Update: {
@@ -357,6 +359,7 @@ export type Database = {
           file_id?: string | null
           id?: string
           similarity?: number | null
+          user_id?: string | null
           user_query?: string
         }
         Relationships: [
