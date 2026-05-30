@@ -41,16 +41,16 @@ type Chapter = {
   stages: StageDef[];
 };
 
+// 统一克制配色：全部章节共用 emerald + stone 主题，靠 emoji / 编号区分章节身份
+const U_NODE_BG = 'from-emerald-600 to-emerald-800';
+const U_HALO = 'bg-emerald-200/55';
+const U_RIBBON = 'from-emerald-700 to-emerald-900';
+const U_RIBBON_SHADOW = 'shadow-emerald-900/10';
+
 const chapters: Chapter[] = [
   {
-    num: '01',
-    title: '认识自己',
-    subtitle: '搞清楚我是谁、我适合什么',
-    emoji: '🧭',
-    nodeBg: 'from-emerald-400 via-teal-500 to-cyan-500',
-    nodeHalo: 'bg-emerald-300/60',
-    ribbon: 'from-emerald-400 to-teal-500',
-    ribbonShadow: 'shadow-emerald-300/50',
+    num: '01', title: '认识自己', subtitle: '搞清楚我是谁、我适合什么', emoji: '🧭',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
       { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
@@ -60,14 +60,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '02',
-    title: '准备出发',
-    subtitle: '梳理经历,打磨简历,弹药上膛',
-    emoji: '🎒',
-    nodeBg: 'from-sky-400 via-cyan-500 to-blue-500',
-    nodeHalo: 'bg-sky-300/60',
-    ribbon: 'from-sky-400 to-cyan-500',
-    ribbonShadow: 'shadow-sky-300/50',
+    num: '02', title: '准备出发', subtitle: '梳理经历,打磨简历,弹药上膛', emoji: '🎒',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
       { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', to: '/career/resume', priority: 'P0' },
@@ -76,14 +70,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '03',
-    title: '投递闯关',
-    subtitle: '让对的机会主动找到你',
-    emoji: '🚀',
-    nodeBg: 'from-violet-400 via-purple-500 to-fuchsia-500',
-    nodeHalo: 'bg-violet-300/60',
-    ribbon: 'from-violet-400 to-fuchsia-500',
-    ribbonShadow: 'shadow-violet-300/50',
+    num: '03', title: '投递闯关', subtitle: '让对的机会主动找到你', emoji: '🚀',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
       { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Rocket, emoji: '✨', comingSoon: true, priority: 'P0' },
@@ -92,30 +80,17 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '04',
-    title: '面试通关',
-    subtitle: '在镜头前从容做自己',
-    emoji: '👑',
-    nodeBg: 'from-rose-400 via-pink-500 to-orange-500',
-    nodeHalo: 'bg-rose-300/60',
-    ribbon: 'from-rose-400 to-orange-500',
-    ribbonShadow: 'shadow-rose-300/50',
+    num: '04', title: '面试通关', subtitle: '在镜头前从容做自己', emoji: '👑',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
       { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessagesSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
-  // ===== 拿下 Offer 是新征程的起点 =====
   {
-    num: '05',
-    title: '入职适应',
-    subtitle: 'Offer 不是终点,是新故事的开始',
-    emoji: '🌅',
-    nodeBg: 'from-amber-400 via-orange-400 to-rose-400',
-    nodeHalo: 'bg-amber-300/60',
-    ribbon: 'from-amber-400 to-orange-500',
-    ribbonShadow: 'shadow-amber-300/50',
+    num: '05', title: '入职适应', subtitle: 'Offer 不是终点,是新故事的开始', emoji: '🌅',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌻', '☀️', '🍞', '🪴', '📋'],
     stages: [
       { id: 'onboard-prep', title: '背调 & 入职准备', desc: '材料清单、社保转移、报到流程', icon: Briefcase, emoji: '💼', comingSoon: true, priority: 'P0' },
@@ -125,14 +100,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '06',
-    title: '职场文化生存',
-    subtitle: '把规则摸清,把自己保护好',
-    emoji: '🛡️',
-    nodeBg: 'from-indigo-400 via-violet-500 to-purple-500',
-    nodeHalo: 'bg-indigo-300/60',
-    ribbon: 'from-indigo-400 to-purple-500',
-    ribbonShadow: 'shadow-indigo-300/50',
+    num: '06', title: '职场文化生存', subtitle: '把规则摸清,把自己保护好', emoji: '🛡️',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['📚', '🫧', '🌙', '🪞', '🗝️'],
     stages: [
       { id: 'communication', title: '沟通礼仪 & 汇报', desc: '邮件、IM、周报的人话模板', icon: MessagesSquare, emoji: '✉️', comingSoon: true, priority: 'P0' },
@@ -142,14 +111,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '07',
-    title: '长期成长',
-    subtitle: '从打工人到自己的 CEO',
-    emoji: '🌳',
-    nodeBg: 'from-emerald-400 via-lime-500 to-yellow-500',
-    nodeHalo: 'bg-emerald-300/60',
-    ribbon: 'from-emerald-500 to-yellow-500',
-    ribbonShadow: 'shadow-emerald-300/50',
+    num: '07', title: '长期成长', subtitle: '从打工人到自己的 CEO', emoji: '🌳',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌳', '🪙', '🧭', '🍀', '🌟'],
     stages: [
       { id: 'review', title: '绩效面谈 & OKR', desc: '把价值讲清楚,把目标对齐准', icon: TrendingUp, emoji: '📈', comingSoon: true, priority: 'P0' },
@@ -157,18 +120,14 @@ const chapters: Chapter[] = [
       { id: 'pathing', title: 'M / P 双通道', desc: '管理线还是专业线,怎么选路', icon: GitBranch, emoji: '🧭', comingSoon: true, priority: 'P1' },
     ],
   },
-
 ];
 
-// 每章 ribbon 的兜底内联渐变（防止生产构建 purge 掉动态 Tailwind 渐变类导致卡片变白）
+// 统一 ribbon 渐变（深墨绿，避免生产 purge）
+const UNIFIED_RIBBON_CSS = 'linear-gradient(135deg, #047857 0%, #064e3b 100%)';
 const RIBBON_CSS: Record<string, string> = {
-  '01': 'linear-gradient(135deg, #34d399 0%, #14b8a6 100%)',
-  '02': 'linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%)',
-  '03': 'linear-gradient(135deg, #a78bfa 0%, #e879f9 100%)',
-  '04': 'linear-gradient(135deg, #fb7185 0%, #f97316 100%)',
-  '05': 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
-  '06': 'linear-gradient(135deg, #818cf8 0%, #a855f7 100%)',
-  '07': 'linear-gradient(135deg, #10b981 0%, #eab308 100%)',
+  '01': UNIFIED_RIBBON_CSS, '02': UNIFIED_RIBBON_CSS, '03': UNIFIED_RIBBON_CSS,
+  '04': UNIFIED_RIBBON_CSS, '05': UNIFIED_RIBBON_CSS, '06': UNIFIED_RIBBON_CSS,
+  '07': UNIFIED_RIBBON_CSS,
 };
 
 
