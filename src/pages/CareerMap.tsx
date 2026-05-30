@@ -41,16 +41,16 @@ type Chapter = {
   stages: StageDef[];
 };
 
+// 统一克制配色：全部章节共用 emerald + stone 主题，靠 emoji / 编号区分章节身份
+const U_NODE_BG = 'from-emerald-600 to-emerald-800';
+const U_HALO = 'bg-emerald-200/55';
+const U_RIBBON = 'from-emerald-700 to-emerald-900';
+const U_RIBBON_SHADOW = 'shadow-emerald-900/10';
+
 const chapters: Chapter[] = [
   {
-    num: '01',
-    title: '认识自己',
-    subtitle: '搞清楚我是谁、我适合什么',
-    emoji: '🧭',
-    nodeBg: 'from-emerald-400 via-teal-500 to-cyan-500',
-    nodeHalo: 'bg-emerald-300/60',
-    ribbon: 'from-emerald-400 to-teal-500',
-    ribbonShadow: 'shadow-emerald-300/50',
+    num: '01', title: '认识自己', subtitle: '搞清楚我是谁、我适合什么', emoji: '🧭',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌿', '🍄', '🌱', '🦋', '🌸'],
     stages: [
       { id: 'assess', title: '性格 & 能力测评', desc: '8-12 题点选,5-10 分钟', icon: BrainCircuit, emoji: '🧠', to: '/career', priority: 'P0' },
@@ -60,14 +60,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '02',
-    title: '准备出发',
-    subtitle: '梳理经历,打磨简历,弹药上膛',
-    emoji: '🎒',
-    nodeBg: 'from-sky-400 via-cyan-500 to-blue-500',
-    nodeHalo: 'bg-sky-300/60',
-    ribbon: 'from-sky-400 to-cyan-500',
-    ribbonShadow: 'shadow-sky-300/50',
+    num: '02', title: '准备出发', subtitle: '梳理经历,打磨简历,弹药上膛', emoji: '🎒',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
       { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', to: '/career/resume', priority: 'P0' },
@@ -76,14 +70,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '03',
-    title: '投递闯关',
-    subtitle: '让对的机会主动找到你',
-    emoji: '🚀',
-    nodeBg: 'from-violet-400 via-purple-500 to-fuchsia-500',
-    nodeHalo: 'bg-violet-300/60',
-    ribbon: 'from-violet-400 to-fuchsia-500',
-    ribbonShadow: 'shadow-violet-300/50',
+    num: '03', title: '投递闯关', subtitle: '让对的机会主动找到你', emoji: '🚀',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
       { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Rocket, emoji: '✨', comingSoon: true, priority: 'P0' },
@@ -92,30 +80,17 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '04',
-    title: '面试通关',
-    subtitle: '在镜头前从容做自己',
-    emoji: '👑',
-    nodeBg: 'from-rose-400 via-pink-500 to-orange-500',
-    nodeHalo: 'bg-rose-300/60',
-    ribbon: 'from-rose-400 to-orange-500',
-    ribbonShadow: 'shadow-rose-300/50',
+    num: '04', title: '面试通关', subtitle: '在镜头前从容做自己', emoji: '👑',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
       { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessagesSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },
-  // ===== 拿下 Offer 是新征程的起点 =====
   {
-    num: '05',
-    title: '入职适应',
-    subtitle: 'Offer 不是终点,是新故事的开始',
-    emoji: '🌅',
-    nodeBg: 'from-amber-400 via-orange-400 to-rose-400',
-    nodeHalo: 'bg-amber-300/60',
-    ribbon: 'from-amber-400 to-orange-500',
-    ribbonShadow: 'shadow-amber-300/50',
+    num: '05', title: '入职适应', subtitle: 'Offer 不是终点,是新故事的开始', emoji: '🌅',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌻', '☀️', '🍞', '🪴', '📋'],
     stages: [
       { id: 'onboard-prep', title: '背调 & 入职准备', desc: '材料清单、社保转移、报到流程', icon: Briefcase, emoji: '💼', comingSoon: true, priority: 'P0' },
@@ -125,14 +100,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '06',
-    title: '职场文化生存',
-    subtitle: '把规则摸清,把自己保护好',
-    emoji: '🛡️',
-    nodeBg: 'from-indigo-400 via-violet-500 to-purple-500',
-    nodeHalo: 'bg-indigo-300/60',
-    ribbon: 'from-indigo-400 to-purple-500',
-    ribbonShadow: 'shadow-indigo-300/50',
+    num: '06', title: '职场文化生存', subtitle: '把规则摸清,把自己保护好', emoji: '🛡️',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['📚', '🫧', '🌙', '🪞', '🗝️'],
     stages: [
       { id: 'communication', title: '沟通礼仪 & 汇报', desc: '邮件、IM、周报的人话模板', icon: MessagesSquare, emoji: '✉️', comingSoon: true, priority: 'P0' },
@@ -142,14 +111,8 @@ const chapters: Chapter[] = [
     ],
   },
   {
-    num: '07',
-    title: '长期成长',
-    subtitle: '从打工人到自己的 CEO',
-    emoji: '🌳',
-    nodeBg: 'from-emerald-400 via-lime-500 to-yellow-500',
-    nodeHalo: 'bg-emerald-300/60',
-    ribbon: 'from-emerald-500 to-yellow-500',
-    ribbonShadow: 'shadow-emerald-300/50',
+    num: '07', title: '长期成长', subtitle: '从打工人到自己的 CEO', emoji: '🌳',
+    nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌳', '🪙', '🧭', '🍀', '🌟'],
     stages: [
       { id: 'review', title: '绩效面谈 & OKR', desc: '把价值讲清楚,把目标对齐准', icon: TrendingUp, emoji: '📈', comingSoon: true, priority: 'P0' },
@@ -157,18 +120,14 @@ const chapters: Chapter[] = [
       { id: 'pathing', title: 'M / P 双通道', desc: '管理线还是专业线,怎么选路', icon: GitBranch, emoji: '🧭', comingSoon: true, priority: 'P1' },
     ],
   },
-
 ];
 
-// 每章 ribbon 的兜底内联渐变（防止生产构建 purge 掉动态 Tailwind 渐变类导致卡片变白）
+// 统一 ribbon 渐变（深墨绿，避免生产 purge）
+const UNIFIED_RIBBON_CSS = 'linear-gradient(135deg, #047857 0%, #064e3b 100%)';
 const RIBBON_CSS: Record<string, string> = {
-  '01': 'linear-gradient(135deg, #34d399 0%, #14b8a6 100%)',
-  '02': 'linear-gradient(135deg, #38bdf8 0%, #06b6d4 100%)',
-  '03': 'linear-gradient(135deg, #a78bfa 0%, #e879f9 100%)',
-  '04': 'linear-gradient(135deg, #fb7185 0%, #f97316 100%)',
-  '05': 'linear-gradient(135deg, #fbbf24 0%, #f97316 100%)',
-  '06': 'linear-gradient(135deg, #818cf8 0%, #a855f7 100%)',
-  '07': 'linear-gradient(135deg, #10b981 0%, #eab308 100%)',
+  '01': UNIFIED_RIBBON_CSS, '02': UNIFIED_RIBBON_CSS, '03': UNIFIED_RIBBON_CSS,
+  '04': UNIFIED_RIBBON_CSS, '05': UNIFIED_RIBBON_CSS, '06': UNIFIED_RIBBON_CSS,
+  '07': UNIFIED_RIBBON_CSS,
 };
 
 
@@ -390,7 +349,7 @@ export default function CareerMap() {
 
 
   return (
-    <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
+    <div className="map-aurora relative min-h-screen overflow-hidden bg-[#f7f6f1]">
       {/* 远景：山峦 SVG（桌面端，移动端为了简洁隐藏） */}
       <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
         <defs>
@@ -407,37 +366,34 @@ export default function CareerMap() {
         <path d="M0,300 L160,230 L320,280 L460,210 L620,270 L780,220 L940,290 L1080,240 L1200,280 L1200,360 L0,360 Z" fill="url(#mt2)" />
       </svg>
 
-      {/* 移动端：柔和渐变光斑装饰（替代山峦） */}
+      {/* 移动端：极淡的中性光斑（去鲜艳色） */}
       <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[5%] -left-10 w-48 h-48 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="absolute top-[35%] -right-12 w-56 h-56 rounded-full bg-cyan-200/40 blur-3xl" />
-        <div className="absolute top-[65%] -left-8 w-48 h-48 rounded-full bg-violet-200/40 blur-3xl" />
-        <div className="absolute bottom-[5%] -right-10 w-52 h-52 rounded-full bg-rose-200/40 blur-3xl" />
+        <div className="absolute top-[10%] -left-10 w-48 h-48 rounded-full bg-emerald-100/40 blur-3xl" />
+        <div className="absolute top-[55%] -right-12 w-56 h-56 rounded-full bg-stone-200/50 blur-3xl" />
+        <div className="absolute bottom-[8%] -left-8 w-48 h-48 rounded-full bg-emerald-50/60 blur-3xl" />
       </div>
 
 
       {/* 浮云装饰 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[8%] left-[6%] text-3xl opacity-50 animate-[float_8s_ease-in-out_infinite]">☁️</div>
-        <div className="absolute top-[14%] right-[10%] text-4xl opacity-40 animate-[float_10s_ease-in-out_infinite]" style={{ animationDelay: '1.5s' }}>☁️</div>
-        <div className="absolute top-[5%] left-[55%] text-2xl opacity-45 animate-[float_12s_ease-in-out_infinite]" style={{ animationDelay: '3s' }}>☁️</div>
-        <div className="absolute top-[3%] right-[35%] text-xl opacity-50">🌤️</div>
+        <div className="absolute top-[8%] left-[6%] text-2xl opacity-30 animate-[float_8s_ease-in-out_infinite]">☁️</div>
+        <div className="absolute top-[14%] right-[10%] text-3xl opacity-25 animate-[float_10s_ease-in-out_infinite]" style={{ animationDelay: '1.5s' }}>☁️</div>
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/65 border-b border-white/40">
+      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-[#f7f6f1]/85 border-b border-stone-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-300 via-teal-400 to-cyan-400 shadow-[0_8px_20px_-6px_rgba(20,184,166,0.55),inset_0_2px_0_rgba(255,255,255,0.55)]">
-            <Compass className="w-5 h-5 text-white drop-shadow-sm" strokeWidth={2.4} />
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-300 border-2 border-white" />
+          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-emerald-700 shadow-sm">
+            <Compass className="w-5 h-5 text-white" strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
-              <span className="aurora-text truncate">求职闯关地图</span>
-              <span className="hidden sm:inline text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide shrink-0">智联 AI</span>
+            <h1 className="text-sm sm:text-base font-semibold flex items-center gap-2 leading-tight text-foreground">
+              <span className="truncate">求职闯关地图</span>
+              <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium tracking-wide shrink-0 border border-emerald-100">AI 辅助</span>
             </h1>
             <p className="text-[11px] text-muted-foreground hidden sm:block">从认识自己到拿下 offer，一关一关来</p>
           </div>
+
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border/60 shadow-sm">
             <MapIcon className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
@@ -759,12 +715,12 @@ export default function CareerMap() {
               {/* 章节衔接装饰 */}
               {ci < chapters.length - 1 && ci !== 3 && (
                 <div className="flex justify-center my-2">
-                  <div className="flex items-center gap-1.5 opacity-50">
-                    <span className="w-1 h-1 rounded-full bg-emerald-400" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
-                    <span className="w-2 h-2 rounded-full bg-violet-400" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-fuchsia-400" />
-                    <span className="w-1 h-1 rounded-full bg-rose-400" />
+                  <div className="flex items-center gap-1.5 opacity-40">
+                    <span className="w-1 h-1 rounded-full bg-stone-400" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                    <span className="w-2 h-2 rounded-full bg-emerald-600" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-stone-400" />
+                    <span className="w-1 h-1 rounded-full bg-stone-400" />
                   </div>
                 </div>
               )}
@@ -773,29 +729,22 @@ export default function CareerMap() {
               {ci === 3 && (
                 <div className="relative my-8 animate-fade-in">
                   <div className={cn(
-                    'relative overflow-hidden rounded-[28px] p-6 sm:p-8 text-center border border-white/70 backdrop-blur-xl transition-all',
+                    'relative overflow-hidden rounded-[28px] p-6 sm:p-8 text-center border backdrop-blur-xl transition-all',
                     doneCount >= 9
-                      ? 'bg-gradient-to-br from-amber-200/90 via-rose-200/85 to-violet-200/90 shadow-[0_20px_60px_-15px_rgba(168,85,247,0.45)]'
-                      : 'bg-gradient-to-br from-amber-100/70 via-rose-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(244,114,182,0.3)] opacity-95'
+                      ? 'bg-white border-emerald-200 shadow-[0_18px_40px_-20px_rgba(4,120,87,0.25)]'
+                      : 'bg-white/85 border-stone-200 shadow-sm opacity-95'
                   )}>
-                    <div className="absolute -top-12 -right-12 w-44 h-44 rounded-full bg-amber-200/50 blur-3xl pointer-events-none" />
-                    <div className="absolute -bottom-12 -left-12 w-44 h-44 rounded-full bg-violet-300/40 blur-3xl pointer-events-none" />
-                    <div className="absolute top-3 right-4 flex gap-1 pointer-events-none">
-                      <Sparkles className="w-4 h-4 text-amber-400 animate-pulse" />
-                      <Sparkles className="w-3 h-3 text-rose-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
-                    </div>
                     <div className="relative inline-flex items-center justify-center mb-3">
-                      <div className="absolute inset-0 bg-amber-300/40 rounded-full blur-2xl" />
-                      <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-300 to-rose-400 flex items-center justify-center shadow-xl border-4 border-white">
-                        <Trophy className="w-10 h-10 text-white drop-shadow-md" strokeWidth={2.2} />
+                      <div className="relative w-20 h-20 rounded-3xl bg-emerald-700 flex items-center justify-center shadow-md">
+                        <Trophy className="w-10 h-10 text-white" strokeWidth={2.2} />
                       </div>
                     </div>
-                    <p className="text-[10px] font-bold tracking-[0.3em] text-rose-500/80 mb-1 font-display-aurora">MILESTONE · OFFER GET</p>
-                    <h3 className="text-xl sm:text-2xl font-bold font-display-aurora aurora-text">拿下心仪 Offer 🎉</h3>
-                    <p className="text-xs sm:text-sm text-foreground/70 mt-2 max-w-sm mx-auto leading-relaxed">
-                      恭喜走完求职路。<span className="font-bold text-foreground">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
+                    <p className="text-[10px] font-semibold tracking-[0.3em] text-emerald-700/70 mb-1 font-display-aurora">MILESTONE · OFFER GET</p>
+                    <h3 className="text-xl sm:text-2xl font-bold font-display-aurora text-foreground">拿下心仪 Offer</h3>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
+                      恭喜走完求职路。<span className="font-semibold text-foreground">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
                     </p>
-                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/70 backdrop-blur border border-white text-[11px] font-bold text-rose-600">
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-50 border border-emerald-100 text-[11px] font-semibold text-emerald-700">
                       <ChevronsRight className="w-3 h-3" strokeWidth={3} />
                       新征程开启
                     </div>
@@ -809,19 +758,18 @@ export default function CareerMap() {
 
         {/* 系列终点：成为更好的自己 */}
         <section className="relative mt-10">
-          <div className="relative overflow-hidden rounded-[28px] p-8 text-center border border-white/70 backdrop-blur-xl bg-gradient-to-br from-emerald-100/70 via-cyan-100/60 to-violet-100/70 shadow-[0_14px_40px_-15px_rgba(6,182,212,0.35)]">
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-emerald-200/40 blur-3xl pointer-events-none" />
-            <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-violet-300/30 blur-3xl pointer-events-none" />
+          <div className="relative overflow-hidden rounded-[28px] p-8 text-center border border-stone-200 bg-white shadow-sm">
             <div className="text-5xl mb-1">🏰</div>
-            <div className="text-3xl mb-2">🌳✨</div>
-            <h3 className="text-xl font-bold font-display-aurora aurora-text">成为更好的自己</h3>
-            <p className="text-sm text-foreground/70 mt-2 max-w-sm mx-auto leading-relaxed">
+            <div className="text-3xl mb-2">🌳</div>
+            <h3 className="text-xl font-bold font-display-aurora text-foreground">成为更好的自己</h3>
+            <p className="text-sm text-muted-foreground mt-2 max-w-sm mx-auto leading-relaxed">
               {doneCount === implementedTotal && implementedTotal > 0
-                ? '已开放的关卡全部通关 🎊 后续章节正在打磨中，敬请期待～'
+                ? '已开放的关卡全部通关 后续章节正在打磨中，敬请期待'
                 : '从认识自己到长期成长，一关一关，慢慢来。'}
             </p>
           </div>
         </section>
+
 
 
         {/* Mobile reset */}
@@ -872,7 +820,7 @@ export default function CareerMap() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>再想想</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStageSkip} className="bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white">
+            <AlertDialogAction onClick={confirmStageSkip} className="bg-emerald-700 hover:bg-emerald-800 text-white">
               确认跳过
             </AlertDialogAction>
           </AlertDialogFooter>
