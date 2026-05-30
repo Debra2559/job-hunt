@@ -349,7 +349,7 @@ export default function CareerMap() {
 
 
   return (
-    <div className="map-aurora relative min-h-screen overflow-hidden bg-[#f7f6f1]">
+    <div className="map-aurora game-bg relative min-h-screen overflow-hidden bg-[#f7f6f1]">
       {/* 远景：山峦 SVG（桌面端，移动端为了简洁隐藏） */}
       <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
         <defs>
@@ -394,10 +394,11 @@ export default function CareerMap() {
             <p className="text-[11px] text-muted-foreground hidden sm:block">从认识自己到拿下 offer，一关一关来</p>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border/60 shadow-sm">
-            <MapIcon className="w-3 h-3 text-primary" />
-            <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#0f3a2e] text-emerald-200 border border-emerald-900 shadow-[inset_0_2px_0_rgba(255,255,255,0.15),inset_0_-2px_0_rgba(0,0,0,0.4),0_0_0_2px_#ffffff,0_0_0_3px_#0f3a2e]">
+            <MapIcon className="w-3 h-3" />
+            <span className="font-pixel text-[9px] tabular-nums">{availableCount}/{totalStages}</span>
           </div>
+
           {/* 认领助理入口已并入第一章关卡 */}
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
           {/* 重置按钮已隐藏 */}
@@ -433,15 +434,16 @@ export default function CareerMap() {
                   const isCurrent = activeEntry?.ci === ci;
                   return (
                     <div key={ch.num} className="flex-1 min-w-0">
-                      <div className={cn('h-2 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
-                        <div className="h-full transition-all" style={{ width: chImpl === 0 ? '0%' : `${pct}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
+                      <div className={cn('xp-bar-frame h-2.5 relative', isCurrent && 'ring-2 ring-offset-1 ring-amber-300 ring-offset-[#f7f6f1]')}>
+                        <div className="xp-bar-fill h-full transition-all" style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
                       </div>
                     </div>
                   );
                 })}
               </div>
             </div>
-            <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">{doneCount}/{implementedTotal} · {progressPct}%</span>
+            <span className="font-pixel text-[8px] text-emerald-900 tabular-nums shrink-0">{doneCount}/{implementedTotal}</span>
+
           </div>
         </div>
       </header>
@@ -461,7 +463,7 @@ export default function CareerMap() {
             style={{ backgroundImage: RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01'] }}
           >
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
-            <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
+            <div className="absolute right-4 bottom-3 font-pixel text-[8px] tracking-[0.2em] opacity-70 select-none">▶ NEXT QUEST</div>
             <div className="relative flex items-start gap-4">
               <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-lg">
                 <nextRec.stage.icon className="w-8 h-8 text-foreground/90" strokeWidth={2.2} />
@@ -525,8 +527,9 @@ export default function CareerMap() {
                     {ch.emoji}
                   </span>
                   <div className="leading-tight">
-                    <p className="text-[9px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
+                    <p className="font-pixel text-[8px] tracking-[0.18em] opacity-95">CH.{ch.num}</p>
                     <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四','五','六','七'][ci]}章 · {ch.title}</h2>
+
                   </div>
                   {chComplete && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
@@ -592,9 +595,10 @@ export default function CareerMap() {
                       <stop offset="100%" stopColor="#fef3c7" stopOpacity="0.9" />
                     </linearGradient>
                   </defs>
-                  <path d={d} fill="none" stroke="rgba(120, 113, 108, 0.18)" strokeWidth="6" strokeLinecap="round" transform="translate(0.3, 1)" />
+                  <path d={d} fill="none" stroke="rgba(15, 58, 46, 0.22)" strokeWidth="6" strokeLinecap="round" transform="translate(0.3, 1)" />
                   <path d={d} fill="none" stroke={`url(#path-${ch.num})`} strokeWidth="5" strokeLinecap="round" />
-                  <path d={d} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" strokeLinecap="round" strokeDasharray="0.5 3" />
+                  <path d={d} fill="none" stroke="rgba(252, 211, 77, 0.95)" strokeWidth="1.2" strokeLinecap="round" className="path-energy" />
+
                 </svg>
 
                 {/* 关卡节点 */}
@@ -614,12 +618,18 @@ export default function CareerMap() {
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         {/* 软糖式 emoji 节点 */}
                         <div className="relative shrink-0">
-                          {/* 外层光晕（active） */}
+                          {/* 外层光晕 + 旋转金色 shine 环（active） */}
                           {isActive && (
-                            <span className={cn('absolute -inset-3 rounded-full blur-2xl animate-pulse', ch.nodeHalo)} />
+                            <>
+                              <span className={cn('absolute -inset-3 rounded-full blur-2xl animate-pulse', ch.nodeHalo)} />
+                              <span className="node-ring-shine" />
+                              <span className="sparkle absolute -top-2 -right-2 text-[14px] select-none" aria-hidden>✨</span>
+                              <span className="sparkle absolute -bottom-1 -left-2 text-[12px] select-none" style={{ animationDelay: '0.8s' }} aria-hidden>⭐</span>
+                            </>
                           )}
                           {/* 节点底座阴影（悬浮感） */}
                           <span className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-14 h-2 rounded-full bg-black/15 blur-md" />
+
                           <button
                             onClick={() => !isLocked && st.to && navigate(st.to)}
                             disabled={isLocked || !st.to}
