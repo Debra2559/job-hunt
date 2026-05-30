@@ -394,10 +394,11 @@ export default function CareerMap() {
             <p className="text-[11px] text-muted-foreground hidden sm:block">从认识自己到拿下 offer，一关一关来</p>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border/60 shadow-sm">
-            <MapIcon className="w-3 h-3 text-primary" />
-            <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-[#0f3a2e] text-emerald-200 border border-emerald-900 shadow-[inset_0_2px_0_rgba(255,255,255,0.15),inset_0_-2px_0_rgba(0,0,0,0.4),0_0_0_2px_#ffffff,0_0_0_3px_#0f3a2e]">
+            <MapIcon className="w-3 h-3" />
+            <span className="font-pixel text-[9px] tabular-nums">{availableCount}/{totalStages}</span>
           </div>
+
           {/* 认领助理入口已并入第一章关卡 */}
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
           {/* 重置按钮已隐藏 */}
