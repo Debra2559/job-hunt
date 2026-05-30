@@ -122,12 +122,15 @@ const chapters: Chapter[] = [
   },
 ];
 
-// 统一 ribbon 渐变（深墨绿，避免生产 purge）
-const UNIFIED_RIBBON_CSS = 'linear-gradient(135deg, #047857 0%, #064e3b 100%)';
+// 每章一种主色，保持游戏关卡的色彩层次感，避免页面通体绿色
 const RIBBON_CSS: Record<string, string> = {
-  '01': UNIFIED_RIBBON_CSS, '02': UNIFIED_RIBBON_CSS, '03': UNIFIED_RIBBON_CSS,
-  '04': UNIFIED_RIBBON_CSS, '05': UNIFIED_RIBBON_CSS, '06': UNIFIED_RIBBON_CSS,
-  '07': UNIFIED_RIBBON_CSS,
+  '01': 'linear-gradient(135deg, #047857 0%, #064e3b 100%)',   // 翡翠绿 · 认识自己
+  '02': 'linear-gradient(135deg, #0284c7 0%, #075985 100%)',   // 海蓝 · 探索方向
+  '03': 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)',   // 紫水晶 · 简历
+  '04': 'linear-gradient(135deg, #db2777 0%, #831843 100%)',   // 玫红 · 面试
+  '05': 'linear-gradient(135deg, #ea580c 0%, #7c2d12 100%)',   // 火橙 · offer 谈判
+  '06': 'linear-gradient(135deg, #ca8a04 0%, #713f12 100%)',   // 琥珀金 · 入职
+  '07': 'linear-gradient(135deg, #475569 0%, #1e293b 100%)',   // 石墨 · 成长
 };
 
 
