@@ -434,15 +434,16 @@ export default function CareerMap() {
                   const isCurrent = activeEntry?.ci === ci;
                   return (
                     <div key={ch.num} className="flex-1 min-w-0">
-                      <div className={cn('h-2 rounded-full overflow-hidden bg-emerald-100/70 relative', isCurrent && 'ring-2 ring-offset-1 ring-emerald-300 ring-offset-background')}>
-                        <div className="h-full transition-all" style={{ width: chImpl === 0 ? '0%' : `${pct}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
+                      <div className={cn('xp-bar-frame h-2.5 relative', isCurrent && 'ring-2 ring-offset-1 ring-amber-300 ring-offset-[#f7f6f1]')}>
+                        <div className="xp-bar-fill h-full transition-all" style={{ width: chImpl === 0 ? '0%' : `${pct}%` }} />
                       </div>
                     </div>
                   );
                 })}
               </div>
             </div>
-            <span className="text-[10px] font-semibold text-muted-foreground tabular-nums shrink-0">{doneCount}/{implementedTotal} · {progressPct}%</span>
+            <span className="font-pixel text-[8px] text-emerald-900 tabular-nums shrink-0">{doneCount}/{implementedTotal}</span>
+
           </div>
         </div>
       </header>
