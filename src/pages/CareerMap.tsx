@@ -349,7 +349,7 @@ export default function CareerMap() {
 
 
   return (
-    <div className="map-aurora relative min-h-screen overflow-hidden bg-gradient-to-b from-sky-100 via-emerald-50 to-teal-100">
+    <div className="map-aurora relative min-h-screen overflow-hidden bg-[#f7f6f1]">
       {/* 远景：山峦 SVG（桌面端，移动端为了简洁隐藏） */}
       <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-60" viewBox="0 0 1200 360" preserveAspectRatio="none">
         <defs>
