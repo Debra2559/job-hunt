@@ -618,12 +618,18 @@ export default function CareerMap() {
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         {/* 软糖式 emoji 节点 */}
                         <div className="relative shrink-0">
-                          {/* 外层光晕（active） */}
+                          {/* 外层光晕 + 旋转金色 shine 环（active） */}
                           {isActive && (
-                            <span className={cn('absolute -inset-3 rounded-full blur-2xl animate-pulse', ch.nodeHalo)} />
+                            <>
+                              <span className={cn('absolute -inset-3 rounded-full blur-2xl animate-pulse', ch.nodeHalo)} />
+                              <span className="node-ring-shine" />
+                              <span className="sparkle absolute -top-2 -right-2 text-[14px] select-none" aria-hidden>✨</span>
+                              <span className="sparkle absolute -bottom-1 -left-2 text-[12px] select-none" style={{ animationDelay: '0.8s' }} aria-hidden>⭐</span>
+                            </>
                           )}
                           {/* 节点底座阴影（悬浮感） */}
                           <span className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-14 h-2 rounded-full bg-black/15 blur-md" />
+
                           <button
                             onClick={() => !isLocked && st.to && navigate(st.to)}
                             disabled={isLocked || !st.to}
