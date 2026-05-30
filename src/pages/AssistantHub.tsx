@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Sparkles, BookOpen, MessageCircle, Wand2, ArrowRight } from 'lucide-react';
+import { ArrowLeft, Check, Sparkles, BookOpen, MessageCircle, Wand2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -22,7 +22,6 @@ function readSelectedJobs(): PickedJob[] {
   } catch { return []; }
 }
 
-// 关键词 → 助理 id 的匹配表，按优先级判断
 const KEYWORD_MAP: Array<{ id: string; keywords: string[] }> = [
   { id: 'pm',        keywords: ['产品经理', '产品', 'PM', 'product'] },
   { id: 'frontend',  keywords: ['前端', 'frontend', 'react', 'vue', 'web', '客户端', '工程师', '研发', '开发'] },
@@ -41,7 +40,6 @@ function matchAssistantId(jobs: PickedJob[]): string | null {
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
-  // 计数得分，取得分最高的
   let best: { id: string; score: number } | null = null;
   for (const row of KEYWORD_MAP) {
     let score = 0;
@@ -68,7 +66,6 @@ export default function AssistantHub() {
     ? ASSISTANTS.find(a => a.id === previewId) || null
     : (claimed || recommended || ASSISTANTS[0]);
 
-  // 已认领过则自动完成关卡（兼容老用户）
   useEffect(() => {
     if (claimed && !completed.includes('claim_assistant')) {
       markDone('claim_assistant');
@@ -83,7 +80,7 @@ export default function AssistantHub() {
     markDone('claim_assistant');
     onStageCompleted('claim_assistant');
     toast({
-      title: `✨ 已认领 ${a.name}`,
+      title: `已认领 ${a.name}`,
       description: `${a.role}已悬浮在右下角，随时可以聊。`,
     });
   };
@@ -92,30 +89,33 @@ export default function AssistantHub() {
   const others = ASSISTANTS.filter(a => a.id !== recommended?.id);
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-violet-50 via-fuchsia-50 to-rose-50">
-      {/* deco */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-[6%] left-[8%] text-3xl opacity-30">✨</div>
-        <div className="absolute top-[14%] right-[12%] text-4xl opacity-25">📚</div>
-        <div className="absolute bottom-[10%] right-[8%] text-3xl opacity-25">🪄</div>
+    <div className="relative min-h-screen overflow-hidden bg-[#f7f6f1]">
+      {/* 极淡的中性氛围光斑 */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-[10%] -left-16 w-72 h-72 rounded-full bg-emerald-100/40 blur-3xl" />
+        <div className="absolute bottom-[15%] -right-20 w-80 h-80 rounded-full bg-stone-200/50 blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/65 border-b border-white/40">
+      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-[#f7f6f1]/85 border-b border-stone-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <Link to="/career/map" className="w-9 h-9 rounded-xl bg-white/80 border border-white flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all">
-            <ArrowLeft className="w-4 h-4" />
+          <Link
+            to="/career/map"
+            className="w-9 h-9 rounded-xl bg-white border border-stone-200 flex items-center justify-center shadow-sm hover:bg-stone-50 transition-colors"
+            aria-label="返回"
+          >
+            <ArrowLeft className="w-4 h-4 text-foreground" />
           </Link>
-          <div className="w-10 h-10 rounded-2xl flex items-center justify-center text-xl bg-gradient-to-br from-violet-400 via-purple-500 to-fuchsia-500 shadow-lg">
-            <span className="drop-shadow-sm">🤖</span>
+          <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-emerald-700 shadow-sm">
+            <Sparkles className="w-5 h-5 text-white" strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm sm:text-base font-bold leading-tight">认领你的专属 AI 助理</h1>
-            <p className="text-[11px] text-muted-foreground">已根据你选的岗位匹配好一位，一键认领即可</p>
+            <h1 className="text-sm sm:text-base font-semibold leading-tight text-foreground">认领你的专属 AI 助理</h1>
+            <p className="text-[11px] text-muted-foreground mt-0.5">已根据你选的岗位匹配好一位，一键认领即可</p>
           </div>
           {claimed && (
             <button
               onClick={() => { release(); toast({ title: '已释放', description: '可以重新挑一个' }); }}
-              className="text-[11px] px-2.5 py-1.5 rounded-full bg-white border border-border/60 text-muted-foreground hover:text-foreground hover:bg-muted"
+              className="text-[11px] px-2.5 py-1.5 rounded-full bg-white border border-stone-200 text-muted-foreground hover:text-foreground hover:bg-stone-50 transition-colors"
             >
               释放
             </button>
@@ -123,44 +123,45 @@ export default function AssistantHub() {
         </div>
       </header>
 
-      <main className="relative max-w-5xl mx-auto px-3 sm:px-6 py-5 sm:py-6 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-4 sm:gap-6">
+      <main className="relative max-w-5xl mx-auto px-3 sm:px-6 py-5 sm:py-8 grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-5 sm:gap-6">
         <section>
-          {/* ===== 推荐区：根据已选岗位匹配 ===== */}
+          {/* ===== 推荐区 ===== */}
           {recommended ? (
-            <div className={cn(
-              'relative rounded-3xl p-5 mb-5 text-white overflow-hidden shadow-xl bg-gradient-to-br',
-              recommended.gradient,
-            )}>
-              <div className="absolute -top-8 -right-8 text-[120px] opacity-15 select-none">{recommended.emoji}</div>
+            <div className="relative rounded-3xl p-6 mb-6 overflow-hidden bg-white border border-stone-200 shadow-[0_18px_40px_-22px_rgba(4,120,87,0.25)]">
+              {/* 左侧墨绿色品牌色条 */}
+              <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-700" />
+              <div className="absolute -top-12 -right-12 text-[160px] leading-none opacity-[0.06] select-none pointer-events-none">{recommended.emoji}</div>
+
               <div className="relative">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/25 backdrop-blur text-[11px] font-bold mb-3">
-                  <Wand2 className="w-3 h-3" /> 已根据你选的「{jobs[0]?.title || '岗位'}{jobs.length > 1 ? ` 等 ${jobs.length} 个方向` : ''}」匹配
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-semibold mb-4 border border-emerald-100">
+                  <Wand2 className="w-3 h-3" strokeWidth={2.4} />
+                  根据「{jobs[0]?.title || '岗位'}{jobs.length > 1 ? ` 等 ${jobs.length} 个方向` : ''}」匹配
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-16 h-16 rounded-2xl bg-white/25 backdrop-blur flex items-center justify-center text-3xl shadow-inner shrink-0">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 rounded-2xl bg-stone-50 border border-stone-200 flex items-center justify-center text-3xl shrink-0">
                     {recommended.emoji}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h2 className="font-extrabold text-xl leading-tight">{recommended.name}</h2>
-                    <p className="text-[12px] opacity-95 font-semibold">{recommended.role} · 你的专属 AI 学长</p>
-                    <p className="text-[12px] mt-1 opacity-95 line-clamp-2 leading-relaxed">{recommended.tagline}</p>
+                    <h2 className="font-bold text-xl leading-tight text-foreground">{recommended.name}</h2>
+                    <p className="text-[12px] text-muted-foreground font-medium mt-0.5">{recommended.role} · 你的专属 AI 学长</p>
+                    <p className="text-[13px] mt-2 text-foreground/80 line-clamp-2 leading-relaxed">{recommended.tagline}</p>
                   </div>
                 </div>
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="flex flex-wrap gap-1.5 mt-4">
                   {recommended.expertise.slice(0, 4).map(e => (
-                    <span key={e} className="text-[11px] px-2 py-0.5 rounded-full bg-white/20 backdrop-blur font-medium">{e}</span>
+                    <span key={e} className="text-[11px] px-2 py-0.5 rounded-full bg-stone-100 text-foreground/70 font-medium">{e}</span>
                   ))}
                 </div>
                 <Button
                   onClick={() => handleClaim(recommended.id)}
                   disabled={isClaimed(recommended.id)}
                   className={cn(
-                    'mt-4 w-full h-11 rounded-2xl font-bold bg-white text-foreground hover:bg-white/90 shadow-lg',
+                    'mt-5 w-full h-11 rounded-2xl font-semibold bg-emerald-700 hover:bg-emerald-800 text-white shadow-sm',
                     isClaimed(recommended.id) && 'opacity-80',
                   )}
                 >
                   {isClaimed(recommended.id) ? (
-                    <><Check className="w-4 h-4 mr-1" /> 已认领，去右下角找它</>
+                    <><Check className="w-4 h-4 mr-1" strokeWidth={3} /> 已认领，去右下角找它</>
                   ) : (
                     <><Sparkles className="w-4 h-4 mr-1" /> 一键认领 {recommended.name}</>
                   )}
@@ -168,9 +169,9 @@ export default function AssistantHub() {
               </div>
             </div>
           ) : (
-            <div className="mb-5">
+            <div className="mb-6">
               <JobPrereqInline
-                gradient="from-violet-400 via-purple-500 to-fuchsia-500"
+                gradient="from-emerald-600 to-emerald-800"
                 title="先告诉我你想冲哪个岗位？"
                 subtitle="选一个目标，立刻给你匹配一位最对口的 AI 学长。"
                 onSaved={() => window.location.reload()}
@@ -179,11 +180,11 @@ export default function AssistantHub() {
           )}
 
           {/* ===== 其他方向 ===== */}
-          <div className="flex items-center gap-2 mb-2.5 mt-1">
-            <h3 className="text-[12px] font-bold tracking-[0.18em] text-muted-foreground uppercase">
+          <div className="flex items-center gap-3 mb-3 mt-1">
+            <h3 className="text-[11px] font-semibold tracking-[0.22em] text-muted-foreground uppercase">
               {recommended ? '其他方向也可以认领' : '所有 AI 学长'}
             </h3>
-            <div className="flex-1 h-px bg-border/60" />
+            <div className="flex-1 h-px bg-stone-200" />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -195,26 +196,31 @@ export default function AssistantHub() {
                   key={a.id}
                   onClick={() => setPreviewId(a.id)}
                   className={cn(
-                    'group text-left rounded-2xl p-4 transition-all border-2 relative overflow-hidden',
-                    'bg-white/90 backdrop-blur shadow-sm hover:-translate-y-0.5 hover:shadow-md',
-                    active ? 'border-violet-400 ring-2 ring-violet-200' : 'border-white/80',
+                    'group text-left rounded-2xl p-4 transition-all bg-white relative overflow-hidden',
+                    'border hover:-translate-y-0.5 hover:shadow-md',
+                    active
+                      ? 'border-emerald-600 shadow-[0_8px_24px_-12px_rgba(4,120,87,0.4)]'
+                      : 'border-stone-200 shadow-sm',
                   )}
                 >
                   {claimedThis && (
-                    <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded-full bg-violet-600 text-white font-bold inline-flex items-center gap-0.5">
+                    <span className="absolute top-2 right-2 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-700 text-white font-semibold inline-flex items-center gap-0.5">
                       <Check className="w-2.5 h-2.5" strokeWidth={3} /> 已认领
                     </span>
                   )}
                   <div className="flex items-start gap-3">
-                    <div className={cn('w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-gradient-to-br shadow-lg', a.gradient)}>
-                      <span className="drop-shadow-sm">{a.emoji}</span>
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0 bg-stone-50 border border-stone-200">
+                      {a.emoji}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-bold text-sm leading-tight truncate">{a.name} <span className="text-[11px] font-normal text-muted-foreground">· {a.role}</span></h3>
-                      <p className="text-[11px] text-foreground/75 mt-1 line-clamp-2 leading-relaxed">{a.tagline}</p>
+                      <h3 className="font-semibold text-sm leading-tight truncate text-foreground">
+                        {a.name}
+                        <span className="text-[11px] font-normal text-muted-foreground ml-1">· {a.role}</span>
+                      </h3>
+                      <p className="text-[11px] text-foreground/65 mt-1 line-clamp-2 leading-relaxed">{a.tagline}</p>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {a.expertise.slice(0, 2).map((e) => (
-                          <span key={e} className="text-[10px] px-1.5 py-0.5 rounded-full bg-muted/70 text-foreground/70">{e}</span>
+                          <span key={e} className="text-[10px] px-1.5 py-0.5 rounded-full bg-stone-100 text-foreground/65">{e}</span>
                         ))}
                       </div>
                     </div>
@@ -227,51 +233,52 @@ export default function AssistantHub() {
 
         {/* ===== 详情面板 ===== */}
         {preview && (
-          <aside className="lg:sticky lg:top-[80px] self-start h-fit rounded-3xl bg-white/90 backdrop-blur border border-white/70 shadow-xl overflow-hidden">
-            <div className={cn('p-5 text-white bg-gradient-to-br', preview.gradient)}>
-              <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-white/25 backdrop-blur flex items-center justify-center text-3xl shadow-inner">
+          <aside className="lg:sticky lg:top-[80px] self-start h-fit rounded-3xl bg-white border border-stone-200 shadow-[0_18px_40px_-22px_rgba(0,0,0,0.15)] overflow-hidden">
+            <div className="p-5 bg-emerald-900 text-white relative overflow-hidden">
+              <div className="absolute -bottom-8 -right-6 text-[110px] leading-none opacity-[0.08] select-none pointer-events-none">{preview.emoji}</div>
+              <div className="relative flex items-center gap-3">
+                <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 backdrop-blur flex items-center justify-center text-3xl">
                   {preview.emoji}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-extrabold text-xl leading-tight">{preview.name}</h3>
-                  <p className="text-[12px] opacity-90 font-semibold">{preview.role}</p>
+                  <h3 className="font-bold text-xl leading-tight">{preview.name}</h3>
+                  <p className="text-[12px] opacity-80 font-medium mt-0.5">{preview.role}</p>
                 </div>
               </div>
-              <p className="text-[13px] mt-3 leading-relaxed opacity-95">{preview.tagline}</p>
+              <p className="relative text-[13px] mt-3 leading-relaxed opacity-90">{preview.tagline}</p>
             </div>
 
-            <div className="p-5 space-y-4">
+            <div className="p-5 space-y-5">
               <div>
-                <h4 className="text-[11px] font-bold tracking-[0.18em] text-muted-foreground mb-1.5">擅长领域</h4>
+                <h4 className="text-[11px] font-semibold tracking-[0.22em] text-muted-foreground mb-2 uppercase">擅长领域</h4>
                 <div className="flex flex-wrap gap-1.5">
                   {preview.expertise.map((e) => (
-                    <span key={e} className="text-[11px] px-2 py-1 rounded-full bg-violet-50 text-violet-700 border border-violet-100 font-medium">{e}</span>
+                    <span key={e} className="text-[11px] px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 font-medium">{e}</span>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h4 className="text-[11px] font-bold tracking-[0.18em] text-muted-foreground mb-1.5 inline-flex items-center gap-1">
+                <h4 className="text-[11px] font-semibold tracking-[0.22em] text-muted-foreground mb-2 uppercase inline-flex items-center gap-1.5">
                   <BookOpen className="w-3 h-3" /> 投喂的素材
                 </h4>
-                <ul className="space-y-1">
+                <ul className="space-y-1.5">
                   {preview.sources.map((s) => (
-                    <li key={s} className="text-[12px] text-foreground/75 flex gap-1.5">
-                      <span className="text-violet-400 shrink-0">·</span>{s}
+                    <li key={s} className="text-[12px] text-foreground/75 flex gap-2 leading-relaxed">
+                      <span className="text-emerald-600 shrink-0 mt-0.5">·</span>{s}
                     </li>
                   ))}
                 </ul>
               </div>
 
               <div>
-                <h4 className="text-[11px] font-bold tracking-[0.18em] text-muted-foreground mb-1.5 inline-flex items-center gap-1">
+                <h4 className="text-[11px] font-semibold tracking-[0.22em] text-muted-foreground mb-2 uppercase inline-flex items-center gap-1.5">
                   <MessageCircle className="w-3 h-3" /> 可以这样开聊
                 </h4>
                 <div className="space-y-1.5">
                   {preview.starterPrompts.slice(0, 3).map((p) => (
-                    <div key={p} className="text-[12px] text-foreground/80 px-2.5 py-1.5 rounded-lg bg-muted/60 border border-border/40 leading-relaxed">
-                      💬 {p}
+                    <div key={p} className="text-[12px] text-foreground/80 px-3 py-2 rounded-xl bg-stone-50 border border-stone-200 leading-relaxed">
+                      {p}
                     </div>
                   ))}
                 </div>
@@ -281,12 +288,11 @@ export default function AssistantHub() {
                 onClick={() => handleClaim(preview.id)}
                 disabled={isClaimed(preview.id)}
                 className={cn(
-                  'w-full h-11 rounded-2xl font-bold text-white shadow-lg bg-gradient-to-r',
-                  preview.gradient,
+                  'w-full h-11 rounded-2xl font-semibold text-white shadow-sm bg-emerald-700 hover:bg-emerald-800',
                   isClaimed(preview.id) && 'opacity-60 cursor-not-allowed',
                 )}
               >
-                {isClaimed(preview.id) ? <><Check className="w-4 h-4 mr-1" /> 已认领，去右下角找它</> : <><Sparkles className="w-4 h-4 mr-1" /> 认领 {preview.name}</>}
+                {isClaimed(preview.id) ? <><Check className="w-4 h-4 mr-1" strokeWidth={3} /> 已认领，去右下角找它</> : <><Sparkles className="w-4 h-4 mr-1" /> 认领 {preview.name}</>}
               </Button>
             </div>
           </aside>
