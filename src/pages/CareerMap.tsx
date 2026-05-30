@@ -463,7 +463,7 @@ export default function CareerMap() {
             style={{ backgroundImage: RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01'] }}
           >
             <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-15 select-none pointer-events-none">{nextRec.chapter.emoji}</div>
-            <div className="absolute right-4 bottom-3 text-[10px] font-bold tracking-[0.2em] opacity-60 select-none">NEXT STEP</div>
+            <div className="absolute right-4 bottom-3 font-pixel text-[8px] tracking-[0.2em] opacity-70 select-none">▶ NEXT QUEST</div>
             <div className="relative flex items-start gap-4">
               <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-lg">
                 <nextRec.stage.icon className="w-8 h-8 text-foreground/90" strokeWidth={2.2} />
