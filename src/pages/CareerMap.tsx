@@ -595,9 +595,10 @@ export default function CareerMap() {
                       <stop offset="100%" stopColor="#fef3c7" stopOpacity="0.9" />
                     </linearGradient>
                   </defs>
-                  <path d={d} fill="none" stroke="rgba(120, 113, 108, 0.18)" strokeWidth="6" strokeLinecap="round" transform="translate(0.3, 1)" />
+                  <path d={d} fill="none" stroke="rgba(15, 58, 46, 0.22)" strokeWidth="6" strokeLinecap="round" transform="translate(0.3, 1)" />
                   <path d={d} fill="none" stroke={`url(#path-${ch.num})`} strokeWidth="5" strokeLinecap="round" />
-                  <path d={d} fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1" strokeLinecap="round" strokeDasharray="0.5 3" />
+                  <path d={d} fill="none" stroke="rgba(252, 211, 77, 0.95)" strokeWidth="1.2" strokeLinecap="round" className="path-energy" />
+
                 </svg>
 
                 {/* 关卡节点 */}
