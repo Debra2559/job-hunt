@@ -527,8 +527,9 @@ export default function CareerMap() {
                     {ch.emoji}
                   </span>
                   <div className="leading-tight">
-                    <p className="text-[9px] font-bold tracking-[0.25em] opacity-90 font-display-aurora">CHAPTER {ch.num}</p>
+                    <p className="font-pixel text-[8px] tracking-[0.18em] opacity-95">CH.{ch.num}</p>
                     <h2 className="text-sm sm:text-base font-bold font-display-aurora">第{['一','二','三','四','五','六','七'][ci]}章 · {ch.title}</h2>
+
                   </div>
                   {chComplete && (
                     <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-white/30 backdrop-blur font-bold inline-flex items-center gap-0.5">
