@@ -366,37 +366,34 @@ export default function CareerMap() {
         <path d="M0,300 L160,230 L320,280 L460,210 L620,270 L780,220 L940,290 L1080,240 L1200,280 L1200,360 L0,360 Z" fill="url(#mt2)" />
       </svg>
 
-      {/* 移动端：柔和渐变光斑装饰（替代山峦） */}
+      {/* 移动端：极淡的中性光斑（去鲜艳色） */}
       <div className="sm:hidden absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[5%] -left-10 w-48 h-48 rounded-full bg-emerald-200/40 blur-3xl" />
-        <div className="absolute top-[35%] -right-12 w-56 h-56 rounded-full bg-cyan-200/40 blur-3xl" />
-        <div className="absolute top-[65%] -left-8 w-48 h-48 rounded-full bg-violet-200/40 blur-3xl" />
-        <div className="absolute bottom-[5%] -right-10 w-52 h-52 rounded-full bg-rose-200/40 blur-3xl" />
+        <div className="absolute top-[10%] -left-10 w-48 h-48 rounded-full bg-emerald-100/40 blur-3xl" />
+        <div className="absolute top-[55%] -right-12 w-56 h-56 rounded-full bg-stone-200/50 blur-3xl" />
+        <div className="absolute bottom-[8%] -left-8 w-48 h-48 rounded-full bg-emerald-50/60 blur-3xl" />
       </div>
 
 
       {/* 浮云装饰 */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[8%] left-[6%] text-3xl opacity-50 animate-[float_8s_ease-in-out_infinite]">☁️</div>
-        <div className="absolute top-[14%] right-[10%] text-4xl opacity-40 animate-[float_10s_ease-in-out_infinite]" style={{ animationDelay: '1.5s' }}>☁️</div>
-        <div className="absolute top-[5%] left-[55%] text-2xl opacity-45 animate-[float_12s_ease-in-out_infinite]" style={{ animationDelay: '3s' }}>☁️</div>
-        <div className="absolute top-[3%] right-[35%] text-xl opacity-50">🌤️</div>
+        <div className="absolute top-[8%] left-[6%] text-2xl opacity-30 animate-[float_8s_ease-in-out_infinite]">☁️</div>
+        <div className="absolute top-[14%] right-[10%] text-3xl opacity-25 animate-[float_10s_ease-in-out_infinite]" style={{ animationDelay: '1.5s' }}>☁️</div>
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/65 border-b border-white/40">
+      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-[#f7f6f1]/85 border-b border-stone-200/70">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-300 via-teal-400 to-cyan-400 shadow-[0_8px_20px_-6px_rgba(20,184,166,0.55),inset_0_2px_0_rgba(255,255,255,0.55)]">
-            <Compass className="w-5 h-5 text-white drop-shadow-sm" strokeWidth={2.4} />
-            <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-amber-300 border-2 border-white" />
+          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-emerald-700 shadow-sm">
+            <Compass className="w-5 h-5 text-white" strokeWidth={2.2} />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm sm:text-base font-bold flex items-center gap-1.5 leading-tight">
-              <span className="aurora-text truncate">求职闯关地图</span>
-              <span className="hidden sm:inline text-[9px] px-1.5 py-0.5 rounded-full bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white font-semibold tracking-wide shrink-0">智联 AI</span>
+            <h1 className="text-sm sm:text-base font-semibold flex items-center gap-2 leading-tight text-foreground">
+              <span className="truncate">求职闯关地图</span>
+              <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 font-medium tracking-wide shrink-0 border border-emerald-100">AI 辅助</span>
             </h1>
             <p className="text-[11px] text-muted-foreground hidden sm:block">从认识自己到拿下 offer，一关一关来</p>
           </div>
+
           <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-card border border-border/60 shadow-sm">
             <MapIcon className="w-3 h-3 text-primary" />
             <span className="text-[11px] font-semibold tabular-nums text-foreground">{availableCount}/{totalStages}</span>
