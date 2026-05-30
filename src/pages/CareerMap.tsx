@@ -820,7 +820,7 @@ export default function CareerMap() {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>再想想</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmStageSkip} className="bg-gradient-to-r from-emerald-500 via-cyan-500 to-violet-500 text-white">
+            <AlertDialogAction onClick={confirmStageSkip} className="bg-emerald-700 hover:bg-emerald-800 text-white">
               确认跳过
             </AlertDialogAction>
           </AlertDialogFooter>
