@@ -619,7 +619,7 @@ export default function CareerMap() {
                 <div
                   className="relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white"
                   style={{
-                    backgroundImage: RIBBON_CSS[ch.num],
+                    backgroundImage: ribbonCss[ch.num],
                     boxShadow: '0 10px 28px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 24px rgba(255,255,255,0.08)',
                   }}
                 >
