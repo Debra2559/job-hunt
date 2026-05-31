@@ -394,28 +394,63 @@ export default function CareerMap() {
     if (after) after();
   };
 
+  const [selectedStyles, setSelectedStyles] = useState<RomanceStyleId[]>(['oriental', 'garden']);
+  const activeStyles = selectedStyles.length ? selectedStyles : ['oriental'];
 
+  const ribbonCss = useMemo(() => {
+    return Object.fromEntries(
+      chapters.map((ch, ci) => {
+        const styleId = activeStyles[ci % activeStyles.length];
+        const gradients = CHAPTER_GRADIENTS_BY_STYLE[styleId];
+        return [ch.num, gradients[ci % gradients.length]];
+      }),
+    ) as Record<string, string>;
+  }, [activeStyles]);
+
+  const romanticBg = useMemo(() => {
+    const layers = [
+      'radial-gradient(circle at 15% 18%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 24%)',
+      'linear-gradient(180deg, #f8fbff 0%, #eef6ff 18%, #e9f5f1 36%, #f6efff 68%, #fff8f1 100%)',
+    ];
+
+    if (activeStyles.includes('oriental')) layers.unshift('radial-gradient(circle at 18% 12%, rgba(110,231,183,0.22) 0%, rgba(110,231,183,0) 28%)', 'radial-gradient(circle at 82% 28%, rgba(125,211,252,0.26) 0%, rgba(125,211,252,0) 26%)');
+    if (activeStyles.includes('garden')) layers.unshift('radial-gradient(circle at 80% 16%, rgba(244,114,182,0.18) 0%, rgba(244,114,182,0) 24%)', 'radial-gradient(circle at 50% 40%, rgba(187,247,208,0.20) 0%, rgba(187,247,208,0) 30%)');
+    if (activeStyles.includes('sunset')) layers.unshift('radial-gradient(circle at 40% 76%, rgba(251,191,36,0.20) 0%, rgba(251,191,36,0) 30%)');
+    if (activeStyles.includes('moonlit')) layers.unshift('radial-gradient(circle at 86% 72%, rgba(129,140,248,0.20) 0%, rgba(129,140,248,0) 28%)');
+
+    return layers.join(', ');
+  }, [activeStyles]);
+
+  const toggleStyle = (styleId: RomanceStyleId) => {
+    setSelectedStyles((prev) => {
+      if (prev.includes(styleId)) {
+        return prev.length === 1 ? prev : prev.filter((id) => id !== styleId);
+      }
+      return [...prev, styleId];
+    });
+  };
 
   return (
-    <div className="map-aurora map-rpg relative min-h-screen overflow-hidden bg-[#070b18] text-slate-100">
-      {/* 顶部 / 底部柔和的霓虹辉光 */}
+    <div className="map-aurora relative min-h-screen overflow-hidden text-slate-900" style={{ backgroundImage: romanticBg }}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[820px] h-[420px] rounded-full bg-emerald-500/15 blur-[120px]" />
-        <div className="absolute top-[42%] -left-32 w-[420px] h-[420px] rounded-full bg-violet-500/12 blur-[120px]" />
-        <div className="absolute top-[78%] -right-32 w-[420px] h-[420px] rounded-full bg-cyan-500/12 blur-[120px]" />
+        <div className="absolute -top-24 left-[8%] w-[360px] h-[360px] rounded-full bg-cyan-200/35 blur-[110px]" />
+        <div className="absolute top-[12%] right-[6%] w-[320px] h-[320px] rounded-full bg-fuchsia-200/30 blur-[110px]" />
+        <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[560px] h-[220px] rounded-full bg-emerald-100/45 blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[8%] w-[360px] h-[360px] rounded-full bg-amber-100/40 blur-[120px]" />
       </div>
 
-      {/* 网格底纹 */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.18]"
+        className="absolute inset-0 pointer-events-none opacity-[0.22]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-          maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 85%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 85%)',
+            'radial-gradient(rgba(255,255,255,0.7) 0.8px, transparent 0.8px), radial-gradient(rgba(255,255,255,0.45) 0.6px, transparent 0.6px)',
+          backgroundSize: '26px 26px, 52px 52px',
+          backgroundPosition: '0 0, 13px 13px',
+          maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 92%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 92%)',
         }}
       />
+
 
       {/* 远景山脊（暗色霓虹剪影） */}
       <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-70" viewBox="0 0 1200 360" preserveAspectRatio="none">
