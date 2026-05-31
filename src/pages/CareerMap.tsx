@@ -482,20 +482,20 @@ export default function CareerMap() {
       </svg>
 
       {/* Header */}
-      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-[#070b18]/80 border-b border-emerald-400/15 shadow-[0_8px_24px_-12px_rgba(16,185,129,0.35)]">
+      <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/70 border-b border-white/60 shadow-[0_8px_24px_-16px_rgba(148,163,184,0.35)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-emerald-400 to-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.55)]">
-            <Compass className="w-5 h-5 text-slate-900" strokeWidth={2.6} />
+          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-cyan-300 to-fuchsia-300 shadow-[0_8px_20px_-6px_rgba(165,180,252,0.55)]">
+            <Compass className="w-5 h-5 text-white" strokeWidth={2.6} />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-sm sm:text-base font-bold flex items-center gap-2 leading-tight text-white tracking-wide">
+            <h1 className="text-sm sm:text-base font-bold flex items-center gap-2 leading-tight text-slate-800 tracking-wide">
               <span className="truncate">求职闯关地图</span>
-              <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md bg-emerald-400/10 text-emerald-300 font-medium tracking-wide shrink-0 border border-emerald-400/30">AI 辅助</span>
+              <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md bg-fuchsia-100/80 text-fuchsia-600 font-medium tracking-wide shrink-0 border border-fuchsia-200">AI 辅助</span>
             </h1>
-            <p className="text-[11px] text-slate-400 hidden sm:block font-pixel tracking-[0.25em] uppercase mt-0.5">QUEST · ZERO TO OFFER</p>
+            <p className="text-[11px] text-slate-500 hidden sm:block font-pixel tracking-[0.25em] uppercase mt-0.5">QUEST · ZERO TO OFFER</p>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-emerald-400/10 text-emerald-300 border border-emerald-400/30 shadow-[inset_0_0_12px_rgba(16,185,129,0.18)]">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/70 text-slate-600 border border-white shadow-[inset_0_0_12px_rgba(255,255,255,0.6)]">
             <MapIcon className="w-3 h-3" />
             <span className="font-pixel text-[9px] tabular-nums">{availableCount}/{totalStages}</span>
           </div>
@@ -506,17 +506,16 @@ export default function CareerMap() {
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-2.5 pt-5">
           <div className="flex items-center gap-2">
             <div className="flex-1 relative">
-              {/* 走在进度条上的小伙伴 */}
               <div
                 className="absolute -top-5 z-10 pointer-events-none transition-[left] duration-700 ease-out"
                 style={{ left: `calc(${progressPct}% - 14px)` }}
               >
                 <div className="relative flex flex-col items-center">
-                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-slate-900/90 shadow-[0_0_10px_rgba(16,185,129,0.6)] border border-emerald-400/60 text-[9px] font-extrabold text-emerald-300 tabular-nums whitespace-nowrap leading-none">
+                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-white/90 shadow-[0_2px_8px_rgba(165,180,252,0.45)] border border-white text-[9px] font-extrabold text-fuchsia-500 tabular-nums whitespace-nowrap leading-none">
                     {progressPct}%
                   </div>
                   <div
-                    className="text-[18px] leading-none drop-shadow-[0_2px_6px_rgba(16,185,129,0.65)] animate-[mascot-walk_1.2s_ease-in-out_infinite]"
+                    className="text-[18px] leading-none drop-shadow-[0_2px_6px_rgba(165,180,252,0.55)] animate-[mascot-walk_1.2s_ease-in-out_infinite]"
                     aria-hidden
                   >
                     {progressPct >= 100 ? '🏆' : progressPct >= 75 ? '🏃' : progressPct >= 25 ? '🚶' : '🐣'}
@@ -533,8 +532,8 @@ export default function CareerMap() {
                     <div key={ch.num} className="flex-1 min-w-0">
                       <div
                         className={cn(
-                          'relative h-2 rounded-full overflow-hidden border border-white/10 bg-white/5',
-                          isCurrent && 'border-emerald-400/60 shadow-[0_0_10px_rgba(16,185,129,0.5)]',
+                          'relative h-2 rounded-full overflow-hidden border border-white/80 bg-white/50',
+                          isCurrent && 'border-fuchsia-300 shadow-[0_0_10px_rgba(232,121,249,0.35)]',
                         )}
                       >
                         <div
@@ -542,7 +541,7 @@ export default function CareerMap() {
                           style={{
                             width: chImpl === 0 ? '0%' : `${pct}%`,
                             backgroundImage: ribbonCss[ch.num],
-                            boxShadow: '0 0 8px rgba(255,255,255,0.35) inset',
+                            boxShadow: '0 0 8px rgba(255,255,255,0.55) inset',
                           }}
                         />
                       </div>
@@ -551,7 +550,7 @@ export default function CareerMap() {
                 })}
               </div>
             </div>
-            <span className="font-pixel text-[8px] text-emerald-300/80 tabular-nums shrink-0">{doneCount}/{implementedTotal}</span>
+            <span className="font-pixel text-[8px] text-slate-500 tabular-nums shrink-0">{doneCount}/{implementedTotal}</span>
           </div>
         </div>
       </header>
