@@ -465,16 +465,16 @@ export default function CareerMap() {
       />
 
 
-      {/* 远景山脊（暗色霓虹剪影） */}
-      <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-70" viewBox="0 0 1200 360" preserveAspectRatio="none">
+      {/* 远景山脊（柔和淡彩剪影） */}
+      <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-50" viewBox="0 0 1200 360" preserveAspectRatio="none">
         <defs>
           <linearGradient id="mt1" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#0b1124" />
-            <stop offset="100%" stopColor="#070b18" />
+            <stop offset="0%" stopColor="#e0e7ff" stopOpacity="0.9" />
+            <stop offset="100%" stopColor="#fce7f3" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="mt2" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0%" stopColor="#10b981" stopOpacity="0.18" />
-            <stop offset="100%" stopColor="#070b18" stopOpacity="0" />
+            <stop offset="0%" stopColor="#cffafe" stopOpacity="0.85" />
+            <stop offset="100%" stopColor="#fff" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d="M0,260 L120,160 L240,220 L380,120 L520,200 L660,140 L820,210 L960,150 L1100,220 L1200,180 L1200,360 L0,360 Z" fill="url(#mt2)" />
