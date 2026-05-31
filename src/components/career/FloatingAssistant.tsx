@@ -104,18 +104,18 @@ export default function FloatingAssistant() {
           aria-label={`打开 ${assistant.name}`}
         >
           {/* 桌宠主体：大表情 + 柔光底座 */}
-          <span className="relative inline-flex items-center justify-center w-16 h-16 sm:w-[72px] sm:h-[72px]">
-            {/* 柔光底座阴影 */}
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-2.5 rounded-full bg-slate-900/20 blur-[6px]" />
-            {/* 桌宠 emoji（无边框、轻微浮动） */}
+          <span className="relative inline-flex items-center justify-center w-16 h-16 sm:w-[72px] sm:h-[72px] animate-pet-float motion-reduce:animate-none">
+            {/* 柔光底座阴影（跟随呼吸轻微缩放） */}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-2 rounded-full bg-slate-900/15 blur-[6px] animate-pet-breathe motion-reduce:animate-none" />
+            {/* 桌宠 emoji（柔和呼吸缩放，无弹跳） */}
             <span
-              className="relative text-[56px] sm:text-[64px] leading-none drop-shadow-[0_8px_16px_rgba(157,129,186,0.45)] animate-bounce"
-              style={{ animationDuration: '2.4s' }}
+              className="relative text-[52px] sm:text-[60px] leading-none drop-shadow-[0_6px_14px_rgba(157,129,186,0.35)] animate-pet-breathe motion-reduce:animate-none"
+              style={{ willChange: 'transform' }}
             >
               {assistant.emoji}
             </span>
-            {/* 在线小圆点 */}
-            <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white shadow animate-pulse" />
+            {/* 在线小圆点（柔和明灭） */}
+            <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-white shadow-sm animate-dot-breathe motion-reduce:animate-none" />
           </span>
           {/* 名牌气泡 */}
           <span className="mb-1 hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/90 backdrop-blur-md border border-white shadow-[0_8px_24px_-8px_rgba(157,129,186,0.45)] text-left">
