@@ -178,6 +178,17 @@ const CHAPTER_GRADIENTS_BY_STYLE: Record<RomanceStyleId, string[]> = {
   ],
 };
 
+const STYLE_PREVIEW_BG: Record<RomanceStyleId, string> = {
+  oriental:
+    'radial-gradient(circle at 20% 20%, rgba(125,211,252,0.55) 0%, rgba(125,211,252,0) 55%), radial-gradient(circle at 80% 30%, rgba(167,243,208,0.55) 0%, rgba(167,243,208,0) 55%), linear-gradient(160deg, #f0f9ff 0%, #ecfeff 45%, #f5f3ff 100%)',
+  garden:
+    'radial-gradient(circle at 25% 20%, rgba(187,247,208,0.7) 0%, rgba(187,247,208,0) 55%), radial-gradient(circle at 80% 25%, rgba(251,207,232,0.6) 0%, rgba(251,207,232,0) 55%), linear-gradient(160deg, #f0fdf4 0%, #fdf2f8 55%, #faf5ff 100%)',
+  sunset:
+    'radial-gradient(circle at 20% 25%, rgba(254,215,170,0.7) 0%, rgba(254,215,170,0) 55%), radial-gradient(circle at 80% 30%, rgba(251,207,232,0.6) 0%, rgba(251,207,232,0) 55%), linear-gradient(160deg, #fff7ed 0%, #fef3c7 40%, #fce7f3 100%)',
+  moonlit:
+    'radial-gradient(circle at 25% 25%, rgba(129,140,248,0.55) 0%, rgba(129,140,248,0) 55%), radial-gradient(circle at 78% 28%, rgba(167,139,250,0.45) 0%, rgba(167,139,250,0) 55%), linear-gradient(160deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
+};
+
 
 
 
