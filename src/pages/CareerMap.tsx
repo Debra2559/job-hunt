@@ -952,6 +952,133 @@ export default function CareerMap() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* 浮动风格按钮 */}
+      <button
+        onClick={() => setStylePanelOpen(true)}
+        className="fixed z-40 bottom-5 left-5 group flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-white/85 backdrop-blur-xl border border-white/60 shadow-[0_10px_30px_-10px_rgba(99,102,241,0.45)] hover:shadow-[0_14px_40px_-10px_rgba(236,72,153,0.55)] hover:-translate-y-0.5 transition-all"
+        aria-label="切换浪漫风格"
+      >
+        <span
+          className="relative w-7 h-7 rounded-full flex items-center justify-center text-white shadow-inner"
+          style={{
+            backgroundImage:
+              'conic-gradient(from 210deg, #7dd3fc, #c4b5fd, #f9a8d4, #fde68a, #6ee7b7, #7dd3fc)',
+          }}
+        >
+          <Palette className="w-3.5 h-3.5 drop-shadow" strokeWidth={2.5} />
+        </span>
+        <span className="text-[12px] font-bold tracking-wide text-slate-700">
+          风格 <span className="text-slate-400 font-medium">·</span>{' '}
+          <span className="tabular-nums text-fuchsia-600">{selectedStyles.length}</span>
+          <span className="text-slate-400">/{ROMANCE_STYLES.length}</span>
+        </span>
+      </button>
+
+      {/* 风格预览面板 */}
+      <Dialog open={stylePanelOpen} onOpenChange={setStylePanelOpen}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden border-0 bg-gradient-to-br from-white via-slate-50 to-fuchsia-50/50">
+          <div className="px-6 pt-6 pb-2">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-base">
+                <Sparkles className="w-4 h-4 text-fuchsia-500" />
+                选择你的浪漫风格
+                <span className="ml-auto text-[11px] font-medium text-slate-500">
+                  支持多选 · 已选 <b className="text-fuchsia-600 tabular-nums">{selectedStyles.length}</b>
+                </span>
+              </DialogTitle>
+              <DialogDescription className="text-xs text-slate-500">
+                点击卡片预览效果，多选会自动融合背景与章节飘带配色。
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 px-6 pb-6 max-h-[70vh] overflow-y-auto">
+            {ROMANCE_STYLES.map((style) => {
+              const selected = selectedStyles.includes(style.id);
+              const grads = CHAPTER_GRADIENTS_BY_STYLE[style.id];
+              const previewBg = STYLE_PREVIEW_BG[style.id];
+              return (
+                <button
+                  key={style.id}
+                  onClick={() => toggleStyle(style.id)}
+                  className={cn(
+                    'group relative text-left rounded-2xl overflow-hidden transition-all duration-300 border-2',
+                    selected
+                      ? 'border-fuchsia-400 shadow-[0_18px_40px_-16px_rgba(236,72,153,0.55)] -translate-y-0.5'
+                      : 'border-white/80 hover:border-fuchsia-200 hover:-translate-y-0.5 shadow-[0_8px_24px_-12px_rgba(15,23,42,0.15)]',
+                  )}
+                >
+                  {/* 预览舞台 */}
+                  <div
+                    className="relative h-36 overflow-hidden"
+                    style={{ backgroundImage: previewBg }}
+                  >
+                    {/* 山脊剪影 */}
+                    <svg className="absolute bottom-0 left-0 right-0 w-full h-16 opacity-70" viewBox="0 0 200 60" preserveAspectRatio="none">
+                      <path d="M0,40 L30,22 L60,32 L100,14 L140,28 L180,18 L200,30 L200,60 L0,60 Z" fill="rgba(255,255,255,0.45)" />
+                      <path d="M0,48 L40,34 L80,42 L120,28 L160,40 L200,32 L200,60 L0,60 Z" fill="rgba(255,255,255,0.7)" />
+                    </svg>
+                    {/* 飘带 swatch */}
+                    <div className="absolute top-3 left-3 right-3 flex flex-col gap-1.5">
+                      <div className="h-2 rounded-full" style={{ backgroundImage: grads[0], boxShadow: 'inset 0 0 6px rgba(255,255,255,0.5)' }} />
+                      <div className="h-2 rounded-full w-3/4" style={{ backgroundImage: grads[2], boxShadow: 'inset 0 0 6px rgba(255,255,255,0.5)' }} />
+                    </div>
+                    {/* 节点示例 */}
+                    <div className="absolute bottom-3 left-6 flex items-center gap-2">
+                      <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 to-emerald-700 ring-2 ring-white/80 shadow-[0_6px_14px_-4px_rgba(16,185,129,0.6)] flex items-center justify-center text-white">
+                        <Check className="w-4 h-4" strokeWidth={3} />
+                      </div>
+                      <div className="px-2 py-0.5 rounded-full text-[9px] font-bold text-white" style={{ backgroundImage: grads[1] }}>
+                        CH.01
+                      </div>
+                    </div>
+                    {/* emoji 装饰 */}
+                    <div className="absolute bottom-2 right-3 text-2xl drop-shadow-sm">
+                      {style.emoji}
+                    </div>
+                    {/* 选中徽标 */}
+                    {selected && (
+                      <div className="absolute top-2 right-2 w-7 h-7 rounded-full bg-fuchsia-500 text-white flex items-center justify-center shadow-lg ring-2 ring-white animate-scale-in">
+                        <Check className="w-4 h-4" strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
+                  {/* 文案 */}
+                  <div className="px-3.5 py-2.5 bg-white/95 backdrop-blur flex items-center justify-between">
+                    <div className="min-w-0">
+                      <div className="text-sm font-extrabold text-slate-800 flex items-center gap-1.5">
+                        <span>{style.label}</span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 truncate">{style.hint}</div>
+                    </div>
+                    <span
+                      className={cn(
+                        'shrink-0 text-[10px] font-bold px-2 py-1 rounded-full transition-colors',
+                        selected
+                          ? 'bg-fuchsia-100 text-fuchsia-700'
+                          : 'bg-slate-100 text-slate-500 group-hover:bg-fuchsia-50 group-hover:text-fuchsia-600',
+                      )}
+                    >
+                      {selected ? '已选' : '点击应用'}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+
+          <div className="px-6 pb-5 pt-1 flex items-center justify-between text-[11px] text-slate-500">
+            <span>至少保留 1 个风格 · 多选会融合渐变</span>
+            <button
+              onClick={() => setStylePanelOpen(false)}
+              className="px-4 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold shadow hover:bg-slate-800 transition-colors"
+            >
+              完成
+            </button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
