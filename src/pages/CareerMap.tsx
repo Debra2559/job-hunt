@@ -396,6 +396,7 @@ export default function CareerMap() {
   };
 
   const [selectedStyles, setSelectedStyles] = useState<RomanceStyleId[]>(['oriental', 'garden']);
+  const [stylePanelOpen, setStylePanelOpen] = useState(false);
   const activeStyles = selectedStyles.length ? selectedStyles : ['oriental'];
 
   const ribbonCss = useMemo(() => {
