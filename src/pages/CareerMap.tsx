@@ -590,7 +590,7 @@ export default function CareerMap() {
                   className="shrink-0 relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-[0_10px_24px_-8px_rgba(165,180,252,0.55)]"
                   style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
                 >
-                  <nextRec.stage.icon className="w-8 h-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]" strokeWidth={2.4} />
+                  <span className="text-[34px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)] select-none">{nextRec.stage.emoji}</span>
                   <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[10px] font-extrabold border-2 border-white shadow">{nextRec.si + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -792,10 +792,12 @@ export default function CareerMap() {
                             {isLocked ? (
                               <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
-                              <st.icon
-                                className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]"
-                                strokeWidth={2.2}
-                              />
+                              <span
+                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none"
+                                style={{ filter: 'saturate(1.1)' }}
+                              >
+                                {st.emoji}
+                              </span>
                             )}
                             {/* 序号徽章 */}
                             <span className={cn(
