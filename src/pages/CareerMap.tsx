@@ -528,7 +528,7 @@ export default function CareerMap() {
                           className="h-full transition-all"
                           style={{
                             width: chImpl === 0 ? '0%' : `${pct}%`,
-                            backgroundImage: RIBBON_CSS[ch.num],
+                            backgroundImage: ribbonCss[ch.num],
                             boxShadow: '0 0 8px rgba(255,255,255,0.35) inset',
                           }}
                         />
