@@ -122,16 +122,61 @@ const chapters: Chapter[] = [
   },
 ];
 
-// 每章一种主色，保持游戏关卡的色彩层次感，避免页面通体绿色
-const RIBBON_CSS: Record<string, string> = {
-  '01': 'linear-gradient(135deg, #047857 0%, #064e3b 100%)',   // 翡翠绿 · 认识自己
-  '02': 'linear-gradient(135deg, #0284c7 0%, #075985 100%)',   // 海蓝 · 探索方向
-  '03': 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)',   // 紫水晶 · 简历
-  '04': 'linear-gradient(135deg, #db2777 0%, #831843 100%)',   // 玫红 · 面试
-  '05': 'linear-gradient(135deg, #ea580c 0%, #7c2d12 100%)',   // 火橙 · offer 谈判
-  '06': 'linear-gradient(135deg, #ca8a04 0%, #713f12 100%)',   // 琥珀金 · 入职
-  '07': 'linear-gradient(135deg, #475569 0%, #1e293b 100%)',   // 石墨 · 成长
+type RomanceStyleId = 'oriental' | 'garden' | 'sunset' | 'moonlit';
+
+type RomanceStyle = {
+  id: RomanceStyleId;
+  label: string;
+  emoji: string;
+  hint: string;
 };
+
+const ROMANCE_STYLES: RomanceStyle[] = [
+  { id: 'oriental', label: '仙鹤水波', emoji: '🕊️', hint: '青蓝、流云、东方仙气' },
+  { id: 'garden', label: '花园晨光', emoji: '🌸', hint: '薄荷、花枝、玻璃花房' },
+  { id: 'sunset', label: '麦田暮光', emoji: '🌾', hint: '鎏金、雾光、温柔落日' },
+  { id: 'moonlit', label: '月夜剪影', emoji: '🌙', hint: '深靛、湖面、安静星光' },
+];
+
+const CHAPTER_GRADIENTS_BY_STYLE: Record<RomanceStyleId, string[]> = {
+  oriental: [
+    'linear-gradient(135deg, #63cdda 0%, #74b9ff 55%, #b388ff 100%)',
+    'linear-gradient(135deg, #7dd3fc 0%, #5eead4 50%, #c4b5fd 100%)',
+    'linear-gradient(135deg, #60a5fa 0%, #38bdf8 48%, #818cf8 100%)',
+    'linear-gradient(135deg, #22d3ee 0%, #2dd4bf 42%, #a78bfa 100%)',
+    'linear-gradient(135deg, #5eead4 0%, #60a5fa 52%, #f0abfc 100%)',
+    'linear-gradient(135deg, #67e8f9 0%, #93c5fd 50%, #c084fc 100%)',
+    'linear-gradient(135deg, #38bdf8 0%, #2dd4bf 52%, #c4b5fd 100%)',
+  ],
+  garden: [
+    'linear-gradient(135deg, #86efac 0%, #bae6fd 52%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #a7f3d0 0%, #bfdbfe 45%, #fbcfe8 100%)',
+    'linear-gradient(135deg, #bbf7d0 0%, #a5f3fc 48%, #ddd6fe 100%)',
+    'linear-gradient(135deg, #6ee7b7 0%, #93c5fd 50%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #f9a8d4 0%, #fde68a 45%, #a7f3d0 100%)',
+    'linear-gradient(135deg, #c4b5fd 0%, #93c5fd 45%, #86efac 100%)',
+    'linear-gradient(135deg, #fbcfe8 0%, #bfdbfe 48%, #a7f3d0 100%)',
+  ],
+  sunset: [
+    'linear-gradient(135deg, #f9a8d4 0%, #fde68a 55%, #fdba74 100%)',
+    'linear-gradient(135deg, #fbcfe8 0%, #fed7aa 45%, #fde68a 100%)',
+    'linear-gradient(135deg, #fdba74 0%, #fcd34d 48%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #fb7185 0%, #fdba74 45%, #fde68a 100%)',
+    'linear-gradient(135deg, #f97316 0%, #fbbf24 42%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #fca5a5 0%, #fde68a 48%, #fdba74 100%)',
+    'linear-gradient(135deg, #fcd34d 0%, #fb7185 52%, #c4b5fd 100%)',
+  ],
+  moonlit: [
+    'linear-gradient(135deg, #818cf8 0%, #60a5fa 42%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #6366f1 0%, #38bdf8 48%, #a78bfa 100%)',
+    'linear-gradient(135deg, #312e81 0%, #60a5fa 52%, #c084fc 100%)',
+    'linear-gradient(135deg, #4338ca 0%, #7dd3fc 45%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #1d4ed8 0%, #818cf8 48%, #f0abfc 100%)',
+    'linear-gradient(135deg, #3730a3 0%, #60a5fa 45%, #fbcfe8 100%)',
+    'linear-gradient(135deg, #4f46e5 0%, #38bdf8 45%, #f9a8d4 100%)',
+  ],
+};
+
 
 
 
@@ -349,28 +394,63 @@ export default function CareerMap() {
     if (after) after();
   };
 
+  const [selectedStyles, setSelectedStyles] = useState<RomanceStyleId[]>(['oriental', 'garden']);
+  const activeStyles = selectedStyles.length ? selectedStyles : ['oriental'];
 
+  const ribbonCss = useMemo(() => {
+    return Object.fromEntries(
+      chapters.map((ch, ci) => {
+        const styleId = activeStyles[ci % activeStyles.length];
+        const gradients = CHAPTER_GRADIENTS_BY_STYLE[styleId];
+        return [ch.num, gradients[ci % gradients.length]];
+      }),
+    ) as Record<string, string>;
+  }, [activeStyles]);
+
+  const romanticBg = useMemo(() => {
+    const layers = [
+      'radial-gradient(circle at 15% 18%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 24%)',
+      'linear-gradient(180deg, #f8fbff 0%, #eef6ff 18%, #e9f5f1 36%, #f6efff 68%, #fff8f1 100%)',
+    ];
+
+    if (activeStyles.includes('oriental')) layers.unshift('radial-gradient(circle at 18% 12%, rgba(110,231,183,0.22) 0%, rgba(110,231,183,0) 28%)', 'radial-gradient(circle at 82% 28%, rgba(125,211,252,0.26) 0%, rgba(125,211,252,0) 26%)');
+    if (activeStyles.includes('garden')) layers.unshift('radial-gradient(circle at 80% 16%, rgba(244,114,182,0.18) 0%, rgba(244,114,182,0) 24%)', 'radial-gradient(circle at 50% 40%, rgba(187,247,208,0.20) 0%, rgba(187,247,208,0) 30%)');
+    if (activeStyles.includes('sunset')) layers.unshift('radial-gradient(circle at 40% 76%, rgba(251,191,36,0.20) 0%, rgba(251,191,36,0) 30%)');
+    if (activeStyles.includes('moonlit')) layers.unshift('radial-gradient(circle at 86% 72%, rgba(129,140,248,0.20) 0%, rgba(129,140,248,0) 28%)');
+
+    return layers.join(', ');
+  }, [activeStyles]);
+
+  const toggleStyle = (styleId: RomanceStyleId) => {
+    setSelectedStyles((prev) => {
+      if (prev.includes(styleId)) {
+        return prev.length === 1 ? prev : prev.filter((id) => id !== styleId);
+      }
+      return [...prev, styleId];
+    });
+  };
 
   return (
-    <div className="map-aurora map-rpg relative min-h-screen overflow-hidden bg-[#070b18] text-slate-100">
-      {/* 顶部 / 底部柔和的霓虹辉光 */}
+    <div className="map-aurora relative min-h-screen overflow-hidden text-slate-900" style={{ backgroundImage: romanticBg }}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-32 left-1/2 -translate-x-1/2 w-[820px] h-[420px] rounded-full bg-emerald-500/15 blur-[120px]" />
-        <div className="absolute top-[42%] -left-32 w-[420px] h-[420px] rounded-full bg-violet-500/12 blur-[120px]" />
-        <div className="absolute top-[78%] -right-32 w-[420px] h-[420px] rounded-full bg-cyan-500/12 blur-[120px]" />
+        <div className="absolute -top-24 left-[8%] w-[360px] h-[360px] rounded-full bg-cyan-200/35 blur-[110px]" />
+        <div className="absolute top-[12%] right-[6%] w-[320px] h-[320px] rounded-full bg-fuchsia-200/30 blur-[110px]" />
+        <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[560px] h-[220px] rounded-full bg-emerald-100/45 blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[8%] w-[360px] h-[360px] rounded-full bg-amber-100/40 blur-[120px]" />
       </div>
 
-      {/* 网格底纹 */}
       <div
-        className="absolute inset-0 pointer-events-none opacity-[0.18]"
+        className="absolute inset-0 pointer-events-none opacity-[0.22]"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '40px 40px',
-          maskImage: 'radial-gradient(ellipse at center, black 35%, transparent 85%)',
-          WebkitMaskImage: 'radial-gradient(ellipse at center, black 35%, transparent 85%)',
+            'radial-gradient(rgba(255,255,255,0.7) 0.8px, transparent 0.8px), radial-gradient(rgba(255,255,255,0.45) 0.6px, transparent 0.6px)',
+          backgroundSize: '26px 26px, 52px 52px',
+          backgroundPosition: '0 0, 13px 13px',
+          maskImage: 'radial-gradient(ellipse at center, black 40%, transparent 92%)',
+          WebkitMaskImage: 'radial-gradient(ellipse at center, black 40%, transparent 92%)',
         }}
       />
+
 
       {/* 远景山脊（暗色霓虹剪影） */}
       <svg className="hidden sm:block absolute top-0 left-0 right-0 w-full h-[360px] pointer-events-none opacity-70" viewBox="0 0 1200 360" preserveAspectRatio="none">
@@ -448,7 +528,7 @@ export default function CareerMap() {
                           className="h-full transition-all"
                           style={{
                             width: chImpl === 0 ? '0%' : `${pct}%`,
-                            backgroundImage: RIBBON_CSS[ch.num],
+                            backgroundImage: ribbonCss[ch.num],
                             boxShadow: '0 0 8px rgba(255,255,255,0.35) inset',
                           }}
                         />
@@ -474,12 +554,12 @@ export default function CareerMap() {
               !nextRec.stage.comingSoon && 'hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer',
               nextRec.stage.comingSoon && 'opacity-90 cursor-not-allowed',
             )}
-            style={{ backgroundImage: RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01'] }}
+            style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
           >
             <div
               className="relative rounded-[22px] p-5 text-white overflow-hidden bg-[#0b1124]"
               style={{
-                backgroundImage: `${RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01']}, linear-gradient(180deg, rgba(11,17,36,0.65), rgba(11,17,36,0.85))`,
+                backgroundImage: `${ribbonCss[nextRec.chapter.num] || ribbonCss['01']}, linear-gradient(180deg, rgba(11,17,36,0.65), rgba(11,17,36,0.85))`,
                 backgroundBlendMode: 'overlay, normal',
                 boxShadow: '0 20px 60px -20px rgba(16,185,129,0.45), inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
@@ -539,7 +619,7 @@ export default function CareerMap() {
                 <div
                   className="relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white"
                   style={{
-                    backgroundImage: RIBBON_CSS[ch.num],
+                    backgroundImage: ribbonCss[ch.num],
                     boxShadow: '0 10px 28px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 24px rgba(255,255,255,0.08)',
                   }}
                 >
@@ -567,7 +647,7 @@ export default function CareerMap() {
                   <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 backdrop-blur border border-white/10 text-[10px] font-bold tabular-nums text-slate-200">
                     {chDone}/{chImpl}
                     <span className="w-10 h-1 rounded-full bg-white/10 overflow-hidden inline-block">
-                      <span className="block h-full" style={{ width: `${(chDone / chImpl) * 100}%`, backgroundImage: RIBBON_CSS[ch.num] }} />
+                      <span className="block h-full" style={{ width: `${(chDone / chImpl) * 100}%`, backgroundImage: ribbonCss[ch.num] }} />
                     </span>
                   </span>
                 )}
@@ -738,7 +818,7 @@ export default function CareerMap() {
                             <button
                               onClick={() => setStageSkipTarget({ stageId: st.id, stageTitle: st.title, ci, si })}
                               className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all whitespace-nowrap"
-                              style={{ backgroundImage: RIBBON_CSS[ch.num] }}
+                              style={{ backgroundImage: ribbonCss[ch.num] }}
                             >
                               <ChevronsRight className="w-3 h-3" strokeWidth={3} />
                               {st.comingSoon ? '跳过到这关' : '跳到这关'}
