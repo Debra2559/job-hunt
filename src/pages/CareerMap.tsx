@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Brain, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight, Briefcase, CalendarCheck2, Handshake, GraduationCap, Users, Presentation, ShieldCheck, TrendingUp, Coins, GitBranch, Trophy, Sparkles } from 'lucide-react';
+import { Compass, Brain, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight, Briefcase, CalendarCheck2, Handshake, GraduationCap, Users, Presentation, ShieldCheck, TrendingUp, Coins, GitBranch, Trophy, Sparkles, Palette, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
 import { useQuestProgress } from '@/hooks/useQuestProgress';
