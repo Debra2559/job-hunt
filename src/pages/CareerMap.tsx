@@ -452,10 +452,11 @@ export default function CareerMap() {
   return (
     <div className="map-aurora relative min-h-screen overflow-hidden text-slate-900" style={{ backgroundImage: romanticBg }}>
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute -top-24 left-[8%] w-[360px] h-[360px] rounded-full bg-cyan-200/35 blur-[110px]" />
-        <div className="absolute top-[12%] right-[6%] w-[320px] h-[320px] rounded-full bg-fuchsia-200/30 blur-[110px]" />
-        <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[560px] h-[220px] rounded-full bg-emerald-100/45 blur-[120px]" />
-        <div className="absolute bottom-[10%] right-[8%] w-[360px] h-[360px] rounded-full bg-amber-100/40 blur-[120px]" />
+        <div className="absolute -top-24 left-[8%] w-[360px] h-[360px] rounded-full bg-[#A2D9CE]/35 blur-[120px]" />
+        <div className="absolute top-[12%] right-[6%] w-[320px] h-[320px] rounded-full bg-[#9D81BA]/22 blur-[120px]" />
+        <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[560px] h-[220px] rounded-full bg-[#FBCFE8]/35 blur-[120px]" />
+        <div className="absolute bottom-[10%] right-[8%] w-[360px] h-[360px] rounded-full bg-[#FFE4B5]/40 blur-[120px]" />
+
       </div>
 
       <div
