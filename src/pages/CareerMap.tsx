@@ -554,12 +554,12 @@ export default function CareerMap() {
               !nextRec.stage.comingSoon && 'hover:-translate-y-0.5 active:scale-[0.99] cursor-pointer',
               nextRec.stage.comingSoon && 'opacity-90 cursor-not-allowed',
             )}
-            style={{ backgroundImage: RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01'] }}
+            style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
           >
             <div
               className="relative rounded-[22px] p-5 text-white overflow-hidden bg-[#0b1124]"
               style={{
-                backgroundImage: `${RIBBON_CSS[nextRec.chapter.num] || RIBBON_CSS['01']}, linear-gradient(180deg, rgba(11,17,36,0.65), rgba(11,17,36,0.85))`,
+                backgroundImage: `${ribbonCss[nextRec.chapter.num] || ribbonCss['01']}, linear-gradient(180deg, rgba(11,17,36,0.65), rgba(11,17,36,0.85))`,
                 backgroundBlendMode: 'overlay, normal',
                 boxShadow: '0 20px 60px -20px rgba(16,185,129,0.45), inset 0 1px 0 rgba(255,255,255,0.15)',
               }}
