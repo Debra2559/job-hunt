@@ -818,7 +818,7 @@ export default function CareerMap() {
                             <button
                               onClick={() => setStageSkipTarget({ stageId: st.id, stageTitle: st.title, ci, si })}
                               className="mt-1.5 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold text-white shadow-sm hover:scale-105 active:scale-95 transition-all whitespace-nowrap"
-                              style={{ backgroundImage: RIBBON_CSS[ch.num] }}
+                              style={{ backgroundImage: ribbonCss[ch.num] }}
                             >
                               <ChevronsRight className="w-3 h-3" strokeWidth={3} />
                               {st.comingSoon ? '跳过到这关' : '跳到这关'}
