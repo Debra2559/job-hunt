@@ -660,24 +660,24 @@ export default function CareerMap() {
 
               {/* 副标题 + 操作 */}
               <div className="flex items-center justify-center gap-2 flex-wrap mb-5">
-                <p className="text-[12px] text-slate-400">{ch.subtitle}</p>
+                <p className="text-[12px] text-slate-500">{ch.subtitle}</p>
                 {chImpl > 0 && (
-                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 backdrop-blur border border-white/10 text-[10px] font-bold tabular-nums text-slate-200">
+                  <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/70 backdrop-blur border border-white text-[10px] font-bold tabular-nums text-slate-600">
                     {chDone}/{chImpl}
-                    <span className="w-10 h-1 rounded-full bg-white/10 overflow-hidden inline-block">
+                    <span className="w-10 h-1 rounded-full bg-slate-200 overflow-hidden inline-block">
                       <span className="block h-full" style={{ width: `${(chDone / chImpl) * 100}%`, backgroundImage: ribbonCss[ch.num] }} />
                     </span>
                   </span>
                 )}
                 {skipData[chapterIdOf(ch.num)] && !chComplete && (
-                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30 font-bold inline-flex items-center gap-0.5">
+                  <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-bold inline-flex items-center gap-0.5">
                     <FastForward className="w-2.5 h-2.5" strokeWidth={3} />已跳过
                   </span>
                 )}
                 {!chComplete && (
                   <button
                     onClick={() => requestSkipChapter(chapterIdOf(ch.num), ch.title, ch.emoji)}
-                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/5 text-slate-200 text-[10px] font-bold hover:bg-white/10 hover:scale-105 active:scale-95 transition-all border border-white/15 whitespace-nowrap"
+                    className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/70 text-slate-600 text-[10px] font-bold hover:bg-white hover:scale-105 active:scale-95 transition-all border border-white whitespace-nowrap"
                   >
                     <FastForward className="w-2.5 h-2.5" strokeWidth={2.8} />跳过本章
                   </button>
