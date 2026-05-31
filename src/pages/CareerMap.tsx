@@ -122,16 +122,61 @@ const chapters: Chapter[] = [
   },
 ];
 
-// 每章一种主色，保持游戏关卡的色彩层次感，避免页面通体绿色
-const RIBBON_CSS: Record<string, string> = {
-  '01': 'linear-gradient(135deg, #047857 0%, #064e3b 100%)',   // 翡翠绿 · 认识自己
-  '02': 'linear-gradient(135deg, #0284c7 0%, #075985 100%)',   // 海蓝 · 探索方向
-  '03': 'linear-gradient(135deg, #7c3aed 0%, #4c1d95 100%)',   // 紫水晶 · 简历
-  '04': 'linear-gradient(135deg, #db2777 0%, #831843 100%)',   // 玫红 · 面试
-  '05': 'linear-gradient(135deg, #ea580c 0%, #7c2d12 100%)',   // 火橙 · offer 谈判
-  '06': 'linear-gradient(135deg, #ca8a04 0%, #713f12 100%)',   // 琥珀金 · 入职
-  '07': 'linear-gradient(135deg, #475569 0%, #1e293b 100%)',   // 石墨 · 成长
+type RomanceStyleId = 'oriental' | 'garden' | 'sunset' | 'moonlit';
+
+type RomanceStyle = {
+  id: RomanceStyleId;
+  label: string;
+  emoji: string;
+  hint: string;
 };
+
+const ROMANCE_STYLES: RomanceStyle[] = [
+  { id: 'oriental', label: '仙鹤水波', emoji: '🕊️', hint: '青蓝、流云、东方仙气' },
+  { id: 'garden', label: '花园晨光', emoji: '🌸', hint: '薄荷、花枝、玻璃花房' },
+  { id: 'sunset', label: '麦田暮光', emoji: '🌾', hint: '鎏金、雾光、温柔落日' },
+  { id: 'moonlit', label: '月夜剪影', emoji: '🌙', hint: '深靛、湖面、安静星光' },
+];
+
+const CHAPTER_GRADIENTS_BY_STYLE: Record<RomanceStyleId, string[]> = {
+  oriental: [
+    'linear-gradient(135deg, #63cdda 0%, #74b9ff 55%, #b388ff 100%)',
+    'linear-gradient(135deg, #7dd3fc 0%, #5eead4 50%, #c4b5fd 100%)',
+    'linear-gradient(135deg, #60a5fa 0%, #38bdf8 48%, #818cf8 100%)',
+    'linear-gradient(135deg, #22d3ee 0%, #2dd4bf 42%, #a78bfa 100%)',
+    'linear-gradient(135deg, #5eead4 0%, #60a5fa 52%, #f0abfc 100%)',
+    'linear-gradient(135deg, #67e8f9 0%, #93c5fd 50%, #c084fc 100%)',
+    'linear-gradient(135deg, #38bdf8 0%, #2dd4bf 52%, #c4b5fd 100%)',
+  ],
+  garden: [
+    'linear-gradient(135deg, #86efac 0%, #bae6fd 52%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #a7f3d0 0%, #bfdbfe 45%, #fbcfe8 100%)',
+    'linear-gradient(135deg, #bbf7d0 0%, #a5f3fc 48%, #ddd6fe 100%)',
+    'linear-gradient(135deg, #6ee7b7 0%, #93c5fd 50%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #f9a8d4 0%, #fde68a 45%, #a7f3d0 100%)',
+    'linear-gradient(135deg, #c4b5fd 0%, #93c5fd 45%, #86efac 100%)',
+    'linear-gradient(135deg, #fbcfe8 0%, #bfdbfe 48%, #a7f3d0 100%)',
+  ],
+  sunset: [
+    'linear-gradient(135deg, #f9a8d4 0%, #fde68a 55%, #fdba74 100%)',
+    'linear-gradient(135deg, #fbcfe8 0%, #fed7aa 45%, #fde68a 100%)',
+    'linear-gradient(135deg, #fdba74 0%, #fcd34d 48%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #fb7185 0%, #fdba74 45%, #fde68a 100%)',
+    'linear-gradient(135deg, #f97316 0%, #fbbf24 42%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #fca5a5 0%, #fde68a 48%, #fdba74 100%)',
+    'linear-gradient(135deg, #fcd34d 0%, #fb7185 52%, #c4b5fd 100%)',
+  ],
+  moonlit: [
+    'linear-gradient(135deg, #818cf8 0%, #60a5fa 42%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #6366f1 0%, #38bdf8 48%, #a78bfa 100%)',
+    'linear-gradient(135deg, #312e81 0%, #60a5fa 52%, #c084fc 100%)',
+    'linear-gradient(135deg, #4338ca 0%, #7dd3fc 45%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #1d4ed8 0%, #818cf8 48%, #f0abfc 100%)',
+    'linear-gradient(135deg, #3730a3 0%, #60a5fa 45%, #fbcfe8 100%)',
+    'linear-gradient(135deg, #4f46e5 0%, #38bdf8 45%, #f9a8d4 100%)',
+  ],
+};
+
 
 
 
