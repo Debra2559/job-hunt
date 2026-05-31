@@ -569,30 +569,36 @@ export default function CareerMap() {
             style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
           >
             <div
-              className="relative rounded-[22px] p-5 text-white overflow-hidden bg-[#0b1124]"
+              className="relative rounded-[22px] p-5 overflow-hidden bg-white/80 backdrop-blur-xl"
               style={{
-                backgroundImage: `${ribbonCss[nextRec.chapter.num] || ribbonCss['01']}, linear-gradient(180deg, rgba(11,17,36,0.65), rgba(11,17,36,0.85))`,
-                backgroundBlendMode: 'overlay, normal',
-                boxShadow: '0 20px 60px -20px rgba(16,185,129,0.45), inset 0 1px 0 rgba(255,255,255,0.15)',
+                backgroundImage: `${ribbonCss[nextRec.chapter.num] || ribbonCss['01']}, linear-gradient(180deg, rgba(255,255,255,0.78), rgba(255,255,255,0.92))`,
+                backgroundBlendMode: 'soft-light, normal',
+                boxShadow: '0 20px 60px -22px rgba(165,180,252,0.55), inset 0 1px 0 rgba(255,255,255,0.7)',
               }}
             >
-              <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-[0.12] select-none pointer-events-none">{nextRec.chapter.emoji}</div>
-              <div className="absolute right-4 bottom-3 font-pixel text-[8px] tracking-[0.25em] text-white/60 select-none">▶ NEXT QUEST</div>
+              <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-[0.10] select-none pointer-events-none">{nextRec.chapter.emoji}</div>
+              <div className="absolute right-4 bottom-3 font-pixel text-[8px] tracking-[0.25em] text-slate-500 select-none">▶ NEXT QUEST</div>
               <div className="relative flex items-start gap-4">
-                <div className="shrink-0 relative w-16 h-16 rounded-2xl bg-white/95 flex items-center justify-center shadow-[0_0_24px_rgba(255,255,255,0.35)]">
-                  <nextRec.stage.icon className="w-8 h-8 text-slate-900" strokeWidth={2.4} />
-                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-amber-400 text-amber-950 text-[10px] font-extrabold border-2 border-[#0b1124] shadow">{nextRec.si + 1}</span>
+                <div
+                  className="shrink-0 relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-[0_10px_24px_-8px_rgba(165,180,252,0.55)]"
+                  style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
+                >
+                  <nextRec.stage.icon className="w-8 h-8 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]" strokeWidth={2.4} />
+                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[10px] font-extrabold border-2 border-white shadow">{nextRec.si + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-white/85 uppercase font-pixel">CH.{nextRec.chapter.num} · STAGE {nextRec.si + 1}</span>
-                    {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-white/20 backdrop-blur">敬请期待</span>}
+                    <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase font-pixel">CH.{nextRec.chapter.num} · STAGE {nextRec.si + 1}</span>
+                    {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-slate-100 text-slate-500 border border-slate-200">敬请期待</span>}
                   </div>
-                  <h2 className="text-lg font-extrabold mt-1.5 leading-tight drop-shadow-[0_1px_0_rgba(0,0,0,0.35)]">{recHeadline}</h2>
-                  <p className="text-sm font-semibold text-white/95 mt-1">下一关：{nextRec.stage.title}</p>
-                  <p className="text-xs text-white/80 mt-1 leading-relaxed">{recReason || nextRec.stage.desc}</p>
+                  <h2 className="text-lg font-extrabold mt-1.5 leading-tight text-slate-800">{recHeadline}</h2>
+                  <p className="text-sm font-semibold text-slate-700 mt-1">下一关：{nextRec.stage.title}</p>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">{recReason || nextRec.stage.desc}</p>
                   {!nextRec.stage.comingSoon && nextRec.stage.to && (
-                    <div className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-emerald-400 text-slate-900 text-xs font-extrabold shadow-[0_0_20px_rgba(16,185,129,0.65)] group-hover:gap-2.5 transition-all">
+                    <div
+                      className="mt-3 inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-xs font-extrabold shadow-[0_8px_20px_-6px_rgba(165,180,252,0.55)] group-hover:gap-2.5 transition-all"
+                      style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
+                    >
                       {doneCount === 0 ? '立即出发' : '继续闯关'}
                       <ChevronRight className="w-3.5 h-3.5" strokeWidth={3} />
                     </div>
