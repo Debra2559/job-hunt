@@ -491,7 +491,7 @@ export default function CareerMap() {
       {/* Header */}
       <header className="sticky top-0 z-30 backdrop-blur-2xl bg-white/70 border-b border-white/60 shadow-[0_8px_24px_-16px_rgba(148,163,184,0.35)]">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-3 flex items-center gap-3">
-          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-cyan-300 to-fuchsia-300 shadow-[0_8px_20px_-6px_rgba(165,180,252,0.55)]">
+          <div className="relative w-10 h-10 rounded-2xl shrink-0 flex items-center justify-center bg-gradient-to-br from-[#98C1D9] to-[#9D81BA] shadow-[0_8px_20px_-6px_rgba(157,129,186,0.5)]">
             <Compass className="w-5 h-5 text-white" strokeWidth={2.6} />
           </div>
           <div className="flex-1 min-w-0">
