@@ -641,7 +641,7 @@ export default function CareerMap() {
                     boxShadow: '0 10px 28px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 24px rgba(255,255,255,0.08)',
                   }}
                 >
-                  <span className="w-8 h-8 rounded-full bg-slate-900/80 ring-1 ring-white/30 text-white flex items-center justify-center text-lg shrink-0">
+                  <span className="w-8 h-8 rounded-full bg-white/30 ring-1 ring-white/60 text-white flex items-center justify-center text-lg shrink-0">
                     {ch.emoji}
                   </span>
                   <div className="leading-tight">
@@ -768,7 +768,7 @@ export default function CareerMap() {
                               'relative w-[68px] h-[68px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
                               'border-[3px]',
                               isLocked
-                                ? 'border-white/10 bg-gradient-to-br from-slate-800 to-slate-900 cursor-not-allowed'
+                                ? 'border-white/80 bg-gradient-to-br from-slate-100 to-slate-200 cursor-not-allowed'
                                 : cn('border-white/85 bg-gradient-to-br hover:scale-110 hover:-rotate-6 active:scale-95 cursor-pointer', ch.nodeBg),
                               isActive && 'ring-[3px] ring-amber-300 ring-offset-2 ring-offset-white',
                             )}
@@ -869,24 +869,24 @@ export default function CareerMap() {
                     className={cn(
                       'relative overflow-hidden rounded-[28px] p-6 sm:p-8 text-center border backdrop-blur-xl transition-all',
                       doneCount >= 9
-                        ? 'bg-amber-400/[0.06] border-amber-300/40 shadow-[0_0_60px_-20px_rgba(251,191,36,0.55)]'
-                        : 'bg-white/[0.04] border-white/10',
+                        ? 'bg-white/80 border-amber-200 shadow-[0_20px_60px_-24px_rgba(251,191,36,0.55)]'
+                        : 'bg-white/70 border-white',
                     )}
                   >
-                    <div className="absolute inset-0 pointer-events-none opacity-50">
-                      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-amber-300/20 blur-3xl" />
+                    <div className="absolute inset-0 pointer-events-none opacity-60">
+                      <div className="absolute -top-20 left-1/2 -translate-x-1/2 w-72 h-72 rounded-full bg-amber-200/40 blur-3xl" />
                     </div>
                     <div className="relative inline-flex items-center justify-center mb-3">
-                      <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shadow-[0_0_30px_rgba(251,191,36,0.6)]">
-                        <Trophy className="w-10 h-10 text-amber-950" strokeWidth={2.4} />
+                      <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center shadow-[0_12px_28px_-8px_rgba(251,191,36,0.55)]">
+                        <Trophy className="w-10 h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]" strokeWidth={2.4} />
                       </div>
                     </div>
-                    <p className="text-[10px] font-bold tracking-[0.35em] text-amber-300 mb-1 font-pixel">MILESTONE · OFFER GET</p>
-                    <h3 className="text-xl sm:text-2xl font-bold font-display-aurora text-white">拿下心仪 Offer</h3>
-                    <p className="text-xs sm:text-sm text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
-                      恭喜走完求职路。<span className="font-semibold text-white">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
+                    <p className="text-[10px] font-bold tracking-[0.35em] text-amber-500 mb-1 font-pixel">MILESTONE · OFFER GET</p>
+                    <h3 className="text-xl sm:text-2xl font-bold font-display-aurora text-slate-800">拿下心仪 Offer</h3>
+                    <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
+                      恭喜走完求职路。<span className="font-semibold text-slate-700">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
                     </p>
-                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-400/15 border border-amber-300/40 text-[11px] font-semibold text-amber-300">
+                    <div className="mt-4 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-[11px] font-semibold text-amber-700">
                       <ChevronsRight className="w-3 h-3" strokeWidth={3} />
                       新征程开启
                     </div>
@@ -899,14 +899,14 @@ export default function CareerMap() {
 
         {/* 系列终点 */}
         <section className="relative mt-10">
-          <div className="relative overflow-hidden rounded-[28px] p-8 text-center border border-emerald-400/25 bg-gradient-to-b from-emerald-500/10 to-transparent shadow-[0_0_60px_-20px_rgba(16,185,129,0.6)]">
+          <div className="relative overflow-hidden rounded-[28px] p-8 text-center border border-white bg-white/75 backdrop-blur-xl shadow-[0_20px_60px_-24px_rgba(165,180,252,0.45)]">
             <div className="absolute inset-0 pointer-events-none">
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-emerald-400/15 blur-3xl" />
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full bg-emerald-200/35 blur-3xl" />
             </div>
-            <div className="relative text-5xl mb-1 drop-shadow-[0_0_18px_rgba(16,185,129,0.7)]">🏰</div>
+            <div className="relative text-5xl mb-1">🏰</div>
             <div className="relative text-3xl mb-2">🌳</div>
-            <h3 className="relative text-xl font-bold font-display-aurora text-white">成为更好的自己</h3>
-            <p className="relative text-sm text-slate-400 mt-2 max-w-sm mx-auto leading-relaxed">
+            <h3 className="relative text-xl font-bold font-display-aurora text-slate-800">成为更好的自己</h3>
+            <p className="relative text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
               {doneCount === implementedTotal && implementedTotal > 0
                 ? '已开放的关卡全部通关 后续章节正在打磨中，敬请期待'
                 : '从认识自己到长期成长，一关一关，慢慢来。'}
@@ -919,7 +919,7 @@ export default function CareerMap() {
           <div className="sm:hidden flex justify-center pt-6">
             <button
               onClick={handleResetAll}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs text-slate-400 hover:text-white bg-white/5 border border-white/10"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-full text-xs text-slate-500 hover:text-slate-800 bg-white/70 border border-white"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               重置闯关进度
