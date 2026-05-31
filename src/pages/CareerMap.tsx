@@ -792,10 +792,12 @@ export default function CareerMap() {
                             {isLocked ? (
                               <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
-                              <st.icon
-                                className="w-8 h-8 sm:w-10 sm:h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.25)]"
-                                strokeWidth={2.2}
-                              />
+                              <span
+                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none"
+                                style={{ filter: 'saturate(1.1)' }}
+                              >
+                                {st.emoji}
+                              </span>
                             )}
                             {/* 序号徽章 */}
                             <span className={cn(
