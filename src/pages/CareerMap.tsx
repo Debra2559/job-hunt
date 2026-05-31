@@ -43,10 +43,11 @@ type Chapter = {
 };
 
 // 统一克制配色：全部章节共用 emerald + stone 主题，靠 emoji / 编号区分章节身份
-const U_NODE_BG = 'from-emerald-600 to-emerald-800';
-const U_HALO = 'bg-emerald-200/55';
-const U_RIBBON = 'from-emerald-700 to-emerald-900';
-const U_RIBBON_SHADOW = 'shadow-emerald-900/10';
+// 莫奈花园统一调：节点用淡彩水珠（鸢尾紫→天空蓝），和奶油底色融成一片
+const U_NODE_BG = 'from-[#C9BEE3] via-[#B8C9E3] to-[#A9C7D9]';
+const U_HALO = 'bg-[#C9BEE3]/45';
+const U_RIBBON = 'from-[#9D81BA] to-[#7B92B8]';
+const U_RIBBON_SHADOW = 'shadow-[#9D81BA]/15';
 
 const chapters: Chapter[] = [
   {
