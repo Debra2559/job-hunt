@@ -132,61 +132,64 @@ type RomanceStyle = {
   hint: string;
 };
 
+// 莫奈花园统一配色：奶油底 #FDFCF0 + 鸢尾紫 #9D81BA + 天空蓝 #98C1D9
+// + 薄荷绿 #E2F1E1 / #A2D9CE + 樱花粉 #FBCFE8 / 蜂蜜金 #FFB347
+// 四个"风格"保留为同一主调的不同笔触，永远统一不突兀
 const ROMANCE_STYLES: RomanceStyle[] = [
-  { id: 'oriental', label: '仙鹤水波', emoji: '🕊️', hint: '青蓝、流云、东方仙气' },
-  { id: 'garden', label: '花园晨光', emoji: '🌸', hint: '薄荷、花枝、玻璃花房' },
-  { id: 'sunset', label: '麦田暮光', emoji: '🌾', hint: '鎏金、雾光、温柔落日' },
-  { id: 'moonlit', label: '月夜剪影', emoji: '🌙', hint: '深靛、湖面、安静星光' },
+  { id: 'garden', label: '睡莲水面', emoji: '🌿', hint: '薄荷 × 鸢尾紫 × 樱花粉' },
+  { id: 'oriental', label: '晨雾天光', emoji: '☁️', hint: '天空蓝 × 奶油 × 薄霜' },
+  { id: 'sunset', label: '黄昏花房', emoji: '🌸', hint: '蜂蜜金 × 玫瑰粉 × 暖奶' },
+  { id: 'moonlit', label: '紫藤夜影', emoji: '🪻', hint: '深鸢尾 × 月白 × 雾蓝' },
 ];
 
 const CHAPTER_GRADIENTS_BY_STYLE: Record<RomanceStyleId, string[]> = {
-  oriental: [
-    'linear-gradient(135deg, #63cdda 0%, #74b9ff 55%, #b388ff 100%)',
-    'linear-gradient(135deg, #7dd3fc 0%, #5eead4 50%, #c4b5fd 100%)',
-    'linear-gradient(135deg, #60a5fa 0%, #38bdf8 48%, #818cf8 100%)',
-    'linear-gradient(135deg, #22d3ee 0%, #2dd4bf 42%, #a78bfa 100%)',
-    'linear-gradient(135deg, #5eead4 0%, #60a5fa 52%, #f0abfc 100%)',
-    'linear-gradient(135deg, #67e8f9 0%, #93c5fd 50%, #c084fc 100%)',
-    'linear-gradient(135deg, #38bdf8 0%, #2dd4bf 52%, #c4b5fd 100%)',
-  ],
   garden: [
-    'linear-gradient(135deg, #86efac 0%, #bae6fd 52%, #f9a8d4 100%)',
-    'linear-gradient(135deg, #a7f3d0 0%, #bfdbfe 45%, #fbcfe8 100%)',
-    'linear-gradient(135deg, #bbf7d0 0%, #a5f3fc 48%, #ddd6fe 100%)',
-    'linear-gradient(135deg, #6ee7b7 0%, #93c5fd 50%, #f9a8d4 100%)',
-    'linear-gradient(135deg, #f9a8d4 0%, #fde68a 45%, #a7f3d0 100%)',
-    'linear-gradient(135deg, #c4b5fd 0%, #93c5fd 45%, #86efac 100%)',
-    'linear-gradient(135deg, #fbcfe8 0%, #bfdbfe 48%, #a7f3d0 100%)',
+    'linear-gradient(135deg, #A2D9CE 0%, #98C1D9 55%, #9D81BA 100%)',
+    'linear-gradient(135deg, #BBE3D6 0%, #C7DAEC 48%, #B7A4D1 100%)',
+    'linear-gradient(135deg, #D7EFE3 0%, #98C1D9 52%, #C9B8E0 100%)',
+    'linear-gradient(135deg, #A2D9CE 0%, #E6E2FF 48%, #FBCFE8 100%)',
+    'linear-gradient(135deg, #C7E9DE 0%, #B5D0E5 50%, #9D81BA 100%)',
+    'linear-gradient(135deg, #E2F1E1 0%, #C9DEEC 50%, #B59FD0 100%)',
+    'linear-gradient(135deg, #B7E4D2 0%, #98C1D9 48%, #C9B8E0 100%)',
+  ],
+  oriental: [
+    'linear-gradient(135deg, #C7DAEC 0%, #E2F1E1 50%, #E6E2FF 100%)',
+    'linear-gradient(135deg, #B5D0E5 0%, #DDE9F1 48%, #C9B8E0 100%)',
+    'linear-gradient(135deg, #98C1D9 0%, #D7EFE3 52%, #BFB1DA 100%)',
+    'linear-gradient(135deg, #C9DEEC 0%, #E2F1E1 48%, #FBCFE8 100%)',
+    'linear-gradient(135deg, #A8C7DD 0%, #C7E9DE 50%, #9D81BA 100%)',
+    'linear-gradient(135deg, #BCD5E5 0%, #E6E2FF 50%, #C2A8D9 100%)',
+    'linear-gradient(135deg, #98C1D9 0%, #BBE3D6 48%, #B7A4D1 100%)',
   ],
   sunset: [
-    'linear-gradient(135deg, #f9a8d4 0%, #fde68a 55%, #fdba74 100%)',
-    'linear-gradient(135deg, #fbcfe8 0%, #fed7aa 45%, #fde68a 100%)',
-    'linear-gradient(135deg, #fdba74 0%, #fcd34d 48%, #f9a8d4 100%)',
-    'linear-gradient(135deg, #fb7185 0%, #fdba74 45%, #fde68a 100%)',
-    'linear-gradient(135deg, #f97316 0%, #fbbf24 42%, #f9a8d4 100%)',
-    'linear-gradient(135deg, #fca5a5 0%, #fde68a 48%, #fdba74 100%)',
-    'linear-gradient(135deg, #fcd34d 0%, #fb7185 52%, #c4b5fd 100%)',
+    'linear-gradient(135deg, #FFE4B5 0%, #FBCFE8 52%, #9D81BA 100%)',
+    'linear-gradient(135deg, #FFD9A8 0%, #F5C2D4 48%, #C9B8E0 100%)',
+    'linear-gradient(135deg, #FFB347 0%, #FBCFE8 50%, #B5A0CE 100%)',
+    'linear-gradient(135deg, #FCE2C2 0%, #E6CFDD 48%, #98C1D9 100%)',
+    'linear-gradient(135deg, #FFE0B0 0%, #FBCFE8 50%, #B59FD0 100%)',
+    'linear-gradient(135deg, #FFD6B0 0%, #ECCEDE 48%, #A8C7DD 100%)',
+    'linear-gradient(135deg, #FFB347 0%, #F2BFD3 52%, #9D81BA 100%)',
   ],
   moonlit: [
-    'linear-gradient(135deg, #818cf8 0%, #60a5fa 42%, #f9a8d4 100%)',
-    'linear-gradient(135deg, #6366f1 0%, #38bdf8 48%, #a78bfa 100%)',
-    'linear-gradient(135deg, #312e81 0%, #60a5fa 52%, #c084fc 100%)',
-    'linear-gradient(135deg, #4338ca 0%, #7dd3fc 45%, #f9a8d4 100%)',
-    'linear-gradient(135deg, #1d4ed8 0%, #818cf8 48%, #f0abfc 100%)',
-    'linear-gradient(135deg, #3730a3 0%, #60a5fa 45%, #fbcfe8 100%)',
-    'linear-gradient(135deg, #4f46e5 0%, #38bdf8 45%, #f9a8d4 100%)',
+    'linear-gradient(135deg, #9D81BA 0%, #98C1D9 48%, #E2F1E1 100%)',
+    'linear-gradient(135deg, #7E63A1 0%, #98C1D9 50%, #C9DEEC 100%)',
+    'linear-gradient(135deg, #B59FD0 0%, #98C1D9 52%, #DDE9F1 100%)',
+    'linear-gradient(135deg, #8A6CAE 0%, #A8C7DD 48%, #E6E2FF 100%)',
+    'linear-gradient(135deg, #9D81BA 0%, #B5D0E5 50%, #FBCFE8 100%)',
+    'linear-gradient(135deg, #7E63A1 0%, #98C1D9 50%, #C7E9DE 100%)',
+    'linear-gradient(135deg, #6E54A0 0%, #98C1D9 48%, #E2F1E1 100%)',
   ],
 };
 
 const STYLE_PREVIEW_BG: Record<RomanceStyleId, string> = {
-  oriental:
-    'radial-gradient(circle at 20% 20%, rgba(125,211,252,0.55) 0%, rgba(125,211,252,0) 55%), radial-gradient(circle at 80% 30%, rgba(167,243,208,0.55) 0%, rgba(167,243,208,0) 55%), linear-gradient(160deg, #f0f9ff 0%, #ecfeff 45%, #f5f3ff 100%)',
   garden:
-    'radial-gradient(circle at 25% 20%, rgba(187,247,208,0.7) 0%, rgba(187,247,208,0) 55%), radial-gradient(circle at 80% 25%, rgba(251,207,232,0.6) 0%, rgba(251,207,232,0) 55%), linear-gradient(160deg, #f0fdf4 0%, #fdf2f8 55%, #faf5ff 100%)',
+    'radial-gradient(at 0% 0%, #E2F1E1 0%, transparent 50%), radial-gradient(at 100% 0%, #E6E2FF 0%, transparent 50%), radial-gradient(at 50% 100%, #FDFCF0 0%, transparent 50%), #FDFCF0',
+  oriental:
+    'radial-gradient(at 0% 0%, #D9E9F2 0%, transparent 55%), radial-gradient(at 100% 0%, #E2F1E1 0%, transparent 55%), radial-gradient(at 50% 100%, #FDFCF0 0%, transparent 60%), #FDFCF0',
   sunset:
-    'radial-gradient(circle at 20% 25%, rgba(254,215,170,0.7) 0%, rgba(254,215,170,0) 55%), radial-gradient(circle at 80% 30%, rgba(251,207,232,0.6) 0%, rgba(251,207,232,0) 55%), linear-gradient(160deg, #fff7ed 0%, #fef3c7 40%, #fce7f3 100%)',
+    'radial-gradient(at 0% 0%, #FCE2C2 0%, transparent 55%), radial-gradient(at 100% 0%, #FBCFE8 0%, transparent 55%), radial-gradient(at 50% 100%, #FDFCF0 0%, transparent 60%), #FDFCF0',
   moonlit:
-    'radial-gradient(circle at 25% 25%, rgba(129,140,248,0.55) 0%, rgba(129,140,248,0) 55%), radial-gradient(circle at 78% 28%, rgba(167,139,250,0.45) 0%, rgba(167,139,250,0) 55%), linear-gradient(160deg, #1e1b4b 0%, #312e81 50%, #4c1d95 100%)',
+    'radial-gradient(at 0% 0%, #E6E2FF 0%, transparent 55%), radial-gradient(at 100% 0%, #D9E9F2 0%, transparent 55%), radial-gradient(at 50% 100%, #FDFCF0 0%, transparent 60%), #FDFCF0',
 };
 
 
