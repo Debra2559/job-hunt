@@ -424,15 +424,18 @@ export default function CareerMap() {
   }, [activeStyles]);
 
   const romanticBg = useMemo(() => {
+    // Monet 花园统一底：奶油 #FDFCF0 + 薄荷 + 鸢尾紫 + 樱花粉的柔和漫射
     const layers = [
-      'radial-gradient(circle at 15% 18%, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 24%)',
-      'linear-gradient(180deg, #f8fbff 0%, #eef6ff 18%, #e9f5f1 36%, #f6efff 68%, #fff8f1 100%)',
+      'radial-gradient(at 0% 0%, rgba(226,241,225,0.85) 0%, rgba(226,241,225,0) 48%)',
+      'radial-gradient(at 100% 0%, rgba(230,226,255,0.8) 0%, rgba(230,226,255,0) 50%)',
+      'radial-gradient(at 50% 100%, rgba(251,207,232,0.45) 0%, rgba(251,207,232,0) 55%)',
+      'linear-gradient(180deg, #FDFCF0 0%, #FBF8EE 100%)',
     ];
 
-    if (activeStyles.includes('oriental')) layers.unshift('radial-gradient(circle at 18% 12%, rgba(110,231,183,0.22) 0%, rgba(110,231,183,0) 28%)', 'radial-gradient(circle at 82% 28%, rgba(125,211,252,0.26) 0%, rgba(125,211,252,0) 26%)');
-    if (activeStyles.includes('garden')) layers.unshift('radial-gradient(circle at 80% 16%, rgba(244,114,182,0.18) 0%, rgba(244,114,182,0) 24%)', 'radial-gradient(circle at 50% 40%, rgba(187,247,208,0.20) 0%, rgba(187,247,208,0) 30%)');
-    if (activeStyles.includes('sunset')) layers.unshift('radial-gradient(circle at 40% 76%, rgba(251,191,36,0.20) 0%, rgba(251,191,36,0) 30%)');
-    if (activeStyles.includes('moonlit')) layers.unshift('radial-gradient(circle at 86% 72%, rgba(129,140,248,0.20) 0%, rgba(129,140,248,0) 28%)');
+    if (activeStyles.includes('oriental')) layers.unshift('radial-gradient(circle at 18% 22%, rgba(152,193,217,0.22) 0%, rgba(152,193,217,0) 30%)');
+    if (activeStyles.includes('garden')) layers.unshift('radial-gradient(circle at 80% 18%, rgba(157,129,186,0.18) 0%, rgba(157,129,186,0) 28%)', 'radial-gradient(circle at 50% 44%, rgba(162,217,206,0.18) 0%, rgba(162,217,206,0) 32%)');
+    if (activeStyles.includes('sunset')) layers.unshift('radial-gradient(circle at 30% 78%, rgba(255,179,71,0.16) 0%, rgba(255,179,71,0) 32%)');
+    if (activeStyles.includes('moonlit')) layers.unshift('radial-gradient(circle at 86% 70%, rgba(126,99,161,0.18) 0%, rgba(126,99,161,0) 30%)');
 
     return layers.join(', ');
   }, [activeStyles]);
