@@ -98,21 +98,33 @@ export default function FloatingAssistant() {
         <button
           onClick={() => setOpen(true)}
           className={cn(
-            'fixed bottom-24 right-3 sm:bottom-6 sm:right-6 z-40',
-            'group flex items-center gap-2 pl-1.5 pr-2 sm:pl-2 sm:pr-3.5 h-12 sm:h-14 rounded-full text-white font-bold text-sm shadow-2xl',
-            'bg-gradient-to-br hover:scale-105 active:scale-95 transition-all duration-300',
-            assistant.gradient,
+            'fixed bottom-24 right-3 sm:bottom-6 sm:right-6 z-40 group',
+            'flex items-end gap-2 transition-all duration-300 hover:-translate-y-1 active:scale-95',
           )}
-          style={{ boxShadow: '0 16px 40px -10px rgba(124,58,237,0.45), inset 0 2px 0 rgba(255,255,255,0.5)' }}
           aria-label={`打开 ${assistant.name}`}
         >
-          <span className="relative w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/30 backdrop-blur flex items-center justify-center text-xl sm:text-2xl shadow-inner">
-            <span className="drop-shadow">{assistant.emoji}</span>
-            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white animate-pulse" />
+          {/* 桌宠主体：大表情 + 柔光底座 */}
+          <span className="relative inline-flex items-center justify-center w-16 h-16 sm:w-[72px] sm:h-[72px]">
+            {/* 柔光底座阴影 */}
+            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-2.5 rounded-full bg-slate-900/20 blur-[6px]" />
+            {/* 桌宠 emoji（无边框、轻微浮动） */}
+            <span
+              className="relative text-[56px] sm:text-[64px] leading-none drop-shadow-[0_8px_16px_rgba(157,129,186,0.45)] animate-bounce"
+              style={{ animationDuration: '2.4s' }}
+            >
+              {assistant.emoji}
+            </span>
+            {/* 在线小圆点 */}
+            <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-emerald-400 border-2 border-white shadow animate-pulse" />
           </span>
-          <span className="hidden sm:inline-block leading-tight text-left">
-            <span className="block text-[10px] opacity-85 font-semibold tracking-wide">你的助理</span>
-            <span className="block text-sm font-extrabold">{assistant.name}</span>
+          {/* 名牌气泡 */}
+          <span className="mb-1 hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/90 backdrop-blur-md border border-white shadow-[0_8px_24px_-8px_rgba(157,129,186,0.45)] text-left">
+            <span className="block">
+              <span className="block text-[10px] text-slate-500 font-semibold tracking-wide leading-none mb-0.5">你的桌宠</span>
+              <span className="block text-sm font-extrabold text-slate-800 leading-none">{assistant.name}</span>
+            </span>
+            {/* 气泡小尾巴 */}
+            <span className="absolute -left-1 bottom-3 w-2 h-2 rotate-45 bg-white/90 border-l border-b border-white" />
           </span>
         </button>
       )}
