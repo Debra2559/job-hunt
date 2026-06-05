@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, Sparkles, BookOpen, MessageCircle, Wand2 } from 'lucide-react';
+import { ArrowLeft, Check, Sparkles, BookOpen, MessageCircle, Wand2, Compass } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toast } from '@/hooks/use-toast';
@@ -53,7 +53,7 @@ function matchAssistantId(jobs: PickedJob[]): string | null {
 
 export default function AssistantHub() {
   const navigate = useNavigate();
-  const { assistant: claimed, claim, release } = useAssistant();
+  const { assistant: claimed, assistants: claimedList, claim, release, releaseAll, isClaimed: checkClaimed } = useAssistant();
   const { markDone, completed } = useQuestProgress();
   const { onStageCompleted } = useGameProgress();
 
@@ -81,11 +81,11 @@ export default function AssistantHub() {
     onStageCompleted('claim_assistant');
     toast({
       title: `已认领 ${a.name}`,
-      description: `${a.role}已悬浮在右下角，随时可以聊。`,
+      description: `去「求职陪伴官」里找 ${a.name} 聊天吧`,
     });
   };
 
-  const isClaimed = (id: string) => claimed?.id === id;
+  const isClaimed = (id: string) => checkClaimed(id);
   const others = ASSISTANTS.filter(a => a.id !== recommended?.id);
 
   return (
@@ -112,12 +112,12 @@ export default function AssistantHub() {
             <h1 className="text-sm sm:text-base font-semibold leading-tight text-foreground">认领你的专属 AI 助理</h1>
             <p className="text-[11px] text-muted-foreground mt-0.5">已根据你选的岗位匹配好一位，一键认领即可</p>
           </div>
-          {claimed && (
+          {claimedList.length > 0 && (
             <button
-              onClick={() => { release(); toast({ title: '已释放', description: '可以重新挑一个' }); }}
+              onClick={() => { releaseAll(); toast({ title: '已释放全部助手', description: '可以重新挑选' }); }}
               className="text-[11px] px-2.5 py-1.5 rounded-full bg-white border border-stone-200 text-muted-foreground hover:text-foreground hover:bg-stone-50 transition-colors"
             >
-              释放
+              释放全部
             </button>
           )}
         </div>
@@ -161,11 +161,19 @@ export default function AssistantHub() {
                   )}
                 >
                   {isClaimed(recommended.id) ? (
-                    <><Check className="w-4 h-4 mr-1" strokeWidth={3} /> 已认领，去右下角找它</>
+                    <><Check className="w-4 h-4 mr-1" strokeWidth={3} /> 已认领，去陪伴官找它</>
                   ) : (
                     <><Sparkles className="w-4 h-4 mr-1" /> 一键认领 {recommended.name}</>
                   )}
                 </Button>
+                {isClaimed(recommended.id) && (
+                  <Link
+                    to="/career/companion"
+                    className="mt-2 w-full h-11 rounded-2xl font-semibold bg-gradient-to-r from-amber-400 via-orange-400 to-orange-500 text-white shadow-sm hover:opacity-95 inline-flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5"
+                  >
+                    <Compass className="w-4 h-4" /> 开始深度陪伴
+                  </Link>
+                )}
               </div>
             </div>
           ) : (
@@ -292,8 +300,16 @@ export default function AssistantHub() {
                   isClaimed(preview.id) && 'opacity-60 cursor-not-allowed',
                 )}
               >
-                {isClaimed(preview.id) ? <><Check className="w-4 h-4 mr-1" strokeWidth={3} /> 已认领，去右下角找它</> : <><Sparkles className="w-4 h-4 mr-1" /> 认领 {preview.name}</>}
+                {isClaimed(preview.id) ? <><Check className="w-4 h-4 mr-1" strokeWidth={3} /> 已认领，去陪伴官找它</> : <><Sparkles className="w-4 h-4 mr-1" /> 认领 {preview.name}</>}
               </Button>
+              {isClaimed(preview.id) && (
+                <Link
+                  to="/career/companion"
+                  className="mt-2 w-full h-11 rounded-2xl font-semibold bg-gradient-to-r from-amber-400 via-orange-400 to-orange-500 text-white shadow-sm hover:opacity-95 inline-flex items-center justify-center gap-2 transition-all hover:-translate-y-0.5"
+                >
+                  <Compass className="w-4 h-4" /> 开始深度陪伴
+                </Link>
+              )}
             </div>
           </aside>
         )}

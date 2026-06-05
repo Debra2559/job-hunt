@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 type Msg = { role: 'user' | 'assistant'; content: string };
 
 type StreamOpts = {
-  mode: 'resume' | 'resume-structured' | 'tips' | 'agent' | 'assistant';
+  mode: 'resume' | 'resume-structured' | 'tips' | 'agent' | 'assistant' | 'companion';
   input: string;
   context?: string;
   /** for assistant mode */

@@ -76,8 +76,8 @@ const chapters: Chapter[] = [
     nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🏯', '🪷', '🌊', '🐠', '⛩️'],
     stages: [
-      { id: 'feed', title: '每日机会 Feed', desc: '一键推荐卡片', icon: Rocket, emoji: '✨', comingSoon: true, priority: 'P0' },
-      { id: 'apply', title: '一键投递', desc: '简历直达 HR 信箱', icon: MailPlus, emoji: '📮', comingSoon: true, priority: 'P0' },
+      { id: 'feed', title: '每日机会 Feed', desc: '个性化职位推荐卡片', icon: Rocket, emoji: '✨', to: '/career/feed', priority: 'P0' },
+      { id: 'apply', title: '一键投递', desc: '收藏职位 · 简历快检 · 一键投递', icon: MailPlus, emoji: '📮', to: '/career/apply', priority: 'P0' },
       { id: 'jd-break', title: 'JD 拆解', desc: '逐条对照你的优势', icon: ScissorsLineDashed, emoji: '✂️', comingSoon: true, priority: 'P1' },
     ],
   },
