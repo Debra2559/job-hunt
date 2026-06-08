@@ -11,6 +11,8 @@ import CareerResume from "./pages/CareerResume";
 import CareerResumeQuest from "./pages/CareerResumeQuest";
 import CareerResumeWorkspace from "./pages/CareerResumeWorkspace";
 import CareerTips from "./pages/CareerTips";
+import CareerSelfIntro from "./pages/CareerSelfIntro";
+import CareerInterviewQuestionBank from "./pages/CareerInterviewQuestionBank";
 import CareerCompany from "./pages/CareerCompany";
 import CareerFeed from "./pages/CareerFeed";
 import CareerApply from "./pages/CareerApply";
@@ -39,6 +41,8 @@ const App = () => (
           <Route path="/career/resume-quest" element={<CareerResumeQuest />} />
           <Route path="/career/resume-workspace" element={<CareerResumeWorkspace />} />
           <Route path="/career/tips" element={<CareerTips />} />
+          <Route path="/career/self-intro" element={<CareerSelfIntro />} />
+          <Route path="/career/interview-question-bank" element={<CareerInterviewQuestionBank />} />
           <Route path="/career/company" element={<CareerCompany />} />
           <Route path="/career/feed" element={<CareerFeed />} />
           <Route path="/career/apply" element={<CareerApply />} />

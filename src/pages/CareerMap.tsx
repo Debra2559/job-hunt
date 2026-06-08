@@ -86,7 +86,8 @@ const chapters: Chapter[] = [
     nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🏔️', '🦅', '✨', '🌅', '🏰'],
     stages: [
-      { id: 'qa', title: '逐字稿 & QA', desc: '高频问题人话版回答', icon: MessagesSquare, emoji: '💬', comingSoon: true, priority: 'P0' },
+      { id: 'self-intro', title: '开场白训练室', desc: '自我介绍与核心经历讲述稿', icon: Presentation, emoji: '🎙️', to: '/career/self-intro', priority: 'P0' },
+      { id: 'question-bank', title: '面试题库站', desc: '岗位定向面经库与 QA 问题', icon: MessagesSquare, emoji: '📚', to: '/career/interview-question-bank', priority: 'P0' },
       { id: 'mock', title: '模拟面试', desc: '语音对练 + 即时反馈', icon: Mic, emoji: '🎤', comingSoon: true, priority: 'P1' },
     ],
   },

@@ -64,7 +64,7 @@ export const CHAPTER_STAGES: Record<string, string[]> = {
   ch1: ['assess', 'recommend', 'jd', 'claim_assistant'],
   ch2: ['resume', 'tips', 'company'],
   ch3: ['feed', 'apply', 'jd-break'],
-  ch4: ['qa', 'mock'],
+  ch4: ['self-intro', 'question-bank', 'mock'],
   ch5: ['onboard-prep', 'plan-90', 'first-week', 'probation'],
   ch6: ['communication', 'collab', 'meeting', 'anti-pua'],
   ch7: ['review', 'negotiate', 'pathing'],

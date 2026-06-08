@@ -125,7 +125,7 @@ export default function CareerTips() {
       footer={
         <>
           <Button asChild className="flex-1 rounded-2xl bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 font-bold text-white shadow-lg">
-            <Link to="/career/companion">进入逐字稿 & QA</Link>
+            <Link to="/career/self-intro">进入开场白训练室</Link>
           </Button>
           <Button asChild variant="outline" className="flex-1 rounded-2xl border-amber-200 bg-white/90 font-bold text-amber-800">
             <Link to="/career/resume-workspace">返回简历工作台</Link>
