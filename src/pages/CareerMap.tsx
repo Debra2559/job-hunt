@@ -67,7 +67,7 @@ const chapters: Chapter[] = [
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
       { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', to: '/career/resume', priority: 'P0' },
-      { id: 'tips', title: '求职小 Tips', desc: '流程 & 细节随时问', icon: Lightbulb, emoji: '💡', to: '/career/tips', priority: 'P0' },
+      { id: 'tips', title: '面试情报站', desc: '面试流程、题型与细节情报', icon: Lightbulb, emoji: '💡', to: '/career/tips', priority: 'P0' },
       { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', to: '/career/company', priority: 'P1' },
     ],
   },

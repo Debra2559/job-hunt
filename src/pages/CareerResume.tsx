@@ -1,79 +1,93 @@
 import { useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-  Sparkles, Loader2, ArrowRight, Upload, FileText, Wand2, Download, Eye, Pencil,
+  ArrowRight, FileText, Image as ImageIcon, Loader2, Route, Upload,
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { toast } from '@/hooks/use-toast';
 import Ch2PageShell from '@/components/career/Ch2PageShell';
-import JobContextBanner from '@/components/career/JobContextBanner';
-import ResumeEditor from '@/components/career/ResumeEditor';
-import ResumePreview from '@/components/career/ResumePreview';
-import { useQuestProgress } from '@/hooks/useQuestProgress';
-import { useGameProgress } from '@/hooks/useGameProgress';
+import ResumeTargetCard from '@/components/career/ResumeTargetCard';
+import { Textarea } from '@/components/ui/textarea';
+import { toast } from '@/hooks/use-toast';
 import { extractTextFromFile } from '@/lib/parseResumeFile';
-import { emptyResume, normalizeResume, type ResumeData } from '@/lib/resumeTypes';
-import { supabase } from '@/integrations/supabase/client';
+import { generateStructuredResume } from '@/lib/resumeGenerate';
+import { parseResumeTextToResumeData } from '@/lib/resumeParser';
+import { formatRoleContextForPrompt, readResumeRoleContext, type ResumeRoleContext } from '@/lib/resumeRoleContext';
+import { generateResumeSuggestions } from '@/lib/resumeSuggestions';
+import { saveResumeWorkspaceState } from '@/lib/resumeWorkspace';
 
 const GRADIENT = 'from-sky-400 via-cyan-500 to-blue-500';
 
-async function generateStructured(input: string): Promise<ResumeData> {
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-  const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
-  const { data: sessionData } = await supabase.auth.getSession();
-  const accessToken = sessionData.session?.access_token;
-  const resp = await fetch(`${SUPABASE_URL}/functions/v1/ch2-toolkit`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: ANON,
-      Authorization: `Bearer ${accessToken || ANON}`,
-    },
-    body: JSON.stringify({ mode: 'resume-structured', input }),
-  });
-  if (!resp.ok) throw new Error(`AI ${resp.status}`);
-  const json = await resp.json();
-  return normalizeResume(json?.data);
-}
-
 export default function CareerResume() {
-  const [resume, setResume] = useState<ResumeData>(emptyResume());
-  const [desc, setDesc] = useState('');
-  const [tab, setTab] = useState<'desc' | 'upload'>('desc');
-  const [view, setView] = useState<'edit' | 'preview'>('edit');
+  const navigate = useNavigate();
+  const [roleContext, setRoleContext] = useState<ResumeRoleContext | null>(() => readResumeRoleContext());
+  const [rawText, setRawText] = useState('');
   const [loading, setLoading] = useState(false);
-  const [hasContent, setHasContent] = useState(false);
-  const [completed, setCompleted] = useState(false);
-  const { markDone, isDone } = useQuestProgress();
-  const { onStageCompleted } = useGameProgress();
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const markGenerated = () => {
-    setHasContent(true);
-    if (!isDone('resume')) {
-      markDone('resume');
-      onStageCompleted('resume');
-      setCompleted(true);
-      toast({ title: '🎉 第 1 关通关', description: '简历草稿已生成，可继续编辑或导出 PDF' });
-    } else {
-      setCompleted(true);
-    }
+  const currentTargetContext = () => roleContext || {
+    targetRole: '通用校招岗位',
+    roleCategory: '通用',
+    matchReason: '用户暂未设置明确目标岗位。',
+    requiredAbilities: ['学习能力', '沟通表达', '结构化思考', '执行力'],
+    preferredExperienceSignals: ['课程项目', '竞赛经历', '社团活动', '个人作品'],
+    resumeFocus: '优先整理真实经历，并补足动作、方法、结果和量化信息。',
   };
 
-  const handleGenerateFromDesc = async () => {
-    if (!desc.trim()) {
-      toast({ title: '先描述一下你的经历', description: '哪怕只是一段话也可以' });
+  const createWorkspaceFromText = async (text: string, sourceName = '粘贴文本') => {
+    const targetContext = currentTargetContext();
+    let parseWarnings: string[] = [];
+    let resumeData;
+
+    try {
+      toast({ title: '正在用 AI 解析简历…', description: '会优先识别教育、项目、实习、校园经历和技能' });
+      resumeData = await generateStructuredResume(`你是简历结构化解析器。请把用户上传或粘贴的旧简历文本，转换成 ResumeData JSON，并面向目标岗位进行轻度优化。
+
+【目标岗位上下文】
+${formatRoleContextForPrompt(targetContext)}
+
+【原始简历文本】
+${text}
+
+解析要求：
+1. 必须尽可能保留真实信息，不要编造学校、公司、奖项、项目、数字。
+2. 识别并填入 basic、education、experience、projects、campus、skills、certs、selfEval。
+3. 如果 PDF 文本顺序混乱，请根据语义重新归类，不要把整段原文塞进 selfEval。
+4. 项目、实习、校园经历的 bullets 要改写为简历表达：动作 + 方法 + 结果。
+5. 如果缺少结果或数字，用「待补充：具体结果/数字」占位。
+6. target 优先使用目标岗位。
+7. 只输出符合 schema 的 JSON。`);
+    } catch (error) {
+      const parsed = parseResumeTextToResumeData(text, targetContext);
+      resumeData = parsed.resumeData;
+      parseWarnings = [
+        'AI 解析失败，已使用本地规则兜底，结果可能需要手动整理',
+        ...parsed.parseWarnings,
+      ];
+    }
+
+    const aiSuggestions = generateResumeSuggestions(resumeData, targetContext, 'upload');
+    saveResumeWorkspaceState({
+      source: 'upload',
+      targetContext,
+      resumeData,
+      aiSuggestions,
+      createdAt: new Date().toISOString(),
+    });
+    if (parseWarnings.length > 0) {
+      toast({ title: `${sourceName}解析完成`, description: parseWarnings[0] });
+    } else {
+      toast({ title: `${sourceName}解析完成`, description: '正在进入简历工作台' });
+    }
+    navigate('/career/resume-workspace');
+  };
+
+  const handlePasteParse = async () => {
+    if (!rawText.trim()) {
+      toast({ title: '请先粘贴简历文本' });
       return;
     }
     setLoading(true);
     try {
-      const data = await generateStructured(desc.trim());
-      setResume(data);
-      markGenerated();
-    } catch (e: any) {
-      toast({ title: '生成失败', description: e?.message || '稍后再试', variant: 'destructive' });
+      await createWorkspaceFromText(rawText.trim(), '文本');
     } finally {
       setLoading(false);
     }
@@ -83,12 +97,15 @@ export default function CareerResume() {
     setLoading(true);
     try {
       toast({ title: '正在解析文件…', description: file.name });
-      const text = await extractTextFromFile(file);
+      const lowerName = file.name.toLowerCase();
+      let text = '';
+      if (file.type.startsWith('image/') || /\.(png|jpe?g)$/.test(lowerName)) {
+        text = `【图片简历：${file.name}】\nMVP 暂无法在前端完成图片 OCR，请在工作台中手动补充，或先把图片中的文字复制到粘贴框。`;
+      } else {
+        text = await extractTextFromFile(file);
+      }
       if (!text || text.length < 20) throw new Error('未能从文件中提取出有效内容');
-      const data = await generateStructured(`以下是用户上传的简历原文，请解析为结构化 JSON：\n\n${text}`);
-      setResume(data);
-      markGenerated();
-      toast({ title: '解析完成', description: '已自动填入下方表单，记得检查' });
+      await createWorkspaceFromText(text, file.name);
     } catch (e: any) {
       toast({ title: '解析失败', description: e?.message || '稍后再试', variant: 'destructive' });
     } finally {
@@ -97,172 +114,80 @@ export default function CareerResume() {
     }
   };
 
-  const handleStartBlank = () => {
-    setResume(emptyResume());
-    setHasContent(true);
-    setView('edit');
-  };
-
-  const handleExport = () => {
-    setView('preview');
-    setTimeout(() => window.print(), 250);
-  };
-
   return (
     <Ch2PageShell
       emoji="📝"
-      title="一键简历"
-      subtitle="上传 / 描述 / 手填三选一，AI 自动结构化，直接导出 PDF"
+      title="岗位定向简历"
+      subtitle="承接目标岗位，选择从 0 创建或上传旧简历优化"
       gradient={GRADIENT}
       footer={
-        completed ? (
-          <>
-            <div className="flex-1 text-xs text-muted-foreground hidden sm:block">🎉 第 1 关已通关</div>
-            <Button onClick={handleExport} variant="outline" className="shrink-0 rounded-2xl h-11 px-4 font-semibold">
-              <Download className="w-4 h-4 mr-1" /> 导出 PDF
-            </Button>
-            <Link
-              to="/career/tips"
-              className="shrink-0 inline-flex items-center gap-1.5 rounded-2xl px-5 h-11 bg-gradient-to-r from-sky-400 via-cyan-500 to-blue-500 text-white font-bold shadow-lg hover:opacity-95"
-            >
-              下一关 <ArrowRight className="w-4 h-4" />
-            </Link>
-          </>
-        ) : hasContent ? (
-          <>
-            <div className="flex-1 text-xs text-muted-foreground hidden sm:block">填好后可直接导出 PDF</div>
-            <Button onClick={handleExport} className={`shrink-0 rounded-2xl h-11 px-5 text-white font-bold shadow-lg bg-gradient-to-r ${GRADIENT}`}>
-              <Download className="w-4 h-4 mr-1" /> 导出 PDF
-            </Button>
-          </>
-        ) : (
-          <div className="flex-1 text-xs text-muted-foreground text-center">从上传、描述或空白开始 ⬆</div>
-        )
+        <div className="flex-1 text-xs text-muted-foreground text-center">先确认目标岗位，再选择创建方式 ⬆</div>
       }
     >
-      <JobContextBanner gradient={GRADIENT} hint="设定目标岗位后，AI 写简历会按这个方向定关键词与项目侧重。" />
+      <ResumeTargetCard gradient={GRADIENT} onChange={setRoleContext} />
 
-      {!hasContent && (
-        <div className="rounded-3xl border border-white/70 bg-white/85 backdrop-blur p-4 sm:p-5 shadow-sm mb-4">
-          <Tabs value={tab} onValueChange={(v) => setTab(v as 'desc' | 'upload')}>
-            <TabsList className="grid grid-cols-2 w-full mb-3 bg-sky-50">
-              <TabsTrigger value="desc" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <Wand2 className="w-3.5 h-3.5 mr-1" /> 描述生成
-              </TabsTrigger>
-              <TabsTrigger value="upload" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                <Upload className="w-3.5 h-3.5 mr-1" /> 上传简历
-              </TabsTrigger>
-            </TabsList>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+        <Link
+          to="/career/resume-quest"
+          className="rounded-3xl border border-white/70 bg-white/90 backdrop-blur p-5 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition-all"
+        >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-500 text-white flex items-center justify-center mb-4 shadow-lg">
+            <Route className="w-5 h-5" />
+          </div>
+          <h3 className="font-extrabold text-base">我没有简历，从 0 开始创建</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+            通过闯关式问答完成基础身份、技能发现、经历考古、经历细化和能力发现。
+          </p>
+          <div className="mt-4 inline-flex items-center gap-1 text-[12px] font-bold text-sky-600">
+            开始闯关 <ArrowRight className="w-3.5 h-3.5" />
+          </div>
+        </Link>
 
-            <TabsContent value="desc" className="mt-0">
-              <p className="text-xs text-muted-foreground mb-2">
-                用一段话讲讲你自己：学校、专业、实习、项目、技能…AI 会自动拆解成结构化简历。
-              </p>
-              <Textarea
-                rows={6}
-                value={desc}
-                onChange={(e) => setDesc(e.target.value)}
-                placeholder={`示例：我是同济大学计算机大三学生，2026 届。\n暑期在字节做了 2 个月数据分析实习，用 SQL + Python 搭了一个用户留存看板。\n自己做过一个校园二手书 App，React + Supabase，上线 3 个月 800+ 用户。\n想找数据分析 / 增长方向的岗位。`}
-                className="resize-none text-sm bg-white/70 border-white"
-              />
-              <Button
-                onClick={handleGenerateFromDesc}
-                disabled={loading}
-                className={`w-full mt-3 h-11 rounded-2xl text-white font-bold shadow-lg bg-gradient-to-r ${GRADIENT}`}
-              >
-                {loading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
-                {loading ? '正在生成…' : '一键生成可编辑简历'}
-              </Button>
-            </TabsContent>
-
-            <TabsContent value="upload" className="mt-0">
-              <button
-                onClick={() => fileRef.current?.click()}
-                disabled={loading}
-                className="w-full rounded-2xl border-2 border-dashed border-sky-300 bg-sky-50/50 hover:bg-sky-50 transition py-8 text-center"
-              >
-                {loading ? (
-                  <Loader2 className="w-7 h-7 animate-spin mx-auto text-sky-500" />
-                ) : (
-                  <FileText className="w-7 h-7 mx-auto text-sky-500" />
-                )}
-                <div className="mt-2 text-sm font-semibold text-foreground">
-                  {loading ? '正在解析…' : '点击上传简历'}
-                </div>
-                <div className="text-[11px] text-muted-foreground mt-1">支持 PDF / DOCX / TXT，本地解析后由 AI 结构化</div>
-              </button>
-              <input
-                ref={fileRef}
-                type="file"
-                accept=".pdf,.docx,.txt,.md"
-                className="hidden"
-                onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) handleUpload(f);
-                }}
-              />
-            </TabsContent>
-          </Tabs>
-
-          <div className="mt-3 text-center">
+        <div className="rounded-3xl border border-white/70 bg-white/90 backdrop-blur p-5 shadow-sm">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-violet-400 to-sky-500 text-white flex items-center justify-center mb-4 shadow-lg">
+            <Upload className="w-5 h-5" />
+          </div>
+          <h3 className="font-extrabold text-base">我有旧简历，上传解析</h3>
+          <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+            支持粘贴文本，或上传 PDF / DOCX / TXT / PNG / JPG。解析后统一进入简历工作台。
+          </p>
+          <Textarea
+            rows={5}
+            value={rawText}
+            onChange={(e) => setRawText(e.target.value)}
+            placeholder="也可以直接把旧简历文本粘贴到这里..."
+            className="mt-4 resize-none text-sm bg-white/80"
+          />
+          <div className="mt-3 grid grid-cols-1 gap-2">
             <button
-              onClick={handleStartBlank}
-              className="text-[12px] text-sky-600 hover:text-sky-700 font-medium"
+              onClick={handlePasteParse}
+              disabled={loading || !rawText.trim()}
+              className="w-full rounded-2xl border border-sky-200 bg-sky-50 hover:bg-sky-100 transition px-4 h-11 text-sm font-bold text-sky-700 disabled:opacity-50 inline-flex items-center justify-center gap-2"
             >
-              或者，从空白开始手动填写 →
+              <FileText className="w-4 h-4" /> 解析粘贴文本
+            </button>
+            <button
+              onClick={() => fileRef.current?.click()}
+              disabled={loading}
+              className="w-full rounded-2xl border border-violet-200 bg-violet-50 hover:bg-violet-100 transition px-4 h-11 text-sm font-bold text-violet-700 disabled:opacity-50 inline-flex items-center justify-center gap-2"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ImageIcon className="w-4 h-4" />}
+              {loading ? '正在解析…' : '上传文件'}
             </button>
           </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg,image/png,image/jpeg"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleUpload(f);
+            }}
+          />
         </div>
-      )}
+      </div>
 
-      {hasContent && (
-        <>
-          <div className="sticky top-[60px] z-10 -mx-1 px-1 py-2 mb-3 flex items-center gap-2">
-            <div className="inline-flex rounded-full bg-white/85 backdrop-blur border border-white p-0.5 shadow-sm">
-              <button
-                onClick={() => setView('edit')}
-                className={`px-3 h-8 rounded-full text-xs font-semibold inline-flex items-center gap-1 transition ${
-                  view === 'edit' ? `bg-gradient-to-r ${GRADIENT} text-white shadow` : 'text-foreground/70'
-                }`}
-              >
-                <Pencil className="w-3 h-3" /> 编辑
-              </button>
-              <button
-                onClick={() => setView('preview')}
-                className={`px-3 h-8 rounded-full text-xs font-semibold inline-flex items-center gap-1 transition ${
-                  view === 'preview' ? `bg-gradient-to-r ${GRADIENT} text-white shadow` : 'text-foreground/70'
-                }`}
-              >
-                <Eye className="w-3 h-3" /> 预览
-              </button>
-            </div>
-            <div className="flex-1" />
-            <button
-              onClick={() => { setHasContent(false); setResume(emptyResume()); setDesc(''); }}
-              className="text-[11px] text-muted-foreground hover:text-foreground"
-            >
-              重新开始
-            </button>
-          </div>
-
-          {view === 'edit' ? (
-            <ResumeEditor data={resume} onChange={setResume} />
-          ) : (
-            <div className="overflow-x-auto -mx-2 px-2 pb-4 print:hidden">
-              <div className="origin-top scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100 mx-auto" style={{ width: 'fit-content' }}>
-                <ResumePreview data={resume} />
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/* Hidden printable copy — used by window.print() */}
-      {hasContent && (
-        <div className="hidden print:block">
-          <ResumePreview data={resume} />
-        </div>
-      )}
     </Ch2PageShell>
   );
 }
