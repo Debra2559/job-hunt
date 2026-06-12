@@ -526,12 +526,12 @@ export default function CareerMap() {
               <span className="truncate">求职闯关地图</span>
               <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md bg-fuchsia-100/80 text-fuchsia-600 font-medium tracking-wide shrink-0 border border-fuchsia-200">AI 辅助</span>
             </h1>
-            <p className="text-[11px] text-slate-500 hidden sm:block font-pixel tracking-[0.25em] uppercase mt-0.5">QUEST · ZERO TO OFFER</p>
+            <p className="text-[10px] text-slate-400 hidden sm:block tracking-[0.32em] uppercase mt-0.5 font-medium">Quest · Zero to Offer</p>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/70 text-slate-600 border border-white shadow-[inset_0_0_12px_rgba(255,255,255,0.6)]">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 text-slate-500 border border-white/80 shadow-[inset_0_0_12px_rgba(255,255,255,0.6)]">
             <MapIcon className="w-3 h-3" />
-            <span className="font-pixel text-[9px] tabular-nums">{availableCount}/{totalStages}</span>
+            <span className="text-[10px] tabular-nums font-semibold tracking-wide">{availableCount}/{totalStages}</span>
           </div>
 
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
