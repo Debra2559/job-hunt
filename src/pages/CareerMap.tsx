@@ -785,17 +785,17 @@ export default function CareerMap() {
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         <div className="relative shrink-0">
-                          {/* active 节点：霓虹光晕 + 旋转金环 */}
+                          {/* active 节点：柔和鸢尾光晕 + 旋转金环 */}
                           {isActive && (
                             <>
-                              <span className="absolute -inset-4 rounded-full blur-2xl animate-pulse bg-emerald-400/40" />
-                              <span className="node-ring-shine" />
+                              <span className="absolute -inset-4 rounded-full blur-2xl animate-pulse bg-[#C9BEE3]/45" />
+                              <span className="node-ring-shine opacity-70" />
                               <span className="sparkle absolute -top-2 -right-2 text-[14px] select-none" aria-hidden>✨</span>
                               <span className="sparkle absolute -bottom-1 -left-2 text-[12px] select-none" style={{ animationDelay: '0.8s' }} aria-hidden>⭐</span>
                             </>
                           )}
-                          {/* 底座阴影 */}
-                          <span className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-14 h-2 rounded-full bg-black/60 blur-md" />
+                          {/* 底座阴影 —— 改成柔和投影，去掉黑色硬阴影 */}
+                          <span className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-12 h-1.5 rounded-full bg-[#9D81BA]/25 blur-md" />
 
                           <button
                             onClick={() => !isLocked && st.to && navigate(st.to)}
@@ -805,44 +805,44 @@ export default function CareerMap() {
                               'border-[3px]',
                               isLocked
                                 ? 'border-white/80 bg-gradient-to-br from-slate-100 to-slate-200 cursor-not-allowed'
-                                : cn('border-white/85 bg-gradient-to-br hover:scale-110 hover:-rotate-6 active:scale-95 cursor-pointer', ch.nodeBg),
-                              isActive && 'ring-[3px] ring-amber-300 ring-offset-2 ring-offset-white',
+                                : cn('border-white/90 bg-gradient-to-br hover:scale-110 hover:-rotate-6 active:scale-95 cursor-pointer', ch.nodeBg),
+                              isActive && 'ring-[3px] ring-[#C9BEE3] ring-offset-2 ring-offset-white',
                             )}
                             style={{
                               boxShadow: isLocked
-                                ? 'inset 0 2px 0 rgba(255,255,255,0.5), 0 6px 14px -4px rgba(148,163,184,0.35)'
-                                : '0 14px 30px -8px rgba(148,163,184,0.45), inset 0 -5px 0 rgba(0,0,0,0.18), inset 0 3px 0 rgba(255,255,255,0.55), 0 0 22px rgba(165,180,252,0.25)',
+                                ? 'inset 0 2px 0 rgba(255,255,255,0.5), 0 6px 14px -4px rgba(148,163,184,0.3)'
+                                : '0 14px 30px -10px rgba(157,129,186,0.4), inset 0 -4px 0 rgba(157,129,186,0.18), inset 0 3px 0 rgba(255,255,255,0.6), 0 0 22px rgba(201,190,227,0.3)',
                             }}
                             title={st.title}
                           >
                             {!isLocked && (
-                              <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/70 blur-[2px] rotate-[-20deg] pointer-events-none" />
+                              <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/75 blur-[2px] rotate-[-20deg] pointer-events-none" />
                             )}
                             {isLocked ? (
                               <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
                               <span
-                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none animate-node-bob motion-reduce:animate-none"
-                                style={{ filter: 'saturate(1.15)', animationDelay: `${(si * 0.4) % 2}s` }}
+                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(157,129,186,0.25)] select-none animate-node-bob motion-reduce:animate-none"
+                                style={{ filter: 'saturate(1.12)', animationDelay: `${(si * 0.4) % 2}s` }}
                               >
                                 {st.emoji}
                               </span>
                             )}
-                            {/* 序号徽章 */}
+                            {/* 序号徽章 —— 鸢尾紫 */}
                             <span className={cn(
-                              'absolute -top-2 -left-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-fuchsia-500 text-[11px] sm:text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-fuchsia-200 font-pixel',
+                              'absolute -top-2 -left-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-[#9D81BA] text-[11px] sm:text-[12px] font-extrabold flex items-center justify-center shadow-[0_3px_8px_-2px_rgba(157,129,186,0.4)] border border-[#E4DCF1] tabular-nums',
                               isLocked && 'opacity-70 text-slate-400 border-slate-200',
                             )}>
                               {si + 1}
                             </span>
                             {isDone && (
-                              <span className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-400 text-white flex items-center justify-center shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-2 border-white">
+                              <span className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#B8C9E3] to-[#9D81BA] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(157,129,186,0.45)] border-2 border-white">
                                 <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3.5} />
                               </span>
                             )}
                             {isActive && (
-                              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-300 text-amber-900 shadow-[0_4px_14px_rgba(251,191,36,0.5)] border-2 border-white whitespace-nowrap animate-bounce font-pixel tracking-wider">
-                                GO!
+                              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white text-[#9D81BA] shadow-[0_4px_14px_rgba(157,129,186,0.35)] border border-[#E4DCF1] whitespace-nowrap tracking-[0.18em] animate-pulse">
+                                GO
                               </span>
                             )}
                           </button>
