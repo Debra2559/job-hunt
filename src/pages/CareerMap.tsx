@@ -672,20 +672,20 @@ export default function CareerMap() {
                   className="relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white"
                   style={{
                     backgroundImage: ribbonCss[ch.num],
-                    boxShadow: '0 10px 28px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 24px rgba(255,255,255,0.08)',
+                    boxShadow: '0 12px 28px -14px rgba(157,129,186,0.55), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(157,129,186,0.25)',
                   }}
                 >
-                  <span className="w-8 h-8 rounded-full bg-white/30 ring-1 ring-white/60 text-white flex items-center justify-center text-lg shrink-0">
+                  <span className="w-8 h-8 rounded-full bg-white/35 ring-1 ring-white/70 text-white flex items-center justify-center text-lg shrink-0 backdrop-blur-sm">
                     {ch.emoji}
                   </span>
                   <div className="leading-tight">
-                    <p className="font-pixel text-[8px] tracking-[0.22em] text-white/80">CH.{ch.num}</p>
-                    <h2 className="text-sm sm:text-base font-bold font-display-aurora drop-shadow-[0_1px_0_rgba(0,0,0,0.4)]">
+                    <p className="text-[9px] tracking-[0.32em] text-white/85 font-medium uppercase">Ch.{ch.num}</p>
+                    <h2 className="text-sm sm:text-base font-bold font-display-aurora text-white">
                       第{['一','二','三','四','五','六','七'][ci]}章 · {ch.title}
                     </h2>
                   </div>
                   {chComplete && (
-                    <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 font-bold inline-flex items-center gap-0.5 shadow">
+                    <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-white/95 text-[#9D81BA] font-bold inline-flex items-center gap-0.5 shadow-sm">
                       <Check className="w-2.5 h-2.5" strokeWidth={3} />通关
                     </span>
                   )}
