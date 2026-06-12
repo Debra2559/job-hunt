@@ -526,12 +526,12 @@ export default function CareerMap() {
               <span className="truncate">求职闯关地图</span>
               <span className="hidden sm:inline text-[10px] px-1.5 py-0.5 rounded-md bg-fuchsia-100/80 text-fuchsia-600 font-medium tracking-wide shrink-0 border border-fuchsia-200">AI 辅助</span>
             </h1>
-            <p className="text-[11px] text-slate-500 hidden sm:block font-pixel tracking-[0.25em] uppercase mt-0.5">QUEST · ZERO TO OFFER</p>
+            <p className="text-[10px] text-slate-400 hidden sm:block tracking-[0.32em] uppercase mt-0.5 font-medium">Quest · Zero to Offer</p>
           </div>
 
-          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white/70 text-slate-600 border border-white shadow-[inset_0_0_12px_rgba(255,255,255,0.6)]">
+          <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/70 text-slate-500 border border-white/80 shadow-[inset_0_0_12px_rgba(255,255,255,0.6)]">
             <MapIcon className="w-3 h-3" />
-            <span className="font-pixel text-[9px] tabular-nums">{availableCount}/{totalStages}</span>
+            <span className="text-[10px] tabular-nums font-semibold tracking-wide">{availableCount}/{totalStages}</span>
           </div>
 
           <PlayerHub state={game} level={level} onUseItem={useItem} onClaim={claimDaily} />
@@ -545,7 +545,7 @@ export default function CareerMap() {
                 style={{ left: `calc(${progressPct}% - 14px)` }}
               >
                 <div className="relative flex flex-col items-center">
-                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-white/90 shadow-[0_2px_8px_rgba(165,180,252,0.45)] border border-white text-[9px] font-extrabold text-fuchsia-500 tabular-nums whitespace-nowrap leading-none">
+                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-white/95 shadow-[0_2px_8px_rgba(157,129,186,0.35)] border border-[#E4DCF1] text-[9px] font-extrabold text-[#9D81BA] tabular-nums whitespace-nowrap leading-none">
                     {progressPct}%
                   </div>
                   <div
@@ -584,7 +584,7 @@ export default function CareerMap() {
                 })}
               </div>
             </div>
-            <span className="font-pixel text-[8px] text-slate-500 tabular-nums shrink-0">{doneCount}/{implementedTotal}</span>
+            <span className="text-[10px] text-slate-400 tabular-nums shrink-0 font-medium tracking-wide">{doneCount}/{implementedTotal}</span>
           </div>
         </div>
       </header>
@@ -611,18 +611,18 @@ export default function CareerMap() {
               }}
             >
               <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-[0.10] select-none pointer-events-none">{nextRec.chapter.emoji}</div>
-              <div className="absolute right-4 bottom-3 font-pixel text-[8px] tracking-[0.25em] text-slate-500 select-none">▶ NEXT QUEST</div>
+              <div className="absolute right-4 bottom-3 text-[9px] tracking-[0.32em] text-slate-400 select-none font-medium uppercase">Next Quest</div>
               <div className="relative flex items-start gap-4">
                 <div
                   className="shrink-0 relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-[0_10px_24px_-8px_rgba(165,180,252,0.55)]"
                   style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
                 >
                   <span className="text-[34px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)] select-none">{nextRec.stage.emoji}</span>
-                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[10px] font-extrabold border-2 border-white shadow">{nextRec.si + 1}</span>
+                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-[#9D81BA] text-[10px] font-extrabold border border-[#E4DCF1] shadow-[0_4px_10px_-2px_rgba(157,129,186,0.35)]">{nextRec.si + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase font-pixel">CH.{nextRec.chapter.num} · STAGE {nextRec.si + 1}</span>
+                    <span className="text-[10px] font-semibold tracking-[0.28em] text-slate-400 uppercase">CH.{nextRec.chapter.num} · Stage {nextRec.si + 1}</span>
                     {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-slate-100 text-slate-500 border border-slate-200">敬请期待</span>}
                   </div>
                   <h2 className="text-lg font-extrabold mt-1.5 leading-tight text-slate-800">{recHeadline}</h2>
@@ -672,20 +672,20 @@ export default function CareerMap() {
                   className="relative inline-flex items-center gap-2.5 pl-2 pr-4 py-1.5 rounded-full text-white"
                   style={{
                     backgroundImage: ribbonCss[ch.num],
-                    boxShadow: '0 10px 28px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.08) inset, 0 0 24px rgba(255,255,255,0.08)',
+                    boxShadow: '0 12px 28px -14px rgba(157,129,186,0.55), inset 0 1px 0 rgba(255,255,255,0.35), inset 0 -1px 0 rgba(157,129,186,0.25)',
                   }}
                 >
-                  <span className="w-8 h-8 rounded-full bg-white/30 ring-1 ring-white/60 text-white flex items-center justify-center text-lg shrink-0">
+                  <span className="w-8 h-8 rounded-full bg-white/35 ring-1 ring-white/70 text-white flex items-center justify-center text-lg shrink-0 backdrop-blur-sm">
                     {ch.emoji}
                   </span>
                   <div className="leading-tight">
-                    <p className="font-pixel text-[8px] tracking-[0.22em] text-white/80">CH.{ch.num}</p>
-                    <h2 className="text-sm sm:text-base font-bold font-display-aurora drop-shadow-[0_1px_0_rgba(0,0,0,0.4)]">
+                    <p className="text-[9px] tracking-[0.32em] text-white/85 font-medium uppercase">Ch.{ch.num}</p>
+                    <h2 className="text-sm sm:text-base font-bold font-display-aurora text-white">
                       第{['一','二','三','四','五','六','七'][ci]}章 · {ch.title}
                     </h2>
                   </div>
                   {chComplete && (
-                    <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-400 text-emerald-950 font-bold inline-flex items-center gap-0.5 shadow">
+                    <span className="ml-1 text-[10px] px-2 py-0.5 rounded-full bg-white/95 text-[#9D81BA] font-bold inline-flex items-center gap-0.5 shadow-sm">
                       <Check className="w-2.5 h-2.5" strokeWidth={3} />通关
                     </span>
                   )}
@@ -750,8 +750,8 @@ export default function CareerMap() {
                 >
                   <defs>
                     <linearGradient id={`path-${ch.num}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#5eead4" stopOpacity="0.95" />
-                      <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.85" />
+                      <stop offset="0%" stopColor="#C9BEE3" stopOpacity="0.95" />
+                      <stop offset="100%" stopColor="#9DB4D6" stopOpacity="0.85" />
                     </linearGradient>
                     <filter id={`glow-${ch.num}`} x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="1.4" result="blur" />
@@ -762,11 +762,11 @@ export default function CareerMap() {
                     </filter>
                   </defs>
                   {/* 外层柔光 */}
-                  <path d={d} fill="none" stroke="rgba(94, 234, 212, 0.18)" strokeWidth="9" strokeLinecap="round" />
+                  <path d={d} fill="none" stroke="rgba(201, 190, 227, 0.28)" strokeWidth="9" strokeLinecap="round" />
                   {/* 主线条 */}
                   <path d={d} fill="none" stroke={`url(#path-${ch.num})`} strokeWidth="2.5" strokeLinecap="round" filter={`url(#glow-${ch.num})`} />
                   {/* 流动的能量碎片 */}
-                  <path d={d} fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="1" strokeLinecap="round" className="path-energy" />
+                  <path d={d} fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1" strokeLinecap="round" className="path-energy" />
                 </svg>
 
                 {/* 关卡节点 */}
@@ -785,17 +785,17 @@ export default function CareerMap() {
                     >
                       <div className={cn('relative flex items-center', labelLeft ? 'flex-row' : 'flex-row-reverse')}>
                         <div className="relative shrink-0">
-                          {/* active 节点：霓虹光晕 + 旋转金环 */}
+                          {/* active 节点：柔和鸢尾光晕 + 旋转金环 */}
                           {isActive && (
                             <>
-                              <span className="absolute -inset-4 rounded-full blur-2xl animate-pulse bg-emerald-400/40" />
-                              <span className="node-ring-shine" />
+                              <span className="absolute -inset-4 rounded-full blur-2xl animate-pulse bg-[#C9BEE3]/45" />
+                              <span className="node-ring-shine opacity-70" />
                               <span className="sparkle absolute -top-2 -right-2 text-[14px] select-none" aria-hidden>✨</span>
                               <span className="sparkle absolute -bottom-1 -left-2 text-[12px] select-none" style={{ animationDelay: '0.8s' }} aria-hidden>⭐</span>
                             </>
                           )}
-                          {/* 底座阴影 */}
-                          <span className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-14 h-2 rounded-full bg-black/60 blur-md" />
+                          {/* 底座阴影 —— 改成柔和投影，去掉黑色硬阴影 */}
+                          <span className="absolute left-1/2 -bottom-1.5 -translate-x-1/2 w-12 h-1.5 rounded-full bg-[#9D81BA]/25 blur-md" />
 
                           <button
                             onClick={() => !isLocked && st.to && navigate(st.to)}
@@ -805,44 +805,44 @@ export default function CareerMap() {
                               'border-[3px]',
                               isLocked
                                 ? 'border-white/80 bg-gradient-to-br from-slate-100 to-slate-200 cursor-not-allowed'
-                                : cn('border-white/85 bg-gradient-to-br hover:scale-110 hover:-rotate-6 active:scale-95 cursor-pointer', ch.nodeBg),
-                              isActive && 'ring-[3px] ring-amber-300 ring-offset-2 ring-offset-white',
+                                : cn('border-white/90 bg-gradient-to-br hover:scale-110 hover:-rotate-6 active:scale-95 cursor-pointer', ch.nodeBg),
+                              isActive && 'ring-[3px] ring-[#C9BEE3] ring-offset-2 ring-offset-white',
                             )}
                             style={{
                               boxShadow: isLocked
-                                ? 'inset 0 2px 0 rgba(255,255,255,0.5), 0 6px 14px -4px rgba(148,163,184,0.35)'
-                                : '0 14px 30px -8px rgba(148,163,184,0.45), inset 0 -5px 0 rgba(0,0,0,0.18), inset 0 3px 0 rgba(255,255,255,0.55), 0 0 22px rgba(165,180,252,0.25)',
+                                ? 'inset 0 2px 0 rgba(255,255,255,0.5), 0 6px 14px -4px rgba(148,163,184,0.3)'
+                                : '0 14px 30px -10px rgba(157,129,186,0.4), inset 0 -4px 0 rgba(157,129,186,0.18), inset 0 3px 0 rgba(255,255,255,0.6), 0 0 22px rgba(201,190,227,0.3)',
                             }}
                             title={st.title}
                           >
                             {!isLocked && (
-                              <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/70 blur-[2px] rotate-[-20deg] pointer-events-none" />
+                              <span className="absolute top-1.5 left-3 w-5 h-3 rounded-full bg-white/75 blur-[2px] rotate-[-20deg] pointer-events-none" />
                             )}
                             {isLocked ? (
                               <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
                               <span
-                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none animate-node-bob motion-reduce:animate-none"
-                                style={{ filter: 'saturate(1.15)', animationDelay: `${(si * 0.4) % 2}s` }}
+                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(157,129,186,0.25)] select-none animate-node-bob motion-reduce:animate-none"
+                                style={{ filter: 'saturate(1.12)', animationDelay: `${(si * 0.4) % 2}s` }}
                               >
                                 {st.emoji}
                               </span>
                             )}
-                            {/* 序号徽章 */}
+                            {/* 序号徽章 —— 鸢尾紫 */}
                             <span className={cn(
-                              'absolute -top-2 -left-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-fuchsia-500 text-[11px] sm:text-[12px] font-extrabold flex items-center justify-center shadow border-2 border-fuchsia-200 font-pixel',
+                              'absolute -top-2 -left-2 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-white text-[#9D81BA] text-[11px] sm:text-[12px] font-extrabold flex items-center justify-center shadow-[0_3px_8px_-2px_rgba(157,129,186,0.4)] border border-[#E4DCF1] tabular-nums',
                               isLocked && 'opacity-70 text-slate-400 border-slate-200',
                             )}>
                               {si + 1}
                             </span>
                             {isDone && (
-                              <span className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-emerald-400 text-white flex items-center justify-center shadow-[0_4px_12px_rgba(16,185,129,0.4)] border-2 border-white">
+                              <span className="absolute -bottom-1 -right-1 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-gradient-to-br from-[#B8C9E3] to-[#9D81BA] text-white flex items-center justify-center shadow-[0_4px_12px_rgba(157,129,186,0.45)] border-2 border-white">
                                 <Check className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={3.5} />
                               </span>
                             )}
                             {isActive && (
-                              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-300 text-amber-900 shadow-[0_4px_14px_rgba(251,191,36,0.5)] border-2 border-white whitespace-nowrap animate-bounce font-pixel tracking-wider">
-                                GO!
+                              <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white text-[#9D81BA] shadow-[0_4px_14px_rgba(157,129,186,0.35)] border border-[#E4DCF1] whitespace-nowrap tracking-[0.18em] animate-pulse">
+                                GO
                               </span>
                             )}
                           </button>
@@ -890,12 +890,12 @@ export default function CareerMap() {
               {/* 章节衔接装饰 */}
               {ci < chapters.length - 1 && ci !== 3 && (
                 <div className="flex justify-center my-2">
-                  <div className="flex items-center gap-1.5 opacity-60">
-                    <span className="w-1 h-1 rounded-full bg-emerald-400/40" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.7)]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
-                    <span className="w-1 h-1 rounded-full bg-emerald-400/40" />
+                  <div className="flex items-center gap-1.5 opacity-70">
+                    <span className="w-1 h-1 rounded-full bg-[#C9BEE3]/50" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9BEE3]/70" />
+                    <span className="w-2 h-2 rounded-full bg-[#9D81BA] shadow-[0_0_10px_rgba(157,129,186,0.55)]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9BEE3]/70" />
+                    <span className="w-1 h-1 rounded-full bg-[#C9BEE3]/50" />
                   </div>
                 </div>
               )}
@@ -919,7 +919,7 @@ export default function CareerMap() {
                         <Trophy className="w-10 h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]" strokeWidth={2.4} />
                       </div>
                     </div>
-                    <p className="text-[10px] font-bold tracking-[0.35em] text-amber-500 mb-1 font-pixel">MILESTONE · OFFER GET</p>
+                    <p className="text-[10px] font-semibold tracking-[0.4em] text-amber-600/80 mb-1 uppercase">Milestone · Offer Get</p>
                     <h3 className="text-xl sm:text-2xl font-bold font-display-aurora text-slate-800">拿下心仪 Offer</h3>
                     <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
                       恭喜走完求职路。<span className="font-semibold text-slate-700">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
