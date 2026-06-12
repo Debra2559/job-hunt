@@ -611,18 +611,18 @@ export default function CareerMap() {
               }}
             >
               <div className="absolute -right-8 -top-8 text-[140px] leading-none opacity-[0.10] select-none pointer-events-none">{nextRec.chapter.emoji}</div>
-              <div className="absolute right-4 bottom-3 font-pixel text-[8px] tracking-[0.25em] text-slate-500 select-none">▶ NEXT QUEST</div>
+              <div className="absolute right-4 bottom-3 text-[9px] tracking-[0.32em] text-slate-400 select-none font-medium uppercase">Next Quest</div>
               <div className="relative flex items-start gap-4">
                 <div
                   className="shrink-0 relative w-16 h-16 rounded-2xl flex items-center justify-center shadow-[0_10px_24px_-8px_rgba(165,180,252,0.55)]"
                   style={{ backgroundImage: ribbonCss[nextRec.chapter.num] || ribbonCss['01'] }}
                 >
                   <span className="text-[34px] leading-none drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)] select-none">{nextRec.stage.emoji}</span>
-                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-amber-300 text-amber-900 text-[10px] font-extrabold border-2 border-white shadow">{nextRec.si + 1}</span>
+                  <span className="absolute -top-1.5 -right-1.5 px-1.5 py-0.5 rounded-full bg-white text-[#9D81BA] text-[10px] font-extrabold border border-[#E4DCF1] shadow-[0_4px_10px_-2px_rgba(157,129,186,0.35)]">{nextRec.si + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-[10px] font-bold tracking-[0.2em] text-slate-500 uppercase font-pixel">CH.{nextRec.chapter.num} · STAGE {nextRec.si + 1}</span>
+                    <span className="text-[10px] font-semibold tracking-[0.28em] text-slate-400 uppercase">CH.{nextRec.chapter.num} · Stage {nextRec.si + 1}</span>
                     {nextRec.stage.comingSoon && <span className="text-[10px] px-1.5 py-0.5 rounded-md font-bold bg-slate-100 text-slate-500 border border-slate-200">敬请期待</span>}
                   </div>
                   <h2 className="text-lg font-extrabold mt-1.5 leading-tight text-slate-800">{recHeadline}</h2>
