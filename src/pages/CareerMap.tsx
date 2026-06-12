@@ -919,7 +919,7 @@ export default function CareerMap() {
                         <Trophy className="w-10 h-10 text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.18)]" strokeWidth={2.4} />
                       </div>
                     </div>
-                    <p className="text-[10px] font-bold tracking-[0.35em] text-amber-500 mb-1 font-pixel">MILESTONE · OFFER GET</p>
+                    <p className="text-[10px] font-semibold tracking-[0.4em] text-amber-600/80 mb-1 uppercase">Milestone · Offer Get</p>
                     <h3 className="text-xl sm:text-2xl font-bold font-display-aurora text-slate-800">拿下心仪 Offer</h3>
                     <p className="text-xs sm:text-sm text-slate-500 mt-2 max-w-sm mx-auto leading-relaxed">
                       恭喜走完求职路。<span className="font-semibold text-slate-700">Offer 不是终点，是新故事的起点</span>——接下来还有入职、文化、长期成长在等你。
