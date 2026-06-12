@@ -584,7 +584,7 @@ export default function CareerMap() {
                 })}
               </div>
             </div>
-            <span className="font-pixel text-[8px] text-slate-500 tabular-nums shrink-0">{doneCount}/{implementedTotal}</span>
+            <span className="text-[10px] text-slate-400 tabular-nums shrink-0 font-medium tracking-wide">{doneCount}/{implementedTotal}</span>
           </div>
         </div>
       </header>
