@@ -458,6 +458,32 @@ export default function CareerMap() {
         <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[560px] h-[220px] rounded-full bg-[#FBCFE8]/35 blur-[120px]" />
         <div className="absolute bottom-[10%] right-[8%] w-[360px] h-[360px] rounded-full bg-[#FFE4B5]/40 blur-[120px]" />
 
+        {/* 漂浮贴纸 —— 让地图像 BOSS 直聘那种"会动的封面" */}
+        {[
+          { emo: '☁️', top: '6%', size: 44, dur: 46, delay: 0, op: 0.55 },
+          { emo: '🎈', top: '22%', size: 36, dur: 52, delay: 8, op: 0.5 },
+          { emo: '☁️', top: '38%', size: 52, dur: 60, delay: 4, op: 0.45 },
+          { emo: '✉️', top: '58%', size: 32, dur: 50, delay: 14, op: 0.5 },
+          { emo: '🎀', top: '74%', size: 30, dur: 56, delay: 6, op: 0.5 },
+          { emo: '☁️', top: '88%', size: 40, dur: 64, delay: 2, op: 0.4 },
+        ].map((c, i) => (
+          <div
+            key={i}
+            className="absolute left-0 w-full motion-reduce:hidden"
+            style={{ top: c.top }}
+          >
+            <span
+              className="inline-block animate-cloud-drift select-none"
+              style={{
+                fontSize: c.size,
+                animationDuration: `${c.dur}s`,
+                animationDelay: `-${c.delay}s`,
+                opacity: c.op,
+                filter: 'drop-shadow(0 6px 12px rgba(157,129,186,0.25))',
+              }}
+            >{c.emo}</span>
+          </div>
+        ))}
       </div>
 
       <div
@@ -694,21 +720,23 @@ export default function CareerMap() {
 
               {/* 游戏地图区域 */}
               <div className="relative" style={{ height: sectionHeight }}>
-                {/* 散落的景物 —— 暗色画布上保持低饱和 */}
-                {(isMobile ? ch.scenery.slice(0, 2) : ch.scenery).map((emo, i) => {
+                {/* 散落的景物 —— 更亮、更像贴纸 */}
+                {(isMobile ? ch.scenery.slice(0, 3) : ch.scenery).map((emo, i) => {
                   const seed = (ci * 13 + i * 37) % 100;
                   const left = 5 + ((seed * 7) % 85);
                   const top = 10 + ((seed * 11) % 80);
-                  const size = isMobile ? 16 + ((seed * 2) % 8) : 18 + ((seed * 3) % 16);
+                  const size = isMobile ? 20 + ((seed * 2) % 10) : 24 + ((seed * 3) % 18);
+                  const delay = (seed % 7) * 0.3;
                   return (
                     <span
                       key={i}
-                      className="absolute select-none pointer-events-none opacity-25 sm:opacity-35"
+                      className="absolute select-none pointer-events-none opacity-70 animate-sticker-wobble"
                       style={{
                         left: `${left}%`,
                         top: `${top}%`,
                         fontSize: `${size}px`,
-                        filter: 'grayscale(0.4) drop-shadow(0 0 6px rgba(255,255,255,0.15))',
+                        animationDelay: `${delay}s`,
+                        filter: 'drop-shadow(0 4px 8px rgba(157,129,186,0.25))',
                       }}
                     >{emo}</span>
                   );
@@ -794,8 +822,8 @@ export default function CareerMap() {
                               <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
                               <span
-                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none"
-                                style={{ filter: 'saturate(1.1)' }}
+                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none animate-node-bob motion-reduce:animate-none"
+                                style={{ filter: 'saturate(1.15)', animationDelay: `${(si * 0.4) % 2}s` }}
                               >
                                 {st.emoji}
                               </span>

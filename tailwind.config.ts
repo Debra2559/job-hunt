@@ -175,6 +175,18 @@ export default {
           "0%, 100%": { opacity: "0.85" },
           "50%": { opacity: "1" },
         },
+        "node-bob": {
+          "0%, 100%": { transform: "translateY(0) rotate(-1.5deg)" },
+          "50%": { transform: "translateY(-4px) rotate(1.5deg)" },
+        },
+        "cloud-drift": {
+          "0%": { transform: "translateX(-8%)" },
+          "100%": { transform: "translateX(108%)" },
+        },
+        "sticker-wobble": {
+          "0%, 100%": { transform: "translateY(0) rotate(-3deg)" },
+          "50%": { transform: "translateY(-6px) rotate(3deg)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -192,6 +204,9 @@ export default {
         "pet-float": "pet-float 4s ease-in-out infinite",
         "pet-breathe": "pet-breathe 3.6s ease-in-out infinite",
         "dot-breathe": "dot-breathe 2.4s ease-in-out infinite",
+        "node-bob": "node-bob 3.8s ease-in-out infinite",
+        "cloud-drift": "cloud-drift 38s linear infinite",
+        "sticker-wobble": "sticker-wobble 4.2s ease-in-out infinite",
       },
     },
   },
