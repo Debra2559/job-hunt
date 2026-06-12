@@ -458,6 +458,32 @@ export default function CareerMap() {
         <div className="absolute top-[46%] left-1/2 -translate-x-1/2 w-[560px] h-[220px] rounded-full bg-[#FBCFE8]/35 blur-[120px]" />
         <div className="absolute bottom-[10%] right-[8%] w-[360px] h-[360px] rounded-full bg-[#FFE4B5]/40 blur-[120px]" />
 
+        {/* 漂浮贴纸 —— 让地图像 BOSS 直聘那种"会动的封面" */}
+        {[
+          { emo: '☁️', top: '6%', size: 44, dur: 46, delay: 0, op: 0.55 },
+          { emo: '🎈', top: '22%', size: 36, dur: 52, delay: 8, op: 0.5 },
+          { emo: '☁️', top: '38%', size: 52, dur: 60, delay: 4, op: 0.45 },
+          { emo: '✉️', top: '58%', size: 32, dur: 50, delay: 14, op: 0.5 },
+          { emo: '🎀', top: '74%', size: 30, dur: 56, delay: 6, op: 0.5 },
+          { emo: '☁️', top: '88%', size: 40, dur: 64, delay: 2, op: 0.4 },
+        ].map((c, i) => (
+          <div
+            key={i}
+            className="absolute left-0 w-full motion-reduce:hidden"
+            style={{ top: c.top }}
+          >
+            <span
+              className="inline-block animate-cloud-drift select-none"
+              style={{
+                fontSize: c.size,
+                animationDuration: `${c.dur}s`,
+                animationDelay: `-${c.delay}s`,
+                opacity: c.op,
+                filter: 'drop-shadow(0 6px 12px rgba(157,129,186,0.25))',
+              }}
+            >{c.emo}</span>
+          </div>
+        ))}
       </div>
 
       <div
