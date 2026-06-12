@@ -796,8 +796,8 @@ export default function CareerMap() {
                               <Lock className="w-6 h-6 sm:w-7 sm:h-7 text-slate-400" strokeWidth={2.4} />
                             ) : (
                               <span
-                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none"
-                                style={{ filter: 'saturate(1.1)' }}
+                                className="text-[34px] sm:text-[40px] leading-none drop-shadow-[0_3px_6px_rgba(0,0,0,0.18)] select-none animate-node-bob motion-reduce:animate-none"
+                                style={{ filter: 'saturate(1.15)', animationDelay: `${(si * 0.4) % 2}s` }}
                               >
                                 {st.emoji}
                               </span>
