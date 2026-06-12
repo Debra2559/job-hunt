@@ -890,12 +890,12 @@ export default function CareerMap() {
               {/* 章节衔接装饰 */}
               {ci < chapters.length - 1 && ci !== 3 && (
                 <div className="flex justify-center my-2">
-                  <div className="flex items-center gap-1.5 opacity-60">
-                    <span className="w-1 h-1 rounded-full bg-emerald-400/40" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.7)]" />
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400/60" />
-                    <span className="w-1 h-1 rounded-full bg-emerald-400/40" />
+                  <div className="flex items-center gap-1.5 opacity-70">
+                    <span className="w-1 h-1 rounded-full bg-[#C9BEE3]/50" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9BEE3]/70" />
+                    <span className="w-2 h-2 rounded-full bg-[#9D81BA] shadow-[0_0_10px_rgba(157,129,186,0.55)]" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9BEE3]/70" />
+                    <span className="w-1 h-1 rounded-full bg-[#C9BEE3]/50" />
                   </div>
                 </div>
               )}
