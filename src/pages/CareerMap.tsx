@@ -545,7 +545,7 @@ export default function CareerMap() {
                 style={{ left: `calc(${progressPct}% - 14px)` }}
               >
                 <div className="relative flex flex-col items-center">
-                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-white/90 shadow-[0_2px_8px_rgba(165,180,252,0.45)] border border-white text-[9px] font-extrabold text-fuchsia-500 tabular-nums whitespace-nowrap leading-none">
+                  <div className="mb-0.5 px-1.5 py-0.5 rounded-full bg-white/95 shadow-[0_2px_8px_rgba(157,129,186,0.35)] border border-[#E4DCF1] text-[9px] font-extrabold text-[#9D81BA] tabular-nums whitespace-nowrap leading-none">
                     {progressPct}%
                   </div>
                   <div
