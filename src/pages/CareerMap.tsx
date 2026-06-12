@@ -750,8 +750,8 @@ export default function CareerMap() {
                 >
                   <defs>
                     <linearGradient id={`path-${ch.num}`} x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#5eead4" stopOpacity="0.95" />
-                      <stop offset="100%" stopColor="#a78bfa" stopOpacity="0.85" />
+                      <stop offset="0%" stopColor="#C9BEE3" stopOpacity="0.95" />
+                      <stop offset="100%" stopColor="#9DB4D6" stopOpacity="0.85" />
                     </linearGradient>
                     <filter id={`glow-${ch.num}`} x="-20%" y="-20%" width="140%" height="140%">
                       <feGaussianBlur stdDeviation="1.4" result="blur" />
@@ -762,11 +762,11 @@ export default function CareerMap() {
                     </filter>
                   </defs>
                   {/* 外层柔光 */}
-                  <path d={d} fill="none" stroke="rgba(94, 234, 212, 0.18)" strokeWidth="9" strokeLinecap="round" />
+                  <path d={d} fill="none" stroke="rgba(201, 190, 227, 0.28)" strokeWidth="9" strokeLinecap="round" />
                   {/* 主线条 */}
                   <path d={d} fill="none" stroke={`url(#path-${ch.num})`} strokeWidth="2.5" strokeLinecap="round" filter={`url(#glow-${ch.num})`} />
                   {/* 流动的能量碎片 */}
-                  <path d={d} fill="none" stroke="rgba(255,255,255,0.95)" strokeWidth="1" strokeLinecap="round" className="path-energy" />
+                  <path d={d} fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="1" strokeLinecap="round" className="path-energy" />
                 </svg>
 
                 {/* 关卡节点 */}
