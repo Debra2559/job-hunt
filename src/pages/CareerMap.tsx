@@ -694,21 +694,23 @@ export default function CareerMap() {
 
               {/* 游戏地图区域 */}
               <div className="relative" style={{ height: sectionHeight }}>
-                {/* 散落的景物 —— 暗色画布上保持低饱和 */}
-                {(isMobile ? ch.scenery.slice(0, 2) : ch.scenery).map((emo, i) => {
+                {/* 散落的景物 —— 更亮、更像贴纸 */}
+                {(isMobile ? ch.scenery.slice(0, 3) : ch.scenery).map((emo, i) => {
                   const seed = (ci * 13 + i * 37) % 100;
                   const left = 5 + ((seed * 7) % 85);
                   const top = 10 + ((seed * 11) % 80);
-                  const size = isMobile ? 16 + ((seed * 2) % 8) : 18 + ((seed * 3) % 16);
+                  const size = isMobile ? 20 + ((seed * 2) % 10) : 24 + ((seed * 3) % 18);
+                  const delay = (seed % 7) * 0.3;
                   return (
                     <span
                       key={i}
-                      className="absolute select-none pointer-events-none opacity-25 sm:opacity-35"
+                      className="absolute select-none pointer-events-none opacity-70 animate-sticker-wobble"
                       style={{
                         left: `${left}%`,
                         top: `${top}%`,
                         fontSize: `${size}px`,
-                        filter: 'grayscale(0.4) drop-shadow(0 0 6px rgba(255,255,255,0.15))',
+                        animationDelay: `${delay}s`,
+                        filter: 'drop-shadow(0 4px 8px rgba(157,129,186,0.25))',
                       }}
                     >{emo}</span>
                   );
