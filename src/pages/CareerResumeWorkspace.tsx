@@ -111,7 +111,7 @@ export default function CareerResumeWorkspace() {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-4 items-start">
+      <div className="grid grid-cols-1 2xl:grid-cols-[minmax(0,1fr)_360px] gap-4 items-start">
         <section className="min-w-0">
           <div className="sticky top-[60px] z-10 -mx-1 px-1 py-2 mb-3 flex items-center gap-2">
             <div className="inline-flex rounded-full bg-white/85 backdrop-blur border border-white p-0.5 shadow-sm">
@@ -137,15 +137,15 @@ export default function CareerResumeWorkspace() {
           {view === 'edit' ? (
             <ResumeEditor data={workspace.resumeData} onChange={updateResume} />
           ) : (
-            <div className="overflow-x-auto -mx-2 px-2 pb-4 print:hidden">
-              <div className="origin-top scale-[0.55] sm:scale-75 md:scale-90 lg:scale-100 mx-auto" style={{ width: 'fit-content' }}>
+            <div className="w-full overflow-x-auto rounded-3xl bg-white/50 p-3 pb-6 print:hidden">
+              <div className="origin-top mx-auto scale-[0.5] sm:scale-[0.68] md:scale-[0.78] lg:scale-[0.86] xl:scale-[0.92]" style={{ width: '210mm' }}>
                 <ResumePreview data={workspace.resumeData} />
               </div>
             </div>
           )}
         </section>
 
-        <div className="xl:sticky xl:top-[84px]">
+        <div className="2xl:sticky 2xl:top-[84px]">
           <ResumeAISuggestions suggestions={workspace.aiSuggestions?.length ? workspace.aiSuggestions : suggestions} />
         </div>
       </div>

@@ -70,6 +70,10 @@ ${text}
       targetContext,
       resumeData,
       aiSuggestions,
+      sourceEvidence: {
+        rawResumeText: text,
+        parseWarnings,
+      },
       createdAt: new Date().toISOString(),
     });
     if (parseWarnings.length > 0) {

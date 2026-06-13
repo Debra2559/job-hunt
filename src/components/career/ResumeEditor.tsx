@@ -32,6 +32,8 @@ const TextField = ({ label, value, onChange, placeholder }: {
 export default function ResumeEditor({ data, onChange }: Props) {
   const setBasic = (k: keyof ResumeData['basic'], v: string) =>
     onChange({ ...data, basic: { ...data.basic, [k]: v } });
+  const setAvailability = (k: keyof NonNullable<ResumeData['basic']['availability']>, v: string | string[]) =>
+    onChange({ ...data, basic: { ...data.basic, availability: { ...(data.basic.availability || {}), [k]: v } } });
 
   const updateItem = <K extends 'experience' | 'projects' | 'campus' | 'education'>(
     key: K, idx: number, patch: Partial<ResumeData[K][number]>,
@@ -122,12 +124,16 @@ export default function ResumeEditor({ data, onChange }: Props) {
       <Card title="👤 基本信息">
         <div className="grid grid-cols-2 gap-2">
           <TextField label="姓名" value={data.basic.name} onChange={(v) => setBasic('name', v)} />
-          <TextField label="目标岗位" value={data.basic.target} onChange={(v) => setBasic('target', v)} placeholder="如：产品经理（增长方向）" />
-          <TextField label="学校" value={data.basic.school} onChange={(v) => setBasic('school', v)} />
-          <TextField label="专业" value={data.basic.major} onChange={(v) => setBasic('major', v)} />
-          <TextField label="年级 / 届" value={data.basic.grade} onChange={(v) => setBasic('grade', v)} placeholder="2026 届" />
+          <TextField label="目标岗位" value={data.basic.targetRole} onChange={(v) => setBasic('targetRole', v)} placeholder="如：产品经理（增长方向）" />
           <TextField label="电话" value={data.basic.phone} onChange={(v) => setBasic('phone', v)} />
           <TextField label="邮箱" value={data.basic.email} onChange={(v) => setBasic('email', v)} />
+          <TextField label="当前城市" value={data.basic.city || ''} onChange={(v) => setBasic('city', v)} />
+          <TextField label="每周可到岗" value={data.basic.availability?.daysPerWeek || ''} onChange={(v) => setAvailability('daysPerWeek', v)} placeholder="如：3天" />
+          <TextField label="可持续时长" value={data.basic.availability?.internshipDuration || ''} onChange={(v) => setAvailability('internshipDuration', v)} placeholder="如：3个月以上" />
+          <TextField label="可接受 base" value={(data.basic.availability?.baseLocations || []).join('，')} onChange={(v) => setAvailability('baseLocations', v.split(/[，,、\s]+/).filter(Boolean))} placeholder="上海，北京，远程" />
+        </div>
+        <div className="mt-2">
+          <TextField label="作品 / 补充链接" value={(data.basic.links || []).join('，')} onChange={(v) => onChange({ ...data, basic: { ...data.basic, links: v.split(/[，,、\s]+/).filter(Boolean) } })} placeholder="GitHub，作品集，个人主页" />
         </div>
       </Card>
 

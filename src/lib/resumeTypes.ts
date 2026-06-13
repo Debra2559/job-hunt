@@ -1,11 +1,15 @@
 export type ResumeBasic = {
   name: string;
-  school: string;
-  major: string;
-  grade: string;
   phone: string;
   email: string;
-  target: string;
+  city?: string;
+  availability?: {
+    daysPerWeek?: string;
+    internshipDuration?: string;
+    baseLocations?: string[];
+  };
+  links?: string[];
+  targetRole: string;
 };
 
 export type ResumeEducation = {
@@ -36,7 +40,7 @@ export type ResumeData = {
 };
 
 export const emptyResume = (): ResumeData => ({
-  basic: { name: '', school: '', major: '', grade: '', phone: '', email: '', target: '' },
+  basic: { name: '', phone: '', email: '', city: '', availability: { baseLocations: [] }, links: [], targetRole: '' },
   education: [],
   experience: [],
   projects: [],
@@ -53,9 +57,17 @@ export function normalizeResume(raw: any): ResumeData {
   if (!raw || typeof raw !== 'object') return r;
   const b = raw.basic || {};
   r.basic = {
-    name: b.name || '', school: b.school || '', major: b.major || '',
-    grade: b.grade || '', phone: b.phone || '', email: b.email || '',
-    target: b.target || '',
+    name: b.name || '',
+    phone: b.phone || '',
+    email: b.email || '',
+    city: b.city || '',
+    availability: {
+      daysPerWeek: b.availability?.daysPerWeek || b.daysPerWeek || '',
+      internshipDuration: b.availability?.internshipDuration || b.internshipDuration || '',
+      baseLocations: Array.isArray(b.availability?.baseLocations) ? b.availability.baseLocations : Array.isArray(b.baseLocations) ? b.baseLocations : [],
+    },
+    links: Array.isArray(b.links) ? b.links : [],
+    targetRole: b.targetRole || b.target || '',
   };
   // deno-lint-ignore no-explicit-any
   const mapList = (arr: any[], key: 'company' | 'name' | 'org'): ResumeItem[] =>

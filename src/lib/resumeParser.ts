@@ -86,7 +86,7 @@ export function parseResumeTextToResumeData(
   const phone = normalized.match(/(?:\+?86[-\s]?)?1[3-9]\d{9}/)?.[0] || '';
   resumeData.basic.email = email;
   resumeData.basic.phone = phone;
-  resumeData.basic.target = targetContext.targetRole;
+  resumeData.basic.targetRole = targetContext.targetRole;
 
   const lines = splitLines(normalized);
   const firstNameLine = lines.find(line => line.length <= 8 && !/[：:0-9@]/.test(line));

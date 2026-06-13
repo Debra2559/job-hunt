@@ -40,8 +40,9 @@ function describeCandidate(input: GenerateSelfIntroInput) {
   const { resumeData, targetContext } = input.workspaceState;
   const targetRole = targetContext.targetRole;
   const name = resumeData.basic.name || '我';
-  const school = resumeData.basic.school;
-  const major = resumeData.basic.major;
+  const firstEducation = resumeData.education[0];
+  const school = firstEducation?.school || '';
+  const major = firstEducation?.degree || '';
   const identity = [school, major].filter(Boolean).join('，');
   const skills = resumeData.skills.slice(0, 4).join('、');
   const roleFocus = targetContext.requiredAbilities?.slice(0, 3).join('、') || input.interviewTipsData?.roleBasedGuide.interviewFocus.slice(0, 3).join('、') || '岗位相关能力';

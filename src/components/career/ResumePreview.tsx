@@ -34,7 +34,14 @@ const ItemBlock = ({ it, leadLabel }: { it: ResumeItem; leadLabel?: string }) =>
 const ResumePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
   const { basic, education, experience, projects, campus, skills, certs, selfEval } = data;
   const contactLine = [basic.phone, basic.email].filter(Boolean).join(' · ');
-  const schoolLine = [basic.school, basic.major, basic.grade].filter(Boolean).join(' · ');
+  const firstEdu = education[0];
+  const schoolLine = firstEdu ? [firstEdu.school, firstEdu.degree].filter(Boolean).join(' · ') : '';
+  const availabilityLine = [
+    basic.city,
+    basic.availability?.daysPerWeek && `每周${basic.availability.daysPerWeek}`,
+    basic.availability?.internshipDuration && `可实习${basic.availability.internshipDuration}`,
+    basic.availability?.baseLocations?.length ? `base：${basic.availability.baseLocations.join('、')}` : '',
+  ].filter(Boolean).join(' · ');
 
   return (
     <div ref={ref} className="resume-print bg-white text-foreground p-8 mx-auto shadow-md rounded-md" style={{ width: '210mm', minHeight: '297mm' }}>
@@ -42,9 +49,11 @@ const ResumePreview = forwardRef<HTMLDivElement, Props>(({ data }, ref) => {
         <h1 className="text-2xl font-bold tracking-tight">{basic.name || '你的姓名'}</h1>
         {schoolLine && <div className="text-[12px] text-foreground/75 mt-1">{schoolLine}</div>}
         {contactLine && <div className="text-[12px] text-foreground/75 mt-0.5">{contactLine}</div>}
-        {basic.target && (
+        {availabilityLine && <div className="text-[12px] text-foreground/75 mt-0.5">{availabilityLine}</div>}
+        {basic.links?.length ? <div className="text-[11px] text-foreground/70 mt-0.5">{basic.links.join(' · ')}</div> : null}
+        {basic.targetRole && (
           <div className="inline-block mt-2 text-[11px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 font-semibold">
-            求职意向：{basic.target}
+            求职意向：{basic.targetRole}
           </div>
         )}
       </header>

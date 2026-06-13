@@ -1,5 +1,6 @@
 import type { ResumeData } from '@/lib/resumeTypes';
 import type { ResumeRoleContext } from '@/lib/resumeRoleContext';
+import type { ResumeQuestData } from '@/lib/resumeQuest';
 
 export const RESUME_WORKSPACE_STORAGE_KEY = 'resumeWorkspaceState';
 
@@ -25,6 +26,12 @@ export type AISuggestion = {
   suggestedRewrite?: string;
 };
 
+export type ResumeSourceEvidence = {
+  questData?: ResumeQuestData;
+  rawResumeText?: string;
+  parseWarnings?: string[];
+};
+
 export type ResumeWorkspaceState = {
   source: 'quest' | 'upload';
   targetContext: ResumeTargetContext;
@@ -32,6 +39,7 @@ export type ResumeWorkspaceState = {
   skillGroups?: SkillGroup[];
   abilitySummary?: AbilityItem[];
   aiSuggestions?: AISuggestion[];
+  sourceEvidence?: ResumeSourceEvidence;
   createdAt: string;
 };
 
