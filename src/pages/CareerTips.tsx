@@ -1,4 +1,4 @@
-import { useMemo, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link } from 'react-router-dom';
 import {
   BriefcaseBusiness,
@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Ch2PageShell from '@/components/career/Ch2PageShell';
 import JobContextBanner from '@/components/career/JobContextBanner';
-import { buildInterviewTipsData } from '@/lib/interviewTips';
+import { buildInterviewTipsData, type InterviewTipsData } from '@/lib/interviewTips';
+import { generateInterviewTipsWithLLM } from '@/lib/interviewTipsLLM';
 import { readResumeWorkspaceState } from '@/lib/resumeWorkspace';
 
 const MODULES = [
@@ -77,7 +78,20 @@ function BulletList({ items }: { items: string[] }) {
 
 export default function CareerTips() {
   const workspace = useMemo(() => readResumeWorkspaceState(), []);
-  const tipsData = useMemo(() => (workspace ? buildInterviewTipsData(workspace) : null), [workspace]);
+  const ruleBasedTips = useMemo(() => (workspace ? buildInterviewTipsData(workspace) : null), [workspace]);
+  const [tipsData, setTipsData] = useState<InterviewTipsData | null>(ruleBasedTips);
+
+  useEffect(() => {
+    if (!workspace || !ruleBasedTips) return;
+    setTipsData(ruleBasedTips);
+    generateInterviewTipsWithLLM({ workspace, ruleBasedTips })
+      .then(result => {
+        if (result) setTipsData(result);
+      })
+      .catch(() => {
+        setTipsData(ruleBasedTips);
+      });
+  }, [workspace, ruleBasedTips]);
 
   if (!workspace || !tipsData) {
     return (

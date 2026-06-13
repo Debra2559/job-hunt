@@ -597,7 +597,11 @@ function warningsToAISuggestions(warnings: ResumeGenerateResult['missingInfoWarn
   }));
 }
 
-export function questDataToWorkspaceState(data: ResumeQuestData, roleContext?: ResumeRoleContext | null): ResumeWorkspaceState {
+export function questDataToWorkspaceState(
+  data: ResumeQuestData,
+  roleContext?: ResumeRoleContext | null,
+  generateResultOverride?: ResumeGenerateResult,
+): ResumeWorkspaceState {
   const abilities = buildAbilitiesFromQuestData(data);
   const roleDerived = getRoleContextFromTarget(data.target.targetRole);
   const targetContext: ResumeRoleContext = {
@@ -608,7 +612,7 @@ export function questDataToWorkspaceState(data: ResumeQuestData, roleContext?: R
     preferredExperienceSignals: roleContext?.targetRole === data.target.targetRole ? roleContext.preferredExperienceSignals : ['课程项目', '竞赛经历', '社团活动', '个人作品'],
     resumeFocus: data.target.resumeFocus || roleDerived.resumeFocus,
   };
-  const generateResult = generateResumeDraftFromQuestData({ ...data, abilities });
+  const generateResult = generateResultOverride || generateResumeDraftFromQuestData({ ...data, abilities });
   const resumeData = generateResult.resumeData;
   const abilitySummary: AbilityItem[] = abilities.map(item => ({
     name: item.name,

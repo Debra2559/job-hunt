@@ -10,7 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+.env
 *.local
+supabase/.temp/
 
 # Editor directories and files
 .vscode/*

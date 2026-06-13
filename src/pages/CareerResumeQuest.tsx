@@ -12,6 +12,7 @@ import { useQuestProgress } from '@/hooks/useQuestProgress';
 import { readResumeRoleContext, type ResumeRoleContext } from '@/lib/resumeRoleContext';
 import { saveResumeWorkspaceState } from '@/lib/resumeWorkspace';
 import { generateFollowUpPrompt, inferExperienceTypesFromRawText, type FollowUpPromptResult } from '@/lib/resumeQuestFollowUp';
+import { polishResumeDraftWithAI } from '@/lib/resumeQuestLLM';
 import {
   buildAbilitiesFromQuestData,
   createEmptyQuestData,
@@ -26,6 +27,7 @@ import {
   SKILL_GROUPS,
   type ExperienceType,
   type QuestExperience,
+  type ResumeGenerateResult,
   type ResumeQuestData,
 } from '@/lib/resumeQuest';
 
@@ -171,12 +173,12 @@ export default function CareerResumeQuest() {
     setStep(Math.min(steps.length - 1, step + 1));
   };
 
-  const generate = async () => {
+  const generate = async (draftOverride?: ResumeGenerateResult) => {
     if (!validateStep(0) || !validateStep(1) || !validateStep(2)) return;
     setLoading(true);
     try {
       const withAbilities = { ...data, abilities };
-      const workspace = questDataToWorkspaceState(withAbilities, roleContext);
+      const workspace = questDataToWorkspaceState(withAbilities, roleContext, draftOverride);
       saveResumeWorkspaceState(workspace);
       localStorage.removeItem(RESUME_QUEST_DRAFT_KEY);
       if (!isDone('resume')) {
@@ -810,14 +812,59 @@ function SkillStep({ data, updateData }: { data: ResumeQuestData; updateData: (u
   );
 }
 
-function AbilityStep({ abilities, data, generate, loading }: { abilities: ReturnType<typeof buildAbilitiesFromQuestData>; data: ResumeQuestData; generate: () => void; loading: boolean }) {
-  const draft = useMemo(() => generateResumeDraftFromQuestData({ ...data, abilities }), [data, abilities]);
+function AbilityStep({ abilities, data, generate, loading }: { abilities: ReturnType<typeof buildAbilitiesFromQuestData>; data: ResumeQuestData; generate: (draftOverride?: ResumeGenerateResult) => void; loading: boolean }) {
+  const ruleDraft = useMemo(() => generateResumeDraftFromQuestData({ ...data, abilities }), [data, abilities]);
+  const [draft, setDraft] = useState<ResumeGenerateResult>(ruleDraft);
+  const [polishStatus, setPolishStatus] = useState<'loading' | 'success' | 'fallback'>('loading');
+
+  useEffect(() => {
+    let cancelled = false;
+    const roleDerived = getRoleContextFromTarget(data.target.targetRole);
+    setDraft(ruleDraft);
+    setPolishStatus('loading');
+
+    polishResumeDraftWithAI({
+      resumeData: ruleDraft.resumeData,
+      questData: { ...data, abilities },
+      targetContext: {
+        targetRole: data.target.targetRole || '通用校招岗位',
+        roleCategory: data.target.inferredRoleCategory || roleDerived.inferredRoleCategory || '通用',
+        matchReason: '用户从 0 创建简历时确认的目标岗位。',
+        requiredAbilities: data.target.requiredAbilities?.length ? data.target.requiredAbilities : roleDerived.requiredAbilities,
+        preferredExperienceSignals: ['课程项目', '竞赛经历', '社团活动', '个人作品'],
+        resumeFocus: data.target.resumeFocus || roleDerived.resumeFocus,
+      },
+      missingInfoWarnings: ruleDraft.missingInfoWarnings,
+      generatedHighlights: ruleDraft.generatedHighlights,
+    })
+      .then(polished => {
+        if (cancelled) return;
+        setDraft(polished);
+        setPolishStatus('success');
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setDraft(ruleDraft);
+        setPolishStatus('fallback');
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [abilities, data, ruleDraft]);
+
   return (
     <div className="space-y-4">
       <div>
         <h3 className="text-xl font-black text-slate-950">已生成一版简历草稿</h3>
         <p className="mt-1 text-sm text-slate-500">我已经根据你填写的基础信息、教育背景、经历和技能，生成了一版可编辑简历。你可以先查看草稿，再进入工作台继续修改。</p>
       </div>
+
+      <Card title="AI 润色状态">
+        {polishStatus === 'loading' && <p className="text-sm text-slate-600">正在尝试调用 LLM 润色经历 bullet 和自我评价。失败时会自动保留规则版草稿。</p>}
+        {polishStatus === 'success' && <p className="text-sm font-semibold text-emerald-700">已使用 LLM 润色经历 bullet 和自我评价。</p>}
+        {polishStatus === 'fallback' && <p className="text-sm text-amber-700">LLM 暂不可用，当前展示规则版草稿。</p>}
+      </Card>
 
       <Card title="生成摘要">
         <p className="text-sm leading-relaxed text-slate-700">{draft.generationSummary}</p>
@@ -868,7 +915,7 @@ function AbilityStep({ abilities, data, generate, loading }: { abilities: Return
 
       <Card title="进入下一步">
         <p className="text-sm leading-relaxed text-slate-600">点击后会把这版草稿写入 localStorage.resumeWorkspaceState，并进入简历工作台继续手动调整和优化。</p>
-        <Button onClick={generate} disabled={loading} className={`mt-4 w-full rounded-2xl h-11 text-white font-bold shadow-lg bg-gradient-to-r ${GRADIENT}`}>
+        <Button onClick={() => generate(draft)} disabled={loading} className={`mt-4 w-full rounded-2xl h-11 text-white font-bold shadow-lg bg-gradient-to-r ${GRADIENT}`}>
           {loading ? <Loader2 className="w-4 h-4 animate-spin mr-1" /> : <Sparkles className="w-4 h-4 mr-1" />}
           {loading ? '正在写入…' : '进入简历工作台继续优化'}
         </Button>
