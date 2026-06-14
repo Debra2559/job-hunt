@@ -5,13 +5,34 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import { FastForward, Check, AlertTriangle, ChevronLeft } from 'lucide-react';
+import { FastForward, Check, AlertTriangle, ChevronLeft, FileText, Route } from 'lucide-react';
 import type { ChapterId, SkipPayload } from '@/hooks/useChapterSkip';
+import { SELECTED_JOBS_LS_KEY } from '@/pages/CareerRecommend';
+import { readResumeWorkspaceState } from '@/lib/resumeWorkspace';
 
-const POSITION_PRESETS = [
-  '产品经理', '前端工程师', '后端工程师', '算法工程师', '数据分析师',
-  '运营', '市场营销', '人力资源', 'UI/UX 设计师', '财务/审计',
-  '咨询顾问', '销售', '项目经理', '内容创作', '法务',
+const REPORT_LS_KEY = 'career:report:v1';
+
+type JobOption = {
+  title: string;
+  category: string;
+  emoji?: string;
+  skills?: string[];
+  reasons?: string[];
+  path?: string;
+  salary?: string;
+  outlook?: string;
+  match?: number;
+};
+
+const FALLBACK_JOB_OPTIONS: JobOption[] = [
+  { title: '产品经理', category: '互联网', emoji: '🧭' },
+  { title: '互联网运营', category: '互联网', emoji: '📣' },
+  { title: '数据分析师', category: '数据', emoji: '📊' },
+  { title: '前端工程师', category: '研发', emoji: '💻' },
+  { title: '人力资源 HR', category: 'HR', emoji: '🤝' },
+  { title: '市场营销', category: '市场', emoji: '🎯' },
+  { title: 'UI / UX 设计', category: '设计', emoji: '🎨' },
+  { title: '财务 / 金融', category: '财务', emoji: '💼' },
 ];
 
 const CITY_PRESETS = ['北京', '上海', '广州', '深圳', '杭州', '成都', '南京', '武汉', '苏州', '远程'];
@@ -28,14 +49,62 @@ type Props = {
 };
 
 type StepState = {
-  positions: string[];
+  targetRole: string;
+  targetCategory: string;
   customPos: string;
   cities: string[];
   note: string;
   text1: string;
 };
 
-const emptyStep = (): StepState => ({ positions: [], customPos: '', cities: [], note: '', text1: '' });
+const emptyStep = (): StepState => ({ targetRole: '', targetCategory: '', customPos: '', cities: [], note: '', text1: '' });
+
+function normalizeJobOption(raw: any): JobOption | null {
+  const title = typeof raw?.title === 'string' ? raw.title.trim() : '';
+  if (!title) return null;
+  return {
+    title,
+    category: raw?.category || '自定义',
+    emoji: raw?.emoji,
+    skills: Array.isArray(raw?.skills) ? raw.skills.filter(Boolean) : [],
+    reasons: Array.isArray(raw?.reasons) ? raw.reasons.filter(Boolean) : [],
+    path: raw?.path || '',
+    salary: raw?.salary || '—',
+    outlook: raw?.outlook || '—',
+    match: typeof raw?.match === 'number' ? raw.match : 80,
+  };
+}
+
+function readSelectedJobOptions(): JobOption[] {
+  try {
+    const raw = localStorage.getItem(SELECTED_JOBS_LS_KEY);
+    const jobs = raw ? JSON.parse(raw) : [];
+    return Array.isArray(jobs) ? jobs.map(normalizeJobOption).filter(Boolean) as JobOption[] : [];
+  } catch {
+    return [];
+  }
+}
+
+function readReportJobOptions(): JobOption[] {
+  try {
+    const raw = localStorage.getItem(REPORT_LS_KEY);
+    const stored = raw ? JSON.parse(raw) : null;
+    const recs = stored?.data?.recommendations;
+    return Array.isArray(recs) ? recs.map(normalizeJobOption).filter(Boolean) as JobOption[] : [];
+  } catch {
+    return [];
+  }
+}
+
+function uniqueJobs(jobs: JobOption[]) {
+  const seen = new Set<string>();
+  return jobs.filter(job => {
+    const key = job.title.trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
 
 export default function ChapterSkipDialog({ open, onOpenChange, chapters, onConfirm }: Props) {
   const [stepIdx, setStepIdx] = useState(0);
@@ -55,33 +124,50 @@ export default function ChapterSkipDialog({ open, onOpenChange, chapters, onConf
   const total = chapters.length;
   const isLast = stepIdx === total - 1;
   const cur: StepState = (current && steps[current.id]) || emptyStep();
+  const selectedJobOptions = useMemo(() => readSelectedJobOptions(), [open]);
+  const reportJobOptions = useMemo(() => readReportJobOptions(), [open]);
+  const ch1JobOptions = useMemo(
+    () => uniqueJobs([...selectedJobOptions, ...reportJobOptions, ...FALLBACK_JOB_OPTIONS]),
+    [selectedJobOptions, reportJobOptions],
+  );
+  const hasAssessmentOptions = reportJobOptions.length > 0;
+  const hasResumeWorkspace = useMemo(
+    () => current?.id === 'ch2' && Boolean(readResumeWorkspaceState()),
+    [current?.id, open],
+  );
 
   const setCur = (patch: Partial<StepState>) => {
     if (!current) return;
     setSteps(prev => ({ ...prev, [current.id]: { ...(prev[current.id] || emptyStep()), ...patch } }));
   };
 
-  const toggle = (list: string[], key: 'positions' | 'cities', v: string) => {
+  const toggle = (list: string[], key: 'cities', v: string) => {
     setCur({ [key]: list.includes(v) ? list.filter(x => x !== v) : [...list, v] } as any);
   };
 
   const addCustomPos = () => {
     const v = cur.customPos.trim();
-    if (!v || cur.positions.includes(v)) return;
-    setCur({ positions: [...cur.positions, v], customPos: '' });
+    if (!v) return;
+    setCur({ targetRole: v, targetCategory: '自定义', customPos: '' });
   };
 
   const canNext = useMemo(() => {
     if (!current) return false;
-    if (current.id === 'ch1') return cur.positions.length >= 2;
-    if (current.id === 'ch2') return cur.text1.trim().length >= 20;
+    if (current.id === 'ch1') return cur.targetRole.trim().length > 0;
+    if (current.id === 'ch2') return hasResumeWorkspace;
     if (current.id === 'ch3') return cur.text1.trim().length >= 5;
     return true;
-  }, [current, cur]);
+  }, [current, cur, hasResumeWorkspace]);
 
   const buildPayload = (chId: ChapterId, s: StepState): any => {
-    if (chId === 'ch1') return { positions: s.positions, cities: s.cities.length ? s.cities : undefined, note: s.note.trim() || undefined };
-    if (chId === 'ch2') return { resumeHighlights: s.text1.trim() };
+    if (chId === 'ch1') return {
+      targetRole: s.targetRole,
+      targetCategory: s.targetCategory || '自定义',
+      positions: s.targetRole ? [s.targetRole] : [],
+      cities: s.cities.length ? s.cities : undefined,
+      note: s.note.trim() || undefined,
+    };
+    if (chId === 'ch2') return { resumeWorkspaceReady: Boolean(readResumeWorkspaceState()) };
     if (chId === 'ch3') return { targetCompanies: s.text1.trim() };
     return {};
   };
@@ -107,10 +193,20 @@ export default function ChapterSkipDialog({ open, onOpenChange, chapters, onConf
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg">
             <span className="text-2xl leading-none">{current.emoji}</span>
-            <span>补充「{current.title}」的关键材料</span>
+            <span>
+              {current.id === 'ch1'
+                ? '先确认你的主目标岗位'
+                : current.id === 'ch2'
+                  ? '先准备一份简历底稿'
+                  : `补充「${current.title}」的关键材料`}
+            </span>
           </DialogTitle>
           <DialogDescription className="text-xs leading-relaxed">
-            你正在跳过多个章节，请先依次补齐前面章节的关键产出，AI 会基于这些信息继续推进后续。
+            {current.id === 'ch1'
+              ? '后续简历、面试情报站、自我介绍和题库都会围绕这个岗位生成。你之后可以修改，但现在需要先选一个主方向。'
+              : current.id === 'ch2'
+                ? '第二章不再让你临时补亮点。后续模块会直接读取简历底稿；如果还没有简历，请先上传旧简历或从 0 创建。'
+                : '你正在跳过多个章节，请先依次补齐前面章节的关键产出，AI 会基于这些信息继续推进后续。'}
           </DialogDescription>
         </DialogHeader>
 
@@ -141,22 +237,28 @@ export default function ChapterSkipDialog({ open, onOpenChange, chapters, onConf
         {current.id === 'ch1' && (
           <div className="space-y-4">
             <div>
-              <label className="text-xs font-bold text-foreground">倾向岗位 <span className="text-rose-500">*</span> <span className="text-muted-foreground font-normal">（至少选 2 个）</span></label>
+              <label className="text-xs font-bold text-foreground">主目标岗位 <span className="text-rose-500">*</span> <span className="text-muted-foreground font-normal">（必选 1 个）</span></label>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                后续简历、面试情报站、自我介绍和题库都会围绕这个岗位生成。你之后可以修改，但现在需要先选一个主方向。
+              </p>
+              <p className="mt-2 text-[11px] font-bold text-emerald-700">
+                {hasAssessmentOptions ? '基于你的测评结果推荐' : '先选择一个常见求职方向'}
+              </p>
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {POSITION_PRESETS.map(p => {
-                  const on = cur.positions.includes(p);
+                {ch1JobOptions.map(job => {
+                  const on = cur.targetRole === job.title;
                   return (
                     <button
-                      key={p}
+                      key={job.title}
                       type="button"
-                      onClick={() => toggle(cur.positions, 'positions', p)}
+                      onClick={() => setCur({ targetRole: job.title, targetCategory: job.category })}
                       className={cn(
                         'px-2.5 py-1 rounded-full text-xs font-medium border transition-all',
                         on ? 'bg-emerald-500 text-white border-emerald-500 shadow-sm' : 'bg-background border-border hover:border-emerald-300'
                       )}
                     >
                       {on && <Check className="inline w-3 h-3 mr-0.5" strokeWidth={3} />}
-                      {p}
+                      {job.emoji ? `${job.emoji} ` : ''}{job.title}
                     </button>
                   );
                 })}
@@ -171,14 +273,10 @@ export default function ChapterSkipDialog({ open, onOpenChange, chapters, onConf
                 />
                 <Button type="button" size="sm" variant="outline" onClick={addCustomPos} disabled={!cur.customPos.trim()}>添加</Button>
               </div>
-              {cur.positions.filter(p => !POSITION_PRESETS.includes(p)).length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {cur.positions.filter(p => !POSITION_PRESETS.includes(p)).map(p => (
-                    <Badge key={p} variant="secondary" className="text-[10px] cursor-pointer" onClick={() => toggle(cur.positions, 'positions', p)}>
-                      {p} ×
-                    </Badge>
-                  ))}
-                </div>
+              {cur.targetRole && !ch1JobOptions.some(job => job.title === cur.targetRole) && (
+                <Badge variant="secondary" className="mt-2 text-[10px]">
+                  自定义：{cur.targetRole}
+                </Badge>
               )}
             </div>
 
@@ -217,15 +315,40 @@ export default function ChapterSkipDialog({ open, onOpenChange, chapters, onConf
         )}
 
         {current.id === 'ch2' && (
-          <div>
-            <label className="text-xs font-bold text-foreground">简历核心亮点 <span className="text-rose-500">*</span> <span className="text-muted-foreground font-normal">（至少 20 字）</span></label>
-            <Textarea
-              value={cur.text1}
-              onChange={e => setCur({ text1: e.target.value })}
-              placeholder="请用 3-5 句话概括你的核心经历、技能和亮点项目，AI 会以此作为后续投递依据。"
-              className="mt-2 text-xs min-h-[120px]"
-            />
-            <p className="text-[10px] text-muted-foreground mt-1">{cur.text1.trim().length} 字</p>
+          <div className="space-y-3">
+            {hasResumeWorkspace ? (
+              <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                <div className="flex items-center gap-2 font-bold">
+                  <Check className="h-4 w-4" />
+                  已检测到简历底稿
+                </div>
+                <p className="mt-2 text-xs leading-relaxed">
+                  可以继续跳过本章。后续面试情报站、自我介绍和题库会直接读取这份简历，不再依赖临时填写的亮点摘要。
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900">
+                <div className="flex items-center gap-2 font-bold">
+                  <FileText className="h-4 w-4" />
+                  还没有可用的简历底稿
+                </div>
+                <p className="mt-2 text-xs leading-relaxed text-sky-800">
+                  请先上传旧简历，或从 0 一键生成简历。生成后系统会写入 resumeWorkspaceState，再回到地图继续推进。
+                </p>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  <Button type="button" asChild className="bg-sky-600 text-white hover:bg-sky-700">
+                    <a href="/career/resume">
+                      <FileText className="mr-1 h-4 w-4" /> 上传旧简历
+                    </a>
+                  </Button>
+                  <Button type="button" asChild variant="outline">
+                    <a href="/career/resume-quest">
+                      <Route className="mr-1 h-4 w-4" /> 从 0 创建
+                    </a>
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 

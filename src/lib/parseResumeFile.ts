@@ -11,7 +11,7 @@ export async function extractTextFromFile(file: File): Promise<string> {
   const name = file.name.toLowerCase();
   if (name.endsWith('.pdf')) return extractPdf(file);
   if (name.endsWith('.docx')) return extractDocx(file);
-  if (name.endsWith('.txt') || name.endsWith('.md')) return file.text();
+  if (name.endsWith('.txt')) return file.text();
   throw new Error('暂只支持 PDF / DOCX / TXT 格式');
 }
 

@@ -5,13 +5,15 @@ const STORAGE_KEY = 'quest:skip:v1';
 export type ChapterId = 'ch1' | 'ch2' | 'ch3' | 'ch4' | 'ch5' | 'ch6' | 'ch7';
 
 export type Ch1SkipData = {
-  positions: string[];    // 倾向岗位
+  targetRole: string;     // 主目标岗位
+  targetCategory?: string;
+  positions?: string[];   // 兼容旧版倾向岗位记录
   cities?: string[];      // 期望城市
   note?: string;          // 补充说明
 };
 
 export type Ch2SkipData = {
-  resumeHighlights: string; // 简历亮点要点
+  resumeWorkspaceReady: boolean; // 是否已有可供后续模块读取的简历底稿
 };
 
 export type Ch3SkipData = {
