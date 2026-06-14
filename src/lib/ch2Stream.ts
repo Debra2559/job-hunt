@@ -20,7 +20,7 @@ type StreamOpts = {
  */
 export async function streamCh2(opts: StreamOpts): Promise<() => void> {
   const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
-  const ANON = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const ANON = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
   const { data: sessionData } = await supabase.auth.getSession();
   const accessToken = sessionData.session?.access_token;
 

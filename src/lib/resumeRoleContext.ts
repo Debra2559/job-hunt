@@ -14,6 +14,21 @@ type StoredJob = {
   category?: string;
   skills?: string[];
   reasons?: string[];
+  path?: string;
+  salary?: string;
+  outlook?: string;
+  match?: number;
+};
+
+export type SelectedJobInput = {
+  title: string;
+  category?: string;
+  skills?: string[];
+  reasons?: string[];
+  path?: string;
+  salary?: string;
+  outlook?: string;
+  match?: number;
 };
 
 const roleAbilityMap: Record<string, Omit<ResumeRoleContext, 'targetRole'>> = {
@@ -122,6 +137,25 @@ export function readResumeRoleContext(): ResumeRoleContext | null {
   } catch {
     return null;
   }
+}
+
+export function writeSelectedJobContext(input: SelectedJobInput) {
+  const title = input.title.trim();
+  if (!title) return;
+
+  const payload: StoredJob[] = [{
+    title,
+    category: input.category || '自定义',
+    skills: input.skills || [],
+    reasons: input.reasons?.length ? input.reasons : ['你确认的主目标岗位'],
+    path: input.path || '',
+    salary: input.salary || '—',
+    outlook: input.outlook || '—',
+    match: input.match || 80,
+  }];
+
+  localStorage.setItem(SELECTED_JOBS_LS_KEY, JSON.stringify(payload));
+  window.dispatchEvent(new Event('storage'));
 }
 
 export function formatRoleContextForPrompt(ctx: ResumeRoleContext | null) {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Compass, Brain, Crosshair, Newspaper, PenLine, Lightbulb, Building2, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight, Briefcase, CalendarCheck2, Handshake, GraduationCap, Users, Presentation, ShieldCheck, TrendingUp, Coins, GitBranch, Trophy, Sparkles, Palette, X } from 'lucide-react';
+import { Compass, Brain, Crosshair, Newspaper, PenLine, Lightbulb, BotMessageSquare, Rocket, MailPlus, ScissorsLineDashed, MessagesSquare, Mic, Lock, Check, ChevronRight, Map as MapIcon, RotateCcw, FastForward, ChevronsRight, Briefcase, CalendarCheck2, Handshake, GraduationCap, Users, Presentation, ShieldCheck, TrendingUp, Coins, GitBranch, Trophy, Sparkles, Palette, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +10,8 @@ import { useChapterSkip, type ChapterId, type SkipPayload } from '@/hooks/useCha
 import ChapterSkipDialog from '@/components/career/ChapterSkipDialog';
 import PlayerHub from '@/components/career/PlayerHub';
 import { toast } from '@/hooks/use-toast';
+import { readResumeRoleContext, writeSelectedJobContext } from '@/lib/resumeRoleContext';
+import { readResumeWorkspaceState } from '@/lib/resumeWorkspace';
 import {
   AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
   AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
@@ -66,9 +68,8 @@ const chapters: Chapter[] = [
     nodeBg: U_NODE_BG, nodeHalo: U_HALO, ribbon: U_RIBBON, ribbonShadow: U_RIBBON_SHADOW,
     scenery: ['🌲', '🏕️', '🪵', '🐿️', '☘️'],
     stages: [
-      { id: 'resume', title: '对话式一键简历', desc: '支持文字 / 图片 / PDF / 语音', icon: PenLine, emoji: '📝', to: '/career/resume', priority: 'P0' },
+      { id: 'resume', title: '对话式一键简历', desc: '从 0 创建 / 文本 / PDF / DOCX / TXT', icon: PenLine, emoji: '📝', to: '/career/resume', priority: 'P0' },
       { id: 'tips', title: '面试情报站', desc: '面试流程、题型与细节情报', icon: Lightbulb, emoji: '💡', to: '/career/tips', priority: 'P0' },
-      { id: 'company', title: '了解公司', desc: '业务、文化、最新动态', icon: Building2, emoji: '🏢', to: '/career/company', priority: 'P1' },
     ],
   },
   {
@@ -241,6 +242,7 @@ export default function CareerMap() {
   // 跳过完成后的回调（标记 stage / 跳转）
   const [skipAfter, setSkipAfter] = useState<null | (() => void)>(null);
   const [stageSkipTarget, setStageSkipTarget] = useState<{ stageId: string; stageTitle: string; ci: number; si: number } | null>(null);
+  const [resumeRequiredStage, setResumeRequiredStage] = useState<StageDef | null>(null);
 
   useEffect(() => { bumpDaily('open_map'); }, [bumpDaily]);
 
@@ -284,6 +286,31 @@ export default function CareerMap() {
   };
 
   const chapterIdOf = (num: string): ChapterId => (`ch${parseInt(num, 10)}` as ChapterId);
+  const findStage = (stageId: string) => chapters.flatMap(c => c.stages).find(s => s.id === stageId);
+  const targetRequiredStageIds = new Set(['resume', 'tips', 'self-intro', 'question-bank']);
+  const resumeRequiredStageIds = new Set(['tips', 'self-intro', 'question-bank']);
+
+  const guardStageAccess = (stage: StageDef) => {
+    if (stage.comingSoon) {
+      toast({ title: '暂未开放', description: '这个关卡还在建设中，先不用标记完成。' });
+      return false;
+    }
+
+    if (targetRequiredStageIds.has(stage.id) && !readResumeRoleContext()) {
+      setSkipQueue([{ id: 'ch1', title: '认识自己', emoji: '🧭' }]);
+      setSkipAfter(() => () => {
+        if (stage.to) navigate(stage.to);
+      });
+      return false;
+    }
+
+    if (resumeRequiredStageIds.has(stage.id) && !readResumeWorkspaceState()) {
+      setResumeRequiredStage(stage);
+      return false;
+    }
+
+    return true;
+  };
 
   // 章节是否已通关（所有非"敬请期待"关卡完成）
   const isChapterComplete = (chId: ChapterId) => {
@@ -330,7 +357,7 @@ export default function CareerMap() {
     const finalQueue = queue.length > 0 ? queue : [{ id: chId, title, emoji }];
     setSkipQueue(finalQueue);
     setSkipAfter(() => () => {
-      const stageIds = CHAPTER_STAGES[chId] || [];
+      const stageIds = (CHAPTER_STAGES[chId] || []).filter(id => !findStage(id)?.comingSoon);
       stageIds.forEach(id => markDone(id));
       toast({ title: `已跳过「${title}」`, description: '本章关卡已标记完成，可继续推进下一章' });
     });
@@ -341,17 +368,19 @@ export default function CareerMap() {
     const flat = chapters.flatMap(c => c.stages);
     const idx = flat.findIndex(s => s.id === stageId);
     if (idx < 0) return [] as string[];
-    return flat.slice(0, idx).filter(s => !completed.includes(s.id)).map(s => s.id);
+    return flat.slice(0, idx).filter(s => !s.comingSoon && !completed.includes(s.id)).map(s => s.id);
   };
 
   const runStageSkip = () => {
     if (!stageSkipTarget) return;
+    const targetStage = findStage(stageSkipTarget.stageId);
+    if (!targetStage) return;
+    if (!guardStageAccess(targetStage)) {
+      setStageSkipTarget(null);
+      return;
+    }
     const ids = stagesToSkipBefore(stageSkipTarget.stageId);
     ids.forEach(id => markDone(id));
-    const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === stageSkipTarget.stageId);
-    if (targetStage?.comingSoon && !completed.includes(targetStage.id)) {
-      markDone(targetStage.id);
-    }
     const chaptersCrossed = new Set(
       chapters.flatMap(c => c.stages.filter(s => ids.includes(s.id)).map(() => c.num))
     ).size;
@@ -362,7 +391,7 @@ export default function CareerMap() {
         : `跳过了前面 ${ids.length} 关`,
     });
     setStageSkipTarget(null);
-    if (targetStage?.to) navigate(targetStage.to);
+    if (targetStage.to) navigate(targetStage.to);
   };
 
   const confirmStageSkip = () => {
@@ -386,13 +415,16 @@ export default function CareerMap() {
       setStageSkipTarget(pending);
       // 用微任务确保 state 更新后执行
       setTimeout(() => {
+        const targetStage = findStage(pending.stageId);
+        if (!targetStage || !guardStageAccess(targetStage)) {
+          setStageSkipTarget(null);
+          return;
+        }
         const ids = stagesToSkipBefore(pending.stageId);
         ids.forEach(id => markDone(id));
-        const targetStage = chapters.flatMap(c => c.stages).find(s => s.id === pending.stageId);
-        if (targetStage?.comingSoon && !completed.includes(targetStage.id)) markDone(targetStage.id);
         toast({ title: `已跳到「${pending.stageTitle}」`, description: `已跳过前面 ${ids.length} 关` });
         setStageSkipTarget(null);
-        if (targetStage?.to) navigate(targetStage.to);
+        if (targetStage.to) navigate(targetStage.to);
       }, 0);
     });
   };
@@ -401,8 +433,15 @@ export default function CareerMap() {
     (Object.keys(results) as ChapterId[]).forEach(chId => {
       const payload = (results as any)[chId];
       saveSkip(chId, payload);
+      if (chId === 'ch1' && payload?.targetRole) {
+        writeSelectedJobContext({
+          title: payload.targetRole,
+          category: payload.targetCategory || '自定义',
+          reasons: ['通过跳过第 1 章时确认的主目标岗位'],
+        });
+      }
       // 同时标记该章节所有关卡为完成
-      const stageIds = CHAPTER_STAGES[chId] || [];
+      const stageIds = (CHAPTER_STAGES[chId] || []).filter(id => !findStage(id)?.comingSoon);
       stageIds.forEach(id => markDone(id));
     });
     const after = skipAfter;
@@ -568,7 +607,11 @@ export default function CareerMap() {
       {nextRec && (
         <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 pt-6">
           <button
-            onClick={() => !nextRec.stage.comingSoon && nextRec.stage.to && navigate(nextRec.stage.to)}
+            onClick={() => {
+              if (nextRec.stage.comingSoon || !nextRec.stage.to) return;
+              if (!guardStageAccess(nextRec.stage)) return;
+              navigate(nextRec.stage.to);
+            }}
             disabled={nextRec.stage.comingSoon || !nextRec.stage.to}
             className={cn(
               'group relative w-full text-left rounded-3xl p-[1.5px] overflow-hidden transition-all duration-300',
@@ -771,7 +814,11 @@ export default function CareerMap() {
                           <span className="absolute left-1/2 -bottom-2 -translate-x-1/2 w-14 h-2 rounded-full bg-black/60 blur-md" />
 
                           <button
-                            onClick={() => !isLocked && st.to && navigate(st.to)}
+                            onClick={() => {
+                              if (isLocked || !st.to) return;
+                              if (!guardStageAccess(st)) return;
+                              navigate(st.to);
+                            }}
                             disabled={isLocked || !st.to}
                             className={cn(
                               'relative w-[68px] h-[68px] sm:w-[84px] sm:h-[84px] rounded-full flex items-center justify-center transition-all duration-300',
@@ -975,6 +1022,29 @@ export default function CareerMap() {
             <AlertDialogCancel>再想想</AlertDialogCancel>
             <AlertDialogAction onClick={confirmStageSkip} className="bg-emerald-700 hover:bg-emerald-800 text-white">
               确认跳过
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={!!resumeRequiredStage} onOpenChange={(o) => { if (!o) setResumeRequiredStage(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>先准备一份简历底稿</AlertDialogTitle>
+            <AlertDialogDescription className="text-xs leading-relaxed">
+              面试情报站、自我介绍和题库都需要基于你的简历生成。你可以上传旧简历，也可以从 0 创建。
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>先不去</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setResumeRequiredStage(null);
+                navigate('/career/resume');
+              }}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white"
+            >
+              去创建简历
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
