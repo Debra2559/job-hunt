@@ -495,8 +495,12 @@ function ExperienceAssetsStep({ data, updateData }: { data: ResumeQuestData; upd
       <div className="grid gap-3 sm:grid-cols-2">
         {EXPERIENCE_TYPES.map(type => {
           const active = data.selectedExperienceTypes.includes(type);
+          const handleClick = () => updateData((prev): ResumeQuestData => {
+            const next = toggleExperienceType(prev.selectedExperienceTypes, type);
+            return { ...prev, selectedExperienceTypes: next as ExperienceType[] };
+          });
           return (
-            <button key={type} onClick={() => updateData(prev => ({ ...prev, selectedExperienceTypes: toggleExperienceType(prev.selectedExperienceTypes, type) }))} className={`rounded-3xl border p-4 text-left transition ${active ? 'border-sky-300 bg-sky-50' : 'border-slate-100 bg-white hover:border-sky-200'}`}>
+            <button key={type} onClick={handleClick} className={`rounded-3xl border p-4 text-left transition ${active ? 'border-sky-300 bg-sky-50' : 'border-slate-100 bg-white hover:border-sky-200'}`}>
               <div className="flex items-start gap-3">
                 <span className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border ${active ? 'border-sky-500 bg-sky-500' : 'border-slate-300'}`}>{active && <Check className="h-3.5 w-3.5 text-white" />}</span>
                 <span>

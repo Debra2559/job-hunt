@@ -215,10 +215,12 @@ export function inferExperienceTypesFromRawText(rawText: string): StructuredExpe
 
 function sanitizePromptResult(result: FollowUpPromptResult | null, fieldSchema: ExperienceFieldSchemaItem[]): FollowUpPromptResult | null {
   if (!result || typeof result.introText !== 'string' || !Array.isArray(result.fieldHints)) return null;
-  const allowed = new Set(fieldSchema.map(field => field.fieldKey));
+  const allowed: Set<string> = new Set(fieldSchema.map(field => field.fieldKey as string));
   const fieldHints = result.fieldHints
-    .filter(item => allowed.has(item.fieldKey) && typeof item.hint === 'string')
-    .map(item => ({ fieldKey: item.fieldKey, hint: item.hint, example: item.example }));
+    .filter((item): item is { fieldKey: string; hint: string; example?: string } =>
+      typeof item.fieldKey === 'string' && allowed.has(item.fieldKey) && typeof item.hint === 'string'
+    )
+    .map(item => ({ fieldKey: item.fieldKey as ExperienceFieldSchemaItem['fieldKey'], hint: item.hint, example: item.example }));
   if (!fieldHints.length) return null;
   return { introText: result.introText, fieldHints, source: result.source === 'llm' ? 'llm' : 'rules' };
 }
